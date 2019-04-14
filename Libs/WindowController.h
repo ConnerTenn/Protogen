@@ -31,7 +31,9 @@ void Sync();
 void ForceClear();
 void DrawPixel(int x, int y, RGB colour);
 void DrawRectangle(int x, int y, int w, int h, RGB colour);
+void DrawCircle(int x, int y, int w, int h, RGB colour);
 void OutlineRectangle(int x, int y, int w, int h, RGB colour);
+void OutlineCircle(int x, int y, int w, int h, RGB colour);
 void DrawLine(int x1, int y1, int x2, int y2, RGB colour);
 void DrawText(int x, int y, std::string text, RGB colour);
 

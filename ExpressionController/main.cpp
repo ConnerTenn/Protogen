@@ -1,5 +1,5 @@
 
-#include "Globals.h"
+#include "EmotionController.h"
 #include <signal.h>
 
 bool Run = true;
@@ -36,11 +36,15 @@ int main()
 				
 			}
 		}
-		
+
 		
 		
 		ForceClear();
-		
+
+		EmotionController em;
+		em.XPos=50; em.YPos=50;
+		em.Display();
+
 		for (int i = 0; i < 100; i++) { DrawRectangle(400+10*i, 0, 20, 20, RGBVal(i/100.0)); }
 		
 		i64 delta = GetMicroseconds() - lastTime;

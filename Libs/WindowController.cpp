@@ -99,6 +99,15 @@ void DrawRectangle(int x, int y, int w, int h, RGB colour)
 	XFillRectangle(Disp, Win, gc, x, y, w, h);
 	XFreeGC(Disp, gc);
 }
+void DrawCircle(int x, int y, int w, int h, RGB colour)
+{
+	XGCValues values;
+	values.foreground = XColour(colour);
+	unsigned long mask = GCForeground;
+	GC gc = XCreateGC(Disp, Win, mask, &values);
+	XFillArc(Disp, Win, gc, x-w/2, y-h/2, w, h, 0, 360*64);
+	XFreeGC(Disp, gc);
+}
 void OutlineRectangle(int x, int y, int w, int h, RGB colour)
 {
 	XGCValues values;
@@ -106,6 +115,15 @@ void OutlineRectangle(int x, int y, int w, int h, RGB colour)
 	unsigned long mask = GCForeground;
 	GC gc = XCreateGC(Disp, Win, mask, &values);
 	XDrawRectangle(Disp, Win, gc, x, y, w, h);
+	XFreeGC(Disp, gc);
+}
+void OutlineCircle(int x, int y, int w, int h, RGB colour)
+{
+	XGCValues values;
+	values.foreground = XColour(colour);
+	unsigned long mask = GCForeground;
+	GC gc = XCreateGC(Disp, Win, mask, &values);
+	XDrawArc(Disp, Win, gc, x-w/2, y-h/2, w, h, 0, 360*64);
 	XFreeGC(Disp, gc);
 }
 void DrawLine(int x1, int y1, int x2, int y2, RGB colour)
