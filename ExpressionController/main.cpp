@@ -9,14 +9,15 @@ void InteruptHandler(int arg) { Run = false; }
 
 
 std::string MenuItems[] = {
-	"Happy"
+	"Happy", "Angry"
 };
 
-void DrawMenu()
+void DrawMenu(int expr)
 {
-	for (int i = 0; i < 1; i++)
+	DrawText(40, 15*expr+500, ">", {255,255,255});
+	for (int i = 0; i < 2; i++)
 	{
-		DrawText(50, 15*i+400, std::to_string(i+1) + ": " +MenuItems[i], {255,255,255});
+		DrawText(50, 15*i+500, std::to_string(i+1) + ": " +MenuItems[i], {255,255,255});
 	}
 }
 
@@ -31,7 +32,9 @@ int main()
 	i64 lastTime = StartTime;
 	i64 maxTime = 0;
 	
-	int eyeX=0, eyeY=0;
+	int eyeX=0, eyeY=0, expr=0;
+
+	u8 KeyDirs[] = {0,0,0,0};
 
 	while (Run)
 	{		
@@ -43,33 +46,39 @@ int main()
 			{ 
 				key = GetKeyPressed(&event); 
 				std::cout << "Key [" << key << "]\n";
-				if (key==65429) { eyeX = -2; eyeY=-2; }
-				if (key==65431) { eyeX = 0; eyeY=-2; }
-				if (key==65434) { eyeX = 2; eyeY=-2; }
-				if (key==65430) { eyeX = -2; eyeY=0; }
-				if (key==65432) { eyeX = 2; eyeY=0; }
-				if (key==65436) { eyeX = -2; eyeY=2; }
-				if (key==65433) { eyeX = 0; eyeY=2; }
-				if (key==65435) { eyeX = 2; eyeY=2; }
+				if (key==65431) { KeyDirs[0]=1; }
+				if (key==65437) { KeyDirs[1]=1; }
+				if (key==65430) { KeyDirs[2]=1; }
+				if (key==65432) { KeyDirs[3]=1; }
+				if (key>=49 && key <=57) { expr=key-49; }
 				if (key == 65307) { Run = false; }
 			}
 			else if (event.type == KeyRelease) 
 			{ 
 				key = GetKeyReleased(&event); 
-				if (key==65429 || key==65431 || key==65434 || key==65430 || key==65432 || key==65436 || key==65433 || key==65435) { eyeX=0; eyeY=0; }
+				if (key==65431) { KeyDirs[0]=0; }
+				if (key==65437) { KeyDirs[1]=0; }
+				if (key==65430) { KeyDirs[2]=0; }
+				if (key==65432) { KeyDirs[3]=0; }
 			}
 		}
+
+		eyeX=0; eyeY=0;
+		if (KeyDirs[0]) { eyeY-=2; }
+		if (KeyDirs[1]) { eyeY+=2; }
+		if (KeyDirs[2]) { eyeX-=2; }
+		if (KeyDirs[3]) { eyeX+=2; }
 
 		
 		EmotionController em;
 		em.XPos=50; em.YPos=50;
-		em.Update(0, eyeX, eyeY);
+		em.Update(expr, eyeX, eyeY);
 		
 		ForceClear();
 
 		em.Display();
 
-		DrawMenu();
+		DrawMenu(expr);
 
 		for (int i = 0; i < 100; i++) { DrawRectangle(400+10*i, 0, 20, 20, RGBVal(i/100.0)); }
 		
