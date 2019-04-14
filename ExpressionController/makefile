@@ -10,13 +10,16 @@ CFLAGS= -O3 -I ../Libs/
 
 all: program
 
-program: main.o EmotionController.o
+program: main.o EmotionController.o Frames.o
 	$(GPP) $(CFLAGS) $^ $(LIBS) -o $@
 	
 main.o: main.cpp EmotionController.h
 	$(GPP) $(CFLAGS) $< -c -o $@
 	
-EmotionController.o: EmotionController.cpp EmotionController.h
+EmotionController.o: EmotionController.cpp EmotionController.h Frames.h
+	$(GPP) $(CFLAGS) $< -c -o $@
+
+Frames.o: Frames.cpp Frames.h
 	$(GPP) $(CFLAGS) $< -c -o $@
 
 force: clean all

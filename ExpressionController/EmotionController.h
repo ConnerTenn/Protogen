@@ -5,15 +5,33 @@
 #include <General.h>
 #include <Colour.h>
 #include <WindowController.h>
+#include"Frames.h"
+
+/*
+Emotions & Expressions:
+
+Neutral
+Happy
+Sad
+Suprised
+
+*/
+
+/*
+....####........
+..########......
+.##########.....
+############....
+####......###...
+.##........##...
+................
+................
 
 
+*/
 
 struct EmotionController
 {
-	static constexpr int EyeDim[2] = {16,8};
-	static constexpr int MouthDim[4] = {32,8,8,8};
-	static constexpr int NoseDim[2] = {8,8};
-
 	u8 LeftEyeLEDs[EyeDim[1]][EyeDim[0]];
 	u8 RightEyeLEDs[EyeDim[1]][EyeDim[0]];
 	u8 LeftMouthLEDs[MouthDim[1]][MouthDim[0]];
@@ -26,8 +44,9 @@ struct EmotionController
 
 	EmotionController();
 
-	void Display();
+	void Update(int expr, int eyeX, int eyeY);
 
+	void Display();
 };
 
 #endif

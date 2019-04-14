@@ -24,17 +24,33 @@ EmotionController::EmotionController()
 	}
 }
 
+
+void CopyMatrix(u8 *src, u8 *dest, int width, int height)
+{
+	for (int i = 0; i<width*height; i++)
+	{
+		dest[i] = src[i];
+	}
+}
+
+void EmotionController::Update(int expr, int eyeX, int eyeY)
+{
+	CopyMatrix(ExpressionList[expr].LeftMouth, (u8 *)LeftMouthLEDs, MouthDim[0], MouthDim[1]);
+	CopyMatrix(ExpressionList[expr].RightMouth, (u8 *)RightMouthLEDs, MouthDim[0], MouthDim[1]);
+	CopyMatrix(ExpressionList[expr].CenterMouth, (u8 *)CenterMouthLEDs, MouthDim[2], MouthDim[3]);
+	CopyMatrix(ExpressionList[expr].LeftNose, (u8 *)LeftNoseLEDs, NoseDim[0], NoseDim[1]);
+	CopyMatrix(ExpressionList[expr].RightNose, (u8 *)RightNoseLEDs, NoseDim[0], NoseDim[1]);
+	ExpressionList[expr].RenderEyes(eyeX, eyeY, (u8 *)LeftEyeLEDs, (u8 *)RightEyeLEDs);
+}
+
 void RenderMatrix(int xPos, int yPos, u8 *mat, int width, int height)
 {
 	for (int y = 0; y<height; y++)
-	{
-		for (int x = 0; x<width; x++)
-		{
-			DrawCircle(x*15+xPos, y*15+yPos, 15, 15, {255,255,255});
-			DrawCircle(x*15+xPos, y*15+yPos, 13, 13, {0,0,mat[y*height+x]});
-			//OutlineCircle(x*15+xPos, y*15+yPos, 10, 10, {255,255,255});
-		}
-	}
+	{ for (int x = 0; x<width; x++) {
+		DrawCircle(x*15+xPos, y*15+yPos, 15, 15, {255,255,255});
+		DrawCircle(x*15+xPos, y*15+yPos, 13, 13, {0,0,mat[y*width+x]?(u8)255u:(u8)0u});
+		//OutlineCircle(x*15+xPos, y*15+yPos, 10, 10, {255,255,255});
+	} }
 }
 
 void EmotionController::Display()
@@ -45,20 +61,21 @@ void EmotionController::Display()
 	x = 15*EyeDim[0]/2; y = 15*EyeDim[1];
 	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftMouthLEDs, MouthDim[0], MouthDim[1]);
 
-	x = 15*EyeDim[0]/2+15*MouthDim[0]; y = 15*EyeDim[1]+15*MouthDim[1]*2/3;
-	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftMouthLEDs, MouthDim[2], MouthDim[3]);
+	x = 15*EyeDim[0]/2+15*MouthDim[0]; y = 15*EyeDim[1]+15*MouthDim[1]*1/3;
+	RenderMatrix(XPos+x, YPos+y, (u8 *)CenterMouthLEDs, MouthDim[2], MouthDim[3]);
 	
 	x = 15*EyeDim[0]/2+15*MouthDim[0]+15*MouthDim[2]; y = 15*EyeDim[1];
-	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftMouthLEDs, MouthDim[0], MouthDim[1]);
+	RenderMatrix(XPos+x, YPos+y, (u8 *)RightMouthLEDs, MouthDim[0], MouthDim[1]);
 
 	x = 2*15*MouthDim[0]+15*MouthDim[2]; y = 0;
-	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftMouthLEDs, EyeDim[0], EyeDim[1]);
+	RenderMatrix(XPos+x, YPos+y, (u8 *)RightEyeLEDs, EyeDim[0], EyeDim[1]);
 
 
 	x = 15*EyeDim[0]/2 + 15*MouthDim[0] - 15*NoseDim[0]*2/3; y = 0;
-	RenderMatrix(XPos+x, YPos+y, (u8 *)CenterMouthLEDs, MouthDim[2], MouthDim[3]);
+	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftNoseLEDs, NoseDim[0], NoseDim[1]);
 
 	x = 15*EyeDim[0]/2 + 15*MouthDim[0] + 15*MouthDim[2] - 15*NoseDim[0]*1/3; y = 0;
-	RenderMatrix(XPos+x, YPos+y, (u8 *)CenterMouthLEDs, MouthDim[2], MouthDim[3]);
+	RenderMatrix(XPos+x, YPos+y, (u8 *)RightNoseLEDs, NoseDim[0], NoseDim[1]);
 
 }
+
