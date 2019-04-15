@@ -4,24 +4,29 @@
 
 #include <General.h>
 
-static constexpr int EyeDim[2] = {16,8};
-static constexpr int MouthDim[4] = {32,8,8,8};
-static constexpr int NoseDim[2] = {8,8};
+constexpr int EyeDim[2] = {16,8};
+constexpr int MouthDim[4] = {32,8,8,8};
+constexpr int NoseDim[2] = {8,8};
+constexpr int LimbDim[2] = {8,8};
 
+
+struct EyeFrame
+{
+	const u8 *Pupil;
+	const u8 *Frame;
+	const u8 *Blink;
+	const int CenterX, CenterY;
+};
 struct Expression
 {
-	//u8 LeftEye[EyeDim[1]][EyeDim[0]];
-	//u8 RightEye[EyeDim[1]][EyeDim[0]];
-	u8 *LeftMouth;
-	u8 *RightMouth;
-	u8 *CenterMouth;
-	u8 *LeftNose;
-	u8 *RightNose;
-
-	void ( *RenderEyes)(int x, int y, u8 *left, u8 *right);
+	const u8 *SideMouth;
+	const u8 *CenterMouth;
+	const u8 *Nose;
+	EyeFrame Eye;
+	const u8 *Limb;
+	const u8 LeftEarPos;
+	const u8 RightEarPos;
 };
-
-extern Expression Happy;
 
 extern Expression ExpressionList[];
 

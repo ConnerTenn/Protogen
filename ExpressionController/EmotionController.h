@@ -5,7 +5,7 @@
 #include <General.h>
 #include <Colour.h>
 #include <WindowController.h>
-#include"Frames.h"
+#include "Frames.h"
 
 /*
 Emotions & Expressions:
@@ -32,7 +32,8 @@ struct EmotionController
 
 	EmotionController();
 
-	void Update(int expr, int eyeX, int eyeY);
+	void Update(Expression expr, int eyeX, int eyeY);
+	//void Update(int expr, int eyeX, int eyeY);
 
 	void Display();
 };

@@ -9,13 +9,13 @@ void InteruptHandler(int arg) { Run = false; }
 
 
 std::string MenuItems[] = {
-	"Happy", "Angry"
+	"Happy", "Angry", "Sad", "Crazy"
 };
 
 void DrawMenu(int expr)
 {
 	DrawText(40, 15*expr+500, ">", {255,255,255});
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		DrawText(50, 15*i+500, std::to_string(i+1) + ": " +MenuItems[i], {255,255,255});
 	}
@@ -72,7 +72,7 @@ int main()
 		
 		EmotionController em;
 		em.XPos=50; em.YPos=50;
-		em.Update(expr, eyeX, eyeY);
+		em.Update(ExpressionList[0], eyeX, eyeY);
 		
 		ForceClear();
 

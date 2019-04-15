@@ -37,6 +37,13 @@ inline double mmod(double a, double m)
 	return fmod(a, m) + (a<0?m:0);
 }
 
+template<class T>
+inline T MinMax(T x, T min, T max)
+{
+	x=MAX(x,min);
+	return MIN(x, max);
+}
+
 
 template<class T, int N>
 struct Array
