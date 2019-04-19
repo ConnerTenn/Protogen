@@ -47,7 +47,7 @@ void Fourier(float *samples, ComplexD *spectrum, int len)
 		{
 			sum+=(double)samples[i]*exp(((double)f*i/len)*(double)TAU*ComplexD(0,1));
 		}
-		spectrum[f]=sum * (2.0/len) * (f==len-1?0.5:1);
+		spectrum[f]=sum * (2.0/len) * (f==len-1?0.5:1) * (f==0?0.5:1);
 	}
 }
 
@@ -72,7 +72,7 @@ void FftInplace(Ty &x, u32 N)
 	// DFT
 	u32 k = N, n;
 	double thetaT = 3.14159265358979323846264338328L / N;
-	ComplexD phiT = ComplexD(cos(thetaT), -sin(thetaT)), T;
+	ComplexD phiT = ComplexD(cos(thetaT), sin(thetaT)), T;
 	while (k > 1)
 	{
 		n = k;
@@ -114,8 +114,10 @@ void FftInplace(Ty &x, u32 N)
 	//for (unsigned int i = 0; i < N; i++)
 	//	x[i] *= f;
 	
-	ComplexD f = 2.0/N; 
+	ComplexD f = 2.0/N;
 	for (unsigned int i = 0; i < N; i++) { x[i] *= f; }
+	x[0]*=0.5;
+	x[N-1]*=0.5;
 }
 
 template<class Ty>
@@ -126,7 +128,7 @@ void IfftInplace(Ty &x, u32 size)
 		x[i] = std::conj(x[i]*(size/4.9));
 	}
  
-	FftInplace(x);
+	FftInplace(x, size);
 
 	for (u32 i = 0; i < size; i++)
 	{
@@ -141,12 +143,9 @@ void Fft(float *samples, ComplexD *spectrum, u32 size)
 	FftInplace(spectrum, size);
 }
 
-template<class Ty>
-void Ifft(Ty &x, u32 size)
+void Ifft(float *samples, ComplexD *spectrum, u32 size)
 {
-	Ty arr;
-	arr = x;
-	IfftInplace(arr, size);
-	return arr;
+	IfftInplace(spectrum, size);
+	for (u32 i = 0; i < size; i++) { samples[i] = real(spectrum[i]); }
 }
 

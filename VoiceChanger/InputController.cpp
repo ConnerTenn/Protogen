@@ -13,20 +13,22 @@ void PAudioError(PaError error)
 PaStream *Stream;
 
 #define SAMPLERATE 44100/2
-#define BUFFERLEN 256
+#define BUFFERLEN 128
 
 static int PACallback( const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData )
 {
 	ComplexD spectrum[BUFFERLEN];
 	Fft((float *)inputBuffer, spectrum, BUFFERLEN);
+	//Fourier((float *)inputBuffer, spectrum, BUFFERLEN);
 	
+	//Ifft((float *)outputBuffer, spectrum, BUFFERLEN);
 	for (int f=0; f<CEILDIV(BUFFERLEN,2); f++)
 	{
 		for (int i=0; i<BUFFERLEN; i++)
 		{
 			if (f==0) { ((float *)outputBuffer)[i] = 0; }
 			//((float *)inputBuffer)[i] += spectrum[f]*sin((double)f*i*TAU/BUFFERLEN);
-			((float *)outputBuffer)[i] += abs(spectrum[f])*cos((double)f*i*TAU/BUFFERLEN + arg(spectrum[f]));
+			((float *)outputBuffer)[i] += abs(spectrum[f])*cos((double)f*i*TAU/BUFFERLEN - arg(spectrum[f]));
 			//((float *)outputBuffer)[i] += abs(spectrum[f])*(2.0*((f*i+int(arg(spectrum[f])))%BUFFERLEN)/BUFFERLEN-1);
 		}
 	}
