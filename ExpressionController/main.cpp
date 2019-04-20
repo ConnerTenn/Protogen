@@ -33,8 +33,9 @@ int main()
 	i64 maxTime = 0;
 	
 	int eyeX=0, eyeY=0, expr=0;
+	bool blink=false, half=false;
 
-	u8 KeyDirs[] = {0,0,0,0};
+	u8 KeyDirs[] = {0,0,0,0,0};
 
 	while (Run)
 	{		
@@ -50,6 +51,8 @@ int main()
 				if (key==65437) { KeyDirs[1]=1; }
 				if (key==65430) { KeyDirs[2]=1; }
 				if (key==65432) { KeyDirs[3]=1; }
+				if (key==65438) { KeyDirs[4]=1; }
+				if (key=='h') { half=!half; }
 				if (key>=49 && key <=57) { expr=key-49; }
 				if (key == 65307) { Run = false; }
 			}
@@ -60,23 +63,25 @@ int main()
 				if (key==65437) { KeyDirs[1]=0; }
 				if (key==65430) { KeyDirs[2]=0; }
 				if (key==65432) { KeyDirs[3]=0; }
+				if (key==65438) { KeyDirs[4]=0; }
 			}
 		}
 
-		eyeX=0; eyeY=0;
+		eyeX=0; eyeY=0; blink=false;
 		if (KeyDirs[0]) { eyeY-=2; }
 		if (KeyDirs[1]) { eyeY+=2; }
 		if (KeyDirs[2]) { eyeX-=2; }
 		if (KeyDirs[3]) { eyeX+=2; }
+		if (KeyDirs[4]) { blink=true; }
 
 		
 		EmotionController em;
 		em.XPos=50; em.YPos=50;
-		em.Update(ExpressionList[0], eyeX, eyeY);
+		em.Update(ExpressionList[expr], eyeX, eyeY, blink);
 		
 		ForceClear();
 
-		em.Display();
+		em.Display(half);
 
 		DrawMenu(expr);
 

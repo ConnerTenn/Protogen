@@ -37,7 +37,7 @@ inline void CopyArrInv(const u8 *src, u8 *dest, int width, int height)
 	}
 }
 
-void EmotionController::Update(Expression expr, int eyeX, int eyeY)
+void EmotionController::Update(Expression expr, int eyeX, int eyeY, bool blink)
 {
 	if (expr.SideMouth)
 	{
@@ -53,24 +53,37 @@ void EmotionController::Update(Expression expr, int eyeX, int eyeY)
 		CopyArr(expr.Nose, (u8 *)LeftNoseLEDs, NoseDim[0], NoseDim[1]);
 		CopyArrInv(expr.Nose, (u8 *)RightNoseLEDs, NoseDim[0], NoseDim[1]);
 	}
-	for (int y = 0; y<EyeDim[1]; y++)
+	if (!blink)
 	{
-		for (int x = 0; x<EyeDim[0]; x++)
+		for (int y = 0; y<EyeDim[1]; y++)
 		{
-			int ex = x-eyeX-EyeDim[0]/2+expr.Eye.CenterX;
-			int ey = y-eyeY-EyeDim[1]/2+expr.Eye.CenterY;
-			u8 pupil = ex>=0 && ex < EyeDim[0] && ey>=0 && ey < EyeDim[1];
-			pupil = expr.Eye.Pupil[ey*EyeDim[0]+ex] && pupil ? 2 : 0;
-			u8 frame = expr.Eye.Frame[y*EyeDim[0]+x];
-			LeftEyeLEDs[y][x] = (frame&0x1) | (frame&pupil);
+			for (int x = 0; x<EyeDim[0]; x++)
+			{
+				int ex = x-eyeX-EyeDim[0]/2+expr.Eye.CenterX;
+				int ey = y-eyeY-EyeDim[1]/2+expr.Eye.CenterY;
+				u8 pupil = ex>=0 && ex < EyeDim[0] && ey>=0 && ey < EyeDim[1];
+				if (expr.Eye.Pupil) { pupil = expr.Eye.Pupil[ey*EyeDim[0]+ex] && pupil ? 2 : 0; } else { pupil = 0;}
+				u8 frame = 2;
+				if (expr.Eye.Frame) { frame = expr.Eye.Frame[y*EyeDim[0]+x]; }
+				LeftEyeLEDs[y][x] = (frame&0x1) | (frame&pupil);
 
-			ex = -(x-eyeX-EyeDim[0]/2)-1+expr.Eye.CenterX;
-			ey = y-eyeY-EyeDim[1]/2+expr.Eye.CenterY;
-			pupil = ex>=0 && ex < EyeDim[0] && ey>=0 && ey < EyeDim[1];
-			pupil = expr.Eye.Pupil[ey*EyeDim[0]+ex] && pupil ? 2 : 0;
-			frame = expr.Eye.Frame[y*EyeDim[0]+(EyeDim[0]-x-1)];
-			RightEyeLEDs[y][x] = (frame&0x1) | (frame&pupil);
+				ex = -(x-eyeX-EyeDim[0]/2)-1+expr.Eye.CenterX;
+				ey = y-eyeY-EyeDim[1]/2+expr.Eye.CenterY;
+				pupil = ex>=0 && ex < EyeDim[0] && ey>=0 && ey < EyeDim[1];
+				if (expr.Eye.Pupil) { pupil = expr.Eye.Pupil[ey*EyeDim[0]+ex] && pupil ? 2 : 0; } else { pupil = 0;}
+				if (expr.Eye.Frame) { frame = expr.Eye.Frame[y*EyeDim[0]+(EyeDim[0]-x-1)]; } else { frame = 2; }
+				RightEyeLEDs[y][x] = (frame&0x1) | (frame&pupil);
+			}
 		}
+	}
+	else if (expr.Eye.Blink) 
+	{ 
+		CopyArr(expr.Eye.Blink, (u8 *)LeftEyeLEDs, EyeDim[0], EyeDim[1]);
+		CopyArrInv(expr.Eye.Blink, (u8 *)RightEyeLEDs, EyeDim[0], EyeDim[1]);
+	}
+	if (expr.Limb)
+	{
+		CopyArr(expr.Limb, (u8 *)LimbLEDs, LimbDim[0], LimbDim[1]);
 	}
 }
 
@@ -96,7 +109,7 @@ void RenderMatrix(int xPos, int yPos, u8 *mat, int width, int height)
 	}
 }
 
-void EmotionController::Display()
+void EmotionController::Display(bool half)
 {
 	int x = 0, y = 0;
 	RenderMatrix(XPos+0, YPos+0, (u8 *)LeftEyeLEDs, EyeDim[0], EyeDim[1]);
@@ -106,16 +119,22 @@ void EmotionController::Display()
 
 	x = 15*2+15*MouthDim[0]; y = 15*EyeDim[1]+15*MouthDim[1]*1/4+15*8;
 	RenderMatrix(XPos+x, YPos+y, (u8 *)CenterMouthLEDs, MouthDim[2], MouthDim[3]);
-	
+
+	x = 15*2 + 15*MouthDim[0] - 15*NoseDim[0]*2/3; y = 15*7;
+	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftNoseLEDs, NoseDim[0], NoseDim[1]);
+
+	if (half) 
+	{
+		x = 15*2+15*MouthDim[0]+15*MouthDim[2]/2-15/2; y = 15*EyeDim[1]+15*MouthDim[1]*1/4+15*8-15/2;
+		DrawRectangle(x+XPos, y+YPos, 15*MouthDim[2]/2+1, 15*MouthDim[3]+1, {0,0,0});
+		return; 
+	}
+
 	x = 15*2+15*MouthDim[0]+15*MouthDim[2]; y = 15*EyeDim[1]+15*8;
 	RenderMatrix(XPos+x, YPos+y, (u8 *)RightMouthLEDs, MouthDim[0], MouthDim[1]);
 
 	x = 2*15*MouthDim[0]+15*MouthDim[2]-(15*EyeDim[0]-2*15*2); y = 0;
 	RenderMatrix(XPos+x, YPos+y, (u8 *)RightEyeLEDs, EyeDim[0], EyeDim[1]);
-
-
-	x = 15*2 + 15*MouthDim[0] - 15*NoseDim[0]*2/3; y = 15*7;
-	RenderMatrix(XPos+x, YPos+y, (u8 *)LeftNoseLEDs, NoseDim[0], NoseDim[1]);
 
 	x = 15*2 + 15*MouthDim[0] + 15*MouthDim[2] - 15*NoseDim[0]*1/3; y = 15*7;
 	RenderMatrix(XPos+x, YPos+y, (u8 *)RightNoseLEDs, NoseDim[0], NoseDim[1]);

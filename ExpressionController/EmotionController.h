@@ -27,15 +27,16 @@ struct EmotionController
 	u8 CenterMouthLEDs[MouthDim[2]][MouthDim[3]];
 	u8 LeftNoseLEDs[NoseDim[1]][NoseDim[0]];
 	u8 RightNoseLEDs[NoseDim[1]][NoseDim[0]];
+	u8 LimbLEDs[LimbDim[1]][LimbDim[0]];
 
 	int XPos = 0, YPos = 0;
 
 	EmotionController();
 
-	void Update(Expression expr, int eyeX, int eyeY);
+	void Update(Expression expr, int eyeX, int eyeY, bool blink);
 	//void Update(int expr, int eyeX, int eyeY);
 
-	void Display();
+	void Display(bool half);
 };
 
 #endif
