@@ -12,13 +12,50 @@ void PAudioError(PaError error)
 
 PaStream *Stream;
 
-#define SAMPLERATE 44100/2
-#define BUFFERLEN 256
+#define SAMPLERATE 44100/4
+#define BUFFERLEN 128
 
-double Offset[CEILDIV(BUFFERLEN,2)];
+RoundBuffer<float> Buffer(BUFFERLEN);
 u64 Count=0;
 static int PACallback( const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData )
 {
+	for(u64 s = 0; s < framesPerBuffer; s++)
+	{
+		Buffer.InsertBegin(((float *)inputBuffer)[s]);
+		ComplexD spectrum[BUFFERLEN]; float buff[BUFFERLEN];
+		for(int j = 0; j < BUFFERLEN; j++) { buff[j] = Buffer[j]; }
+		Fft(buff, spectrum, BUFFERLEN);
+		
+		
+		for (int f=0; f<CEILDIV(BUFFERLEN,2); f++)
+		{
+			if (f==0) { ((float *)outputBuffer)[s] = 0; }
+			double r = CEILDIV(BUFFERLEN,2);
+			int mod = floor(r/2*(1-cos(f*TAU/2.0)*(1.0-f/r)));
+			((float *)outputBuffer)[s] += abs(spectrum[f])*cos((double)f*(s+Count*framesPerBuffer)*TAU/BUFFERLEN + TAU*mod/(BUFFERLEN/2.0));
+			//((float *)outputBuffer)[s] = ((float *)inputBuffer)[s];
+		}
+		//((float *)outputBuffer)[s] += Buffer[0];
+		//((float *)outputBuffer)[s] += 0.05*cos((double)f*s*TAU/BUFFERLEN - (double)s/BUFFERLEN*TAU) * cos(Count/10.0);
+		
+		for (int i = -100; i <= 100; i++)
+		{
+			if (round(((float *)outputBuffer)[s]*800)==i)
+			{
+				std::cout << "#";
+			}
+			else if (i==0) { std::cout << "|"; }
+			else { std::cout << " "; }
+		}
+		for (int i = 0; i < BUFFERLEN/2; i++)
+		{
+			
+			std::cout << "\033[48;5;" << (int)(23*abs(spectrum[i])/0.05+232) << "m ";
+		}
+		std::cout << "\033[0m\n";
+	}
+	
+	/*
 	ComplexD spectrum[BUFFERLEN];
 	Fft((float *)inputBuffer, spectrum, BUFFERLEN);
 	//Fourier((float *)inputBuffer, spectrum, BUFFERLEN);
@@ -36,6 +73,7 @@ static int PACallback( const void *inputBuffer, void *outputBuffer, unsigned lon
 		}
 		//Offset[f] = abs(spectrum[f])*cos((double)f*(BUFFERLEN-1)*TAU/BUFFERLEN - Offset[f]);
 	}
+	*/
 	
 	Count++;
 	/*for (int i = 0; i < BUFFERLEN; i++)
@@ -71,7 +109,7 @@ void PASetup()
 
 	//error = Pa_OpenStream(&OutStream, 0, &outputParameters, (SAMPLERATE), 1152, paNoFlag, &PAudioOutputCallback, 0);
 
-	error = Pa_OpenStream(&Stream, &inputParameters, &outputParameters, (SAMPLERATE), BUFFERLEN, paNoFlag, &PACallback, 0);
+	error = Pa_OpenStream(&Stream, &inputParameters, &outputParameters, (SAMPLERATE), BUFFERLEN/2, paNoFlag, &PACallback, 0);
 	if( error != paNoError ) { return PAudioError(error); }
 	
 	error = Pa_StartStream( Stream );

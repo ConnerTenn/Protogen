@@ -29,9 +29,9 @@ void Fourier(float *samples, float *spectrum, int len)
 		ComplexD sum=0;
 		for (int i=0; i <len; i++)
 		{
-			sum+=(double)samples[i]*exp(((double)f*i/len)*(double)TAU*ComplexD(0,1));
+			sum+=(double)samples[i]*exp((0.25-(double)f*i/len)*(double)TAU*ComplexD(0,1));
 		}
-		spectrum[f]=abs(sum) * (2.0/len) * (f==len-1?0.5:1);
+		spectrum[f]=abs(sum) * (2.0/len) * (f==len-1?0.5:(f==0?0.5:1));
 	}
 }
 
@@ -45,9 +45,9 @@ void Fourier(float *samples, ComplexD *spectrum, int len)
 		ComplexD sum=0;
 		for (int i=0; i <len; i++)
 		{
-			sum+=(double)samples[i]*exp(((double)f*i/len)*(double)TAU*ComplexD(0,1));
+			sum+=(double)samples[i]*exp((0.25-(double)f*i/len)*(double)TAU*ComplexD(0,1));
 		}
-		spectrum[f]=sum * (2.0/len) * (f==len-1?0.5:1) * (f==0?0.5:1);
+		spectrum[f]=sum * (2.0/len) * (f==len-1?0.5:(f==0?0.5:1));
 	}
 }
 
