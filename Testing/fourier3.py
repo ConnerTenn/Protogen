@@ -54,18 +54,17 @@ def fourier(arr):
 	return bands
 
 arr=[]
-n=100
+n=360
 for i in range(0,n):
 	#v=1*math.sin(0.5*i*math.tau/n+0.2*math.tau)
-	v=2.5*math.sin(10*i*math.tau/n+0.5*math.tau) #+ 3*math.sin(3*i*math.tau/n+0.6*math.tau) + 2*math.sin(5*i*math.tau/n+0.9*math.tau)
+	v=2.5*math.sin(12*i*math.tau/n+0.5*math.tau) + 3*math.sin(21*i*math.tau/n+0.6*math.tau) + 2*math.sin(9*i*math.tau/n+0.9*math.tau)
 	#v=4*((int((5*i/n*2)%2))-0.5)*2
 	#v*=2*(n-i)/n
 	#v=3*math.sin(13*i*math.tau/n) + 3*math.sin(23*i*math.tau/n)
 	#v=2*math.cos(n/2*i*math.tau/n)
 	arr.append(v)
 
-graph(arr,scalex=1)
-print()
+graph(arr,scalex=2)
 
 bands=fourier(arr)
 graphcpx(bands)
@@ -78,43 +77,32 @@ for f in range(0,m):
 		arr2[i]+=abs(bands[f])*math.sin(f*((i/n)*math.tau) + cmath.phase(bands[f])) #
 		#arr2[i]=5*math.cos(f*((i/(n/d))*math.tau) + s*f*math.tau + f/(m/2)*math.tau)
 
-graph(arr2,scalex=1)
+graph(arr2,scalex=2)
 print()
 
 
 d=50
 bands=ceildiv(n,2)+1
-spectrum=[[0]*bands for i in range(0,d)]
+arr3=[0]*n
+#spectrum=[[0]*bands for i in range(0,d)]
 for i in range(0,n):
-	#l=minmax(i-d,0,d)
-	m=ceildiv(n+1,2)
-	
-	for f in range(0,m):
-		imag = lambda i: arr[i] * cmath.exp((0.25-f*i/n)*math.tau*1j)
-		val = imag(i)
-		val=val+spectrum[1][f]#-( imag(i-d) if i-d>=0 else 0)
+	arr2=[0]*(d-i-max(i-d,0)) + arr[max(i-d,0):i]
+	spectrum=fourier(arr2)
 
-		spectrum[0][f]=val# * (2/n) * (1,0.5)[f==m-1] * (1,0.5)[f==0]
-	
-		#spectrum[0][f]=spectrum[0][f] * (2/n) * ((1,0.5)[f==0],0.5)[f==n-1]
-
-	'''if i<4:
-		for f in range(0,m):
-			v=spectrum[0][f] * (2/n) * ((1,0.5)[f==0],0.5)[f==m-1]
-			print("i",i," m",m," f",f,":", abs(v), cmath.phase(v))
-		print()
-	'''
-	'''for f in range(0,bands):
-		v=abs(spectrum[0][f])
-		print("\033[38;5;" + str(int(23*v/10+232)) + "m",end=hex(int(v))[2])
+	for f in range(0,len(spectrum)):
+		v=abs(spectrum[f])
+		print("\033[48;5;" + str(int(23*v/10+232)) + "m",end=" ")#hex(int(v))[2])
 	print("\033[0m")
-	'''
 
-	spectrum=[[0]*bands]+spectrum[:-1]
+	for f in range(0,len(spectrum)):
+		arr3[i]+= abs(spectrum[f])*math.sin(f*((i/d)*math.tau) + i/n*math.tau) # cmath.phase(spectrum[f]))
+	#spectrum=[[0]*bands]+spectrum[:-1]
 
 
-for f in range(0,len(spectrum[1])): spectrum[1][f] = spectrum[1][f] * (2/n) * ((1,0.5)[f==0],0.5)[f==m-1]
-graphcpx(spectrum[1])
+graph(arr3, scalex=2)
+
+#for f in range(0,len(spectrum[1])): spectrum[1][f] = spectrum[1][f] * (2/n) * ((1,0.5)[f==0],0.5)[f==m-1]
+#graphcpx(spectrum[1])
 
 
 '''
