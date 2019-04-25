@@ -97,6 +97,7 @@ private:
 public:
 	inline int size();
 	void InsertBegin(T val);
+	void InsertEnd(T val);
 	
 	T &operator[](int i);
 	void operator=(const RoundBuffer<T> &other);
@@ -232,6 +233,12 @@ void RoundBuffer<T>::InsertBegin(T val)
 {
 	Begin = Transform(-1);
 	(*this)[0] = val;
+}
+template<class T>
+void RoundBuffer<T>::InsertEnd(T val) 
+{
+	Begin = Transform(1);
+	(*this)[-1] = val;
 }
 
 template<class T>
