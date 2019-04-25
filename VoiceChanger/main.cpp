@@ -1,6 +1,6 @@
 
 #include <General.h>
-#include "InputController.h"
+#include "VoiceController.h"
 #include <signal.h>
 #include <unistd.h>
 
@@ -16,14 +16,13 @@ typedef std::complex<double> ComplexD;
 
 int main(int argc, char **argv)
 {
-	
 	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
 	
 	PASetup();
 	
 	std::cout << "Running...\n";
 	
-	while(Run) { usleep(1000); }
+	while(Run) { usleep(100000); }
 	
 	std::cout << "Stopping...\n";
 	

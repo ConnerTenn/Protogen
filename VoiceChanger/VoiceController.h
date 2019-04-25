@@ -1,8 +1,7 @@
 
-class InputController;
 
-#ifndef _INPUT_CONTROLLER_H_
-#define _INPUT_CONTROLLER_H_
+#ifndef _VOICE_CONTROLLER_H_
+#define _VOICE_CONTROLLER_H_
 
 //#include "mad.h"
 #include <portaudio.h>

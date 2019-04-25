@@ -9,13 +9,13 @@ CFLAGS = -O3 -I ../Libs/
 
 all: program
 
-program: main.o InputController.o
+program: main.o VoiceController.o
 	$(GPP) $(CFLAGS) $^ $(LIBS) $(LPIXTERM) -o $@
 	
-main.o: main.cpp InputController.h
+main.o: main.cpp VoiceController.h
 	$(GPP) $(CFLAGS) $< -c -o $@
 	
-InputController.o: InputController.cpp InputController.h Spectrum.h
+VoiceController.o: VoiceController.cpp VoiceController.h Spectrum.h
 	$(GPP) $(CFLAGS) $< -c -o $@
 	
 force: clean all
