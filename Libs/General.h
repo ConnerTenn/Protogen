@@ -38,6 +38,11 @@ inline double mmod(double a, double m)
 	return fmod(a, m) + (a<0?m:0);
 }
 
+inline int mmodi(int a, int m)
+{
+	return (a % m) + (a<0?m:0);
+}
+
 template<class T>
 inline T MinMax(T x, T min, T max)
 {
@@ -104,7 +109,29 @@ public:
 	void operator=(const RoundBuffer<T> &other);
 };
 
-
+template<class T>
+class Queue
+{
+private:
+	int Length = 0;
+	T *Buffer = 0;
+	int ReadIndex = 0;
+	int WriteIndex = 0;
+	
+public:
+	Queue(int len);
+	~Queue();
+	
+private:
+	int Transform(int i);
+	
+public:
+	inline int size();
+	void Push(T val);
+	T Pull();
+	
+	T &operator[](int i);
+};
 
 
 
@@ -224,9 +251,10 @@ template<class T>
 int RoundBuffer<T>::Transform(int i) 
 {
 	if (Length==0) { throw std::domain_error("div/0"); }
-	int v = i+Begin;
-	v = v%Length + (v<0?Length:0);
-	return v;  
+	//int v = i+Begin;
+	//v = v%Length + (v<0?Length:0);
+	//return v;
+	return mmodi(i+Begin, Length);
 }
 
 template<class T>
@@ -262,6 +290,55 @@ void RoundBuffer<T>::operator=(const RoundBuffer<T> &other)
 		Buffer[i] = other.Buffer[i];
 	}
 }
+
+
+
+template<class T>
+Queue<T>::Queue(int len) :
+	Length(len)
+{
+	Buffer = new T[Length];
+	ReadIndex=0;
+	WriteIndex=Length;
+}
+
+template<class T>
+Queue<T>::~Queue()
+{
+	delete[] Buffer;
+}
+
+template<class T>
+int Queue<T>::size() { return Length; }
+
+template<class T>
+int Queue<T>::Transform(int i) 
+{
+	if (Length==0) { throw std::domain_error("div/0"); }
+	return mmodi(i, Length);
+}
+
+template<class T>
+void Queue<T>::Push(T val) 
+{
+	WriteIndex = Transform(WriteIndex+1);
+	(*this)[WriteIndex] = val;
+	if (WriteIndex==ReadIndex) { ReadIndex = Transform(ReadIndex+1); }
+}
+template<class T>
+T Queue<T>::Pull()
+{
+	int idx = ReadIndex;
+	if (ReadIndex!=WriteIndex) { ReadIndex = Transform(ReadIndex+1); }
+	return (*this)[idx];
+}
+
+template<class T>
+T &Queue<T>::operator[](int i)
+{
+	return Buffer[Transform(i)];
+}
+
 
 #endif
 
