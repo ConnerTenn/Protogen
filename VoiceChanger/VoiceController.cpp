@@ -84,9 +84,9 @@ void ProcessSamples(float *input, float *output, int numSamples)
 			{
 				ProcessedBuffer[i]+=(real(frame[i]) * Window[i] / sqrt(WindowSize/(hopOut*2.0)));
 			}
-			for (int i=0; i<hopOut; i++) { OutputBuffer.InsertEnd(ProcessedBuffer[i]); Sample--; } // Fix Output buffering
+			for (int i=0; i<hopOut; i++) { OutputBuffer.InsertEnd(ProcessedBuffer[i]); Sample--; } Sample++; // Fix Output buffering
 		}
-		
+		//std::cout << Sample-1 << "\n";
 		output[s] = OutputBuffer[Sample-1];
 	}
 }
