@@ -60,7 +60,7 @@ struct Array
 	Array(std::initializer_list<T> list);
 	Array(Array<T, N> &other);
 	inline int size();
-	T &operator[](int i);
+	T &operator[](int i); 
 	void Copy(Array<T, N> &other);
 };
 
@@ -131,6 +131,8 @@ public:
 	T Pull();
 	
 	T &operator[](int i);
+	T &AtRead(int i);
+	T &AtWrite(int i);
 };
 
 
@@ -337,6 +339,16 @@ template<class T>
 T &Queue<T>::operator[](int i)
 {
 	return Buffer[Transform(i)];
+}
+template<class T>
+T &Queue<T>::AtRead(int i)
+{
+	return (*this)[ReadIndex+i];
+}
+template<class T>
+T &Queue<T>::AtWrite(int i)
+{
+	return (*this)[WriteIndex+i];
 }
 
 

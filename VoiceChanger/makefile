@@ -7,7 +7,10 @@ LPIXTERMLIBS=-pthread -lgdk_pixbuf_xlib-2.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangoc
 LIBS = -lpthread ../Libs/*.o $(LAUDIO) $(LPIXTERMLIBS)
 CFLAGS = -O3 -I ../Libs/
 
-all: program
+all: Libs program
+
+Libs:
+	make -C ../Libs
 
 program: main.o VoiceController.o
 	$(GPP) $(CFLAGS) $^ $(LIBS) $(LPIXTERM) -o $@
@@ -20,7 +23,7 @@ VoiceController.o: VoiceController.cpp VoiceController.h Spectrum.h
 	
 force: clean all
 
-run:
+run: Libs
 	rm program* -f
 	make all
 	./program

@@ -15,7 +15,7 @@ void InteruptHandler(int arg) { Run = false; }
 typedef std::complex<double> ComplexD;
 
 int main(int argc, char **argv)
-{
+{	
 	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
 	
 	PASetup();
