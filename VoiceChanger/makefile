@@ -5,7 +5,7 @@ LAUDIO=-I ~/Libs/portaudio/include ~/Libs/portaudio/lib/.libs/libportaudio.a -la
 LPIXTERMLIBS=-pthread -lgdk_pixbuf_xlib-2.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype  -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype -lX11
 #LPIXTERM=-L ../../PixelTerm -lPixelTerm $(LPIXTERMLIBS)
 LIBS = -lpthread ../Libs/*.o $(LAUDIO) $(LPIXTERMLIBS)
-CFLAGS = -O3 -I ../Libs/
+CFLAGS = -O3 -I ../Libs/ -Wall
 
 all: Libs program
 

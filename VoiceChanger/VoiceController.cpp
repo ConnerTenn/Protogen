@@ -19,7 +19,7 @@ const int HopSize = 256; //WindowSize/4
 double Window[WindowSize]; //Generate Hanning window
 RoundBuffer<double> SampleBuffer(WindowSize);
 RoundBuffer<double> ProcessedBuffer(WindowSize*4);
-Queue<double> OutputBuffer(WindowSize);
+Queue<double> OutputBuffer(WindowSize*2);
 u64 Sample = 0;
 double PreviousPhase[WindowSize], PhaseCumulative[WindowSize];
 
@@ -35,12 +35,15 @@ void Init()
 		SampleBuffer[i] = 0;
 		ProcessedBuffer[i] = 0;
 		OutputBuffer[i] = 0;
+		
+		PreviousPhase[i]=0;
+		PhaseCumulative[i]=0;
 	}
 }
 
 void ProcessSamples(float *input, float *output, int numSamples)
 {
-	double shift = 1.1;
+	double shift = 1.0;
 	int hopOut = round(shift*HopSize);
 	
 	for (int s=0; s<numSamples; s++)
@@ -51,6 +54,7 @@ void ProcessSamples(float *input, float *output, int numSamples)
 		if (Sample % HopSize == 0) //New full frame generated
 		{
 			ComplexD frame[WindowSize];
+			
 			for (int i=0; i<WindowSize; i++)
 			{
 				frame[i] = SampleBuffer[i] * Window[i] / sqrt(WindowSize/(HopSize*2.0));
@@ -77,6 +81,7 @@ void ProcessSamples(float *input, float *output, int numSamples)
 			
 			for (int i=0; i<WindowSize; i++)
 			{
+				//Get phase difference
 				double deltaPhase = arg(frame[i]) - PreviousPhase[i];
 				PreviousPhase[i] = arg(frame[i]);
 				
@@ -106,21 +111,30 @@ void ProcessSamples(float *input, float *output, int numSamples)
 			//Add frame (with overlap)
 			for (int i=0; i<WindowSize; i++)
 			{
-				std::cout << ProcessedBuffer[-WindowSize+i] << " ";
 				ProcessedBuffer[-WindowSize+i]+=(real(frame[i]) * Window[i] / sqrt(WindowSize/(hopOut*2.0)));
 			}
-			std::cout << "\n";
 			
 			for (int i=0; i<HopSize; i++) 
 			{
-				double s = ((double)i/HopSize)*hopOut;
+				double s = ((double)i*hopOut)/HopSize;
 				double a = fmod(s,1.0);
 				double v = (1.0-a)*ProcessedBuffer[(int)s] + a*ProcessedBuffer[(int)ceil(s)];
 				OutputBuffer.Push(v);
 			}
 		}
 		
-		output[s] = OutputBuffer.Pull();
+		/*if (Sample % WindowSize == 0)
+		{
+			for (int i=0; i<WindowSize; i++) 
+			{
+				double s = ((double)i*hopOut)/HopSize;
+				double a = fmod(s,1.0);
+				double v = (1.0-a)*ProcessedBuffer[(int)s] + a*ProcessedBuffer[(int)ceil(s)];
+				OutputBuffer.Push(v);
+			}
+		}*/
+		
+		output[s] = OutputBuffer.Pull();// + 0.05*sin(1.5*6*Sample*TAU/numSamples);;
 	}
 }
 
