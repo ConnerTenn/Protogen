@@ -142,7 +142,10 @@ void ProcessSamples(float *input, float *output, int numSamples)
 				//double v = (1.0-a)*ProcessedBuffer[(int)s] + a*ProcessedBuffer[(int)s+1];
 				
 				int i1=(int)s, i2=i1+1, i3=i1+2, i0=i1-1;
-				double v0=ProcessedBuffer[i0], v1=ProcessedBuffer[i1], v2=ProcessedBuffer[i2], v3=ProcessedBuffer[i3]; 
+				double v0=ProcessedBuffer[i0], v1=ProcessedBuffer[i1], v2=ProcessedBuffer[i2], v3=ProcessedBuffer[i3];
+				if (i0 < 0) { v0 = v1; }
+				//if (i1 >= hopOut) { v2 = v1; } 
+				//if (i2 >= hopOut) { v3 = v2; } 
 				double v;
 				v=-(1.0/6.0)*v0*(s-i1)*(s-i2)*(s-i3);
 				v=v+(1.0/2.0)*v1*(s-i0)*(s-i2)*(s-i3);
@@ -211,7 +214,7 @@ static int PACallback( const void *inputBuffer, void *outputBuffer, unsigned lon
 	
 	ProcessSamples((float *)inputBuffer, (float *)outputBuffer, framesPerBuffer);
 	
-	for(u64 s = 0; s < framesPerBuffer; s++)
+	for(u64 s = 0; false && s < framesPerBuffer; s++)
 	{
 		//((float *)outputBuffer)[s] = ((float *)inputBuffer)[s];
 		std::cout << "||";
