@@ -43,7 +43,7 @@ void Init()
 
 void ProcessSamples(float *input, float *output, int numSamples)
 {
-	double shift = 1.0;
+	double shift = 1.5;
 	int hopOut = round(shift*HopSize);
 	
 	for (int s=0; s<numSamples; s++)
@@ -51,6 +51,7 @@ void ProcessSamples(float *input, float *output, int numSamples)
 		SampleBuffer.InsertEnd(input[s]);
 		Sample++;
 		
+		//static int maxf = 0; double maxv = 0;
 		if (Sample % HopSize == 0) //New full frame generated
 		{
 			ComplexD frame[WindowSize];
@@ -62,15 +63,26 @@ void ProcessSamples(float *input, float *output, int numSamples)
 			
 			FftInplace(frame, WindowSize);
 			
-			/* Simple Envelope Calculation
+			
+			/*for (int i=1; i<WindowSize/6; i++)
+			{
+				if (abs(frame[i]) > maxv) { maxf = i; maxv=abs(frame[i]); }
+			}
+			for (int i = 0; i < WindowSize/6; i++)
+			{
+				double v = pow(abs(frame[i]),1.0/3.5);
+				if (i==maxf) { std::cout << "\033[48;5;" << (int)(5*(v<=0.5?2*v:1)+(int)(5*(v>0.5?2*v-1:0))*(6)+16) << "m "; }
+				else { std::cout << "\033[48;5;" << (int)(23*v+232) << "m "; }
+			}
+			std::cout << maxf << "\033[0m\n";*/
+			/*// Simple Envelope Calculation
 			for (int i=1; i<WindowSize; i++)
 			{
 				double w = 20;
-				double c = 10;
-				frame[i] = 5.0*frame[i] * exp(-1.0/(w*w) * (i-c)*(i-c));
-			}
-			*/
-			/* Simple Pitch Shift
+				double c = 40;
+				frame[i] = 10.0*frame[i] * exp(-1.0/(w*w) * (i-c)*(i-c));
+			}*/
+			/*//Simple Pitch Shift
 			ComplexD frame2[WindowSize];
 			for (int i=1; i<WindowSize; i++) { frame2[i]=0; }
 			for (int i=WindowSize-1; i>=1; i--)
@@ -78,6 +90,12 @@ void ProcessSamples(float *input, float *output, int numSamples)
 				frame2[i]+=frame[(int)(i/1.5)];
 			}
 			for (int i=1; i<WindowSize; i++) { frame[i]=frame2[i]; }*/
+			
+			//if (maxf*2<WindowSize) { frame[maxf*2] *= 10; }
+			//if (maxf*3<WindowSize) { frame[maxf*2] *= 8; }
+			//if (maxf*3<WindowSize) { frame[maxf*3] *= 6; }
+			//frame[14] = 0.05;
+			
 			
 			for (int i=0; i<WindowSize; i++)
 			{
@@ -93,10 +111,12 @@ void ProcessSamples(float *input, float *output, int numSamples)
 				
 				//Get the new frequency
 				double freq = TAU * i / WindowSize + deltaPhase / HopSize;
+				//std::cout << (TAU * i / WindowSize) << ":" << freq << "    ";
 				
 				//Calculate final phase
-				PhaseCumulative[i] = PhaseCumulative[i] + hopOut * freq;
+				PhaseCumulative[i] = PhaseCumulative[i] + HopSize * freq; //Changed to HopSize from hopOut
 			}
+			//std::cout << "\n";
 			
 			//Apply phases
 			for (int i=0; i<WindowSize; i++)
@@ -117,8 +137,17 @@ void ProcessSamples(float *input, float *output, int numSamples)
 			for (int i=0; i<HopSize; i++) 
 			{
 				double s = ((double)i*hopOut)/HopSize;
-				double a = fmod(s,1.0);
-				double v = (1.0-a)*ProcessedBuffer[(int)s] + a*ProcessedBuffer[(int)ceil(s)];
+				//double a = fmod(s,1.0);
+				//std::cout << a << "    \t" << (int)s << "-" << (int)(s)+1 << "   \t" << hopOut << "\n";
+				//double v = (1.0-a)*ProcessedBuffer[(int)s] + a*ProcessedBuffer[(int)s+1];
+				
+				int i1=(int)s, i2=i1+1, i3=i1+2, i0=i1-1;
+				double v0=ProcessedBuffer[i0], v1=ProcessedBuffer[i1], v2=ProcessedBuffer[i2], v3=ProcessedBuffer[i3]; 
+				double v;
+				v=-(1.0/6.0)*v0*(s-i1)*(s-i2)*(s-i3);
+				v=v+(1.0/2.0)*v1*(s-i0)*(s-i2)*(s-i3);
+				v=v-(1.0/2.0)*v2*(s-i0)*(s-i1)*(s-i3);
+				v=v+(1.0/6.0)*v3*(s-i0)*(s-i1)*(s-i2);
 				OutputBuffer.Push(v);
 			}
 		}
@@ -133,8 +162,9 @@ void ProcessSamples(float *input, float *output, int numSamples)
 				OutputBuffer.Push(v);
 			}
 		}*/
+		//std::cout << maxf << "\n";
 		
-		output[s] = OutputBuffer.Pull();// + 0.05*sin(1.5*6*Sample*TAU/numSamples);;
+		output[s] = 3*OutputBuffer.Pull();
 	}
 }
 
