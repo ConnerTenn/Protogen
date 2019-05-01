@@ -22,27 +22,29 @@
 
 ```
 Inputs:
-NoteOnOff
-Waveform
-LFOWaveform
-PitchBend
+Note On/Off
+ -Waveform
+LFO
+ -Waveform
+Pitch Bend
 ASDR
 Filter
-LoopRecord
-LoopPlay
+Loop
+ -Record/Stop
+ -Play/Stop
 
 Velocity->ASDR, Volume
 Pressure->Filter, Volume, LFO 
 
----------------------------------------
-|                                     |
-| LFO,Bend     Note    ASDR           |
-|   |           |       |             |
-|  Waveform--+-Gate->Envolope-+-->Out |
-|            +-Gate->Envolope-+       |
-|            +   ...          +       |
-|            +-Gate->Envolope-+       |
----------------------------------------
+-------------------------------------
+|                                   |
+| Note   LFO,Bend  ASDR             |
+|   |     |         |               |
+|  Gate->Waveform->Envolope-+-->Out |
+|  Gate->Waveform->Envolope-+       |
+|              ...          +       |
+|  Gate->Waveform->Envolope-+       |
+-------------------------------------
    |
    v
 --------------------
