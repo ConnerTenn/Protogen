@@ -2,6 +2,9 @@
 
 #include "TextScreen.h"
 
+pthread_mutex_t TermLock;
+
+
 struct termios orig_termios;
 
 void reset_terminal_mode()

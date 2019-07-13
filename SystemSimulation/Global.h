@@ -11,6 +11,7 @@
 #include <General.h>
 #include <Colour.h>
 #include "TextScreen.h"
+#include "PseudoInterface.h"
 
 extern bool Run;
 

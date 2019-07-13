@@ -1,10 +1,12 @@
 
-#include "General.h"
+#include "Global.h"
 
 
 void *EmotionController(void *data)
 {
 	PRINTENTERFUNC
+
+	Serial_t serial = Serial::Open(5);
 
 	while (Run)
 	{
@@ -14,6 +16,8 @@ void *EmotionController(void *data)
 		usleep(1000*1000);
 	}
 
+	Serial::Close(serial);
+
 	PRINTRETFUNC
 	return 0;
 }
@@ -21,6 +25,8 @@ void *EmotionController(void *data)
 void *HeadController(void *data)
 {
 	PRINTENTERFUNC
+
+	Serial_t serial = Serial::Open(5);
 	
 	while (Run)
 	{
@@ -29,6 +35,8 @@ void *HeadController(void *data)
 		pthread_mutex_unlock(&TermLock);
 		usleep(1000*1000);
 	}
+
+	Serial::Close(serial);
 
 	PRINTRETFUNC
 	return 0;

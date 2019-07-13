@@ -1,9 +1,8 @@
 
-#include "General.h"
+#include "Global.h"
 
 
 bool Run = true;
-pthread_mutex_t TermLock;
 sem_t RunSem;
 
 struct Thread
@@ -32,6 +31,9 @@ int main()
 	PRINTENTERFUNC
 	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
 
+	pthread_mutex_init(&TermLock, 0);
+	Serial::InitSerial();
+
 	//pthread_t headCtlThread;
 	//pthread_create(&headCtlThread, 0, HeadController, &Run);
 	for (int i = 0; i < NUMTHREADS; i++)
@@ -47,8 +49,10 @@ int main()
 		pthread_join(ThreadList[i].ID, 0);
 	}
 
-	PRINTRETFUNC
+	pthread_mutex_destroy(&TermLock);
+	Serial::CloseSerial();
 
+	PRINTRETFUNC
 	return 0;
 }
 
