@@ -2,11 +2,11 @@
 #include "Global.h"
 
 
-void *EmotionController(void *data)
+void *EmotionControllerEntry(void *data)
 {
 	PRINTENTERFUNC
 
-	Serial_t serial = Serial::Open(5);
+	//Serial_t serial = Serial::Open(5);
 
 	while (Run)
 	{
@@ -16,17 +16,17 @@ void *EmotionController(void *data)
 		usleep(1000*1000);
 	}
 
-	Serial::Close(serial);
+	//Serial::Close(serial);
 
 	PRINTRETFUNC
 	return 0;
 }
 
-void *HeadController(void *data)
+void *HeadControllerEntry(void *data)
 {
 	PRINTENTERFUNC
 
-	Serial_t serial = Serial::Open(5);
+	//Serial_t serial = Serial::Open(5);
 	
 	while (Run)
 	{
@@ -36,7 +36,7 @@ void *HeadController(void *data)
 		usleep(1000*1000);
 	}
 
-	Serial::Close(serial);
+	//Serial::Close(serial);
 
 	PRINTRETFUNC
 	return 0;
