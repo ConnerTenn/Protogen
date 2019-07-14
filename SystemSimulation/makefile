@@ -10,12 +10,12 @@ LIBS= -lpthread $(GENERALLIBS) $(LXTERMLIBS)
 OBJS= main.o TextScreen.o HeadSystem.o PseudoInterface.o Devices.o
 CFLAGS= -O3 -I ../Libs/
 
-all: clean program
+all: program
 
 program: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 	
-%.o: %.cpp
+%.o: %.cpp clean #make sure clean is called first
 	$(CC) $(CFLAGS) $< -c -o $@
 
 force: clean all

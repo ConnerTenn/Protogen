@@ -17,21 +17,44 @@ public:
 
 	PseudoInterface(u32 id);
 };
-typedef PseudoInterface * Interface_t;
+//typedef PseudoInterface * Interface_t;
 
 class GPIO : public PseudoInterface
 {
 public:
-	u8 Direction;
-	u8 State;
+	enum Direction_e
+	{
+		Input,
+		Output
+	};
+	enum Logic_e
+	{
+		Low = 0,
+		High = 1,
+		HiZ = 2,
+		Err = 3,
+	};
+	struct State_t
+	{
+		Direction_e Direction;
+		Logic_e Logic, Push;
+	} State;
 
 	GPIO(u32 id);
 
 	//static GPIO *Open(PseudoInterface *interface);
 	//static void Close(PseudoInterface *interface);
 
-	static void Set(GPIO *interface, bool val);
-	static bool Read(GPIO *interface);
+	static GPIO *Open(PseudoInterface *interface);
+	static void Close(GPIO *interface);
+
+	void Trans();
+	void Recv();
+	State_t Get();
+
+	static void SetDirection(GPIO *interface, Direction_e direction);
+	static void Set(GPIO *interface, Logic_e val);
+	static Logic_e Read(GPIO *interface);
 };
 
 #define SERIAL_BUFF_LEN 1024
@@ -39,50 +62,27 @@ public:
 class Serial : public PseudoInterface
 {
 public:
+	u8 Buffer[SERIAL_BUFF_LEN];
+	u64 Head, Tail;
+	pthread_mutex_t TransLock, ReadLock;
+
 	Serial(u32 id);
 
-	//static void Open();
-	//static void Close();
+	static Serial *Open(PseudoInterface *interface);
+	static void Close(Serial *interface);
 
-	static void Available();
-	static void Read();
-	static void Write();
+	void Trans(u8 *buff, u64 len);
+	void Recv(u8 *buff, u64 len);
+	//void Get();
+
+	static bool Available(Serial *interface);
+	static u64 Read(Serial *interface, void *buff, u64 len);
+	static void Write(Serial *interface, void *buff, u64 len);
 };
 
 
 void InitPseudoInterface();
 void DestroyPseudoInterface();
 
-
-// namespace Serial
-// {
-// 	struct SerialBuffer
-// 	{
-// 		u16 Port;
-// 		u8 Buffer[SERIAL_BUFF_LEN];
-// 		u32 DataHead, DataTail;
-// 		pthread_mutex_t Lockm;
-// 		u32 Count;
-
-// 		SerialBuffer();
-// 		~SerialBuffer();
-
-// 		void Increment();
-// 		void Decrement();
-
-// 		void Lock();
-// 		void Unlock();
-// 	};
-
-// 	SerialBuffer *Open(u16 port);
-// 	int Read(SerialBuffer *ser, void *buff, unsigned int len);
-// 	int Write(SerialBuffer *ser, void *buff, unsigned int len);
-// 	int Available(SerialBuffer *ser);
-// 	int Close(SerialBuffer *ser);
-
-// 	void InitSerial();
-// 	void CloseSerial();
-// };
-// typedef Serial::SerialBuffer * Serial_t;
 
 #endif

@@ -30,6 +30,7 @@
 #define BCOLOUR(r,g,b) CSI("48;2;" #r ";" #g ";" #b, "m")
 #define PRINT(...) printf(__VA_ARGS__) //std::cout<<s<<std::flush
 #define PRINTF(...) PRINT(__VA_ARGS__); fflush(stdout)
+#define ERROR(...) PRINTF(RED "ERROR: " RESET __VA_ARGS__)
 
 inline void MoveRel(int x, int y)
 {

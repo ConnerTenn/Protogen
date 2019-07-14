@@ -9,22 +9,22 @@ Device DeviceList[] =
 	{ 
 		.Name="HeadController",
 		.Entry={0,HeadControllerEntry},
-		.Interfaces={ new GPIO(101), new Serial(201) },
+		.Interfaces={ new GPIO(111), new Serial(121) },
 	},
 	{ 
 		.Name="EmotionController",
 		.Entry={0,EmotionControllerEntry},
-		.Interfaces={ new GPIO(102), new Serial(202) },
+		.Interfaces={ new GPIO(211), new Serial(221) },
 	},
 };
 
 std::vector<u32> ConnectionMatrix[] =
 {
-	{101, 102},
-	{201, 201},
+	{111, 211},
+	{121, 221},
 };
 
-Interface_t FindInterface(u32 ID)
+PseudoInterface *FindInterface(u32 ID)
 {
 	for (size_t i=0; i<ARRAYLEN(DeviceList); i++)
 	{
@@ -47,8 +47,8 @@ void InitDevices()
 	{
 		for (size_t j=0; j<ConnectionMatrix[i].size(); j++)
 		{
-			Interface_t iface = FindInterface(ConnectionMatrix[i][j]);
-			if (!iface) { PRINTF("Interface Not Found: %d\n", ConnectionMatrix[i][j]); }
+			PseudoInterface *iface = FindInterface(ConnectionMatrix[i][j]);
+			if (!iface) { ERROR("Interface Not Found: %d\n", ConnectionMatrix[i][j]); }
 			else
 			{
 				for (size_t k=0; k<ConnectionMatrix[i].size(); k++)
@@ -65,7 +65,7 @@ void InitDevices()
 	for (size_t i = 0; i < ARRAYLEN(DeviceList); i++)
 	{
 		Device *device = &DeviceList[i];
-		pthread_create(&(device->Entry.ID), 0, device->Entry.Entry, &Run);
+		pthread_create(&(device->Entry.ID), 0, device->Entry.Entry, device);
 	}
 
 	PRINTRETFUNC
@@ -87,15 +87,16 @@ void DestroyDevices()
 	PRINTRETFUNC
 }
 
-Interface_t Device::Open(u32 interfaceID)
+PseudoInterface *Device::Open(u32 interfaceID)
 {
 	for (size_t i=0; i<Interfaces.size(); i++)
 	{
 		if (Interfaces[i]->InterfaceID==interfaceID) { return Interfaces[i]; }
 	}
+	ERROR("Interface %d not found for %s\n", interfaceID, Name.c_str());
 	return 0;
 }
 
-void Device::Close(Interface_t interface)
+void Device::Close(PseudoInterface *interface)
 {
 }

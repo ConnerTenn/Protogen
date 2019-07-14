@@ -21,8 +21,8 @@ public:
 	Thread Entry;
 	std::vector<PseudoInterface *> Interfaces;
 
-	Interface_t Open(u32 interfaceID);
-	void Close(Interface_t interface);
+	PseudoInterface *Open(u32 interfaceID);
+	void Close(PseudoInterface *interface);
 };
 
 
