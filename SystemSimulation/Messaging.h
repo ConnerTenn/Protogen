@@ -7,6 +7,7 @@
 
 #define STARTBYTE 0x01
 #define STARTCONTENTBYTE 0x02
+#define CRCBYTE 0x06
 #define ENDBYTE 0x03
 
 //int ParseMessages(void *buffer, u8 *messages);
@@ -22,19 +23,33 @@ struct Message
 {
 	char Dest[MSG_DEST_LEN];
 	char Label[MSG_LABEL_LEN];
-	char Content[MSG_CONTENT_LEN];
+	u8 Content[MSG_CONTENT_LEN];
 };
 
 struct MessageHandler 
 {
 	Serial *Interface;
 	Message Messages[MSG_BUFF_LEN];
-	char Buffer[MSG_TOTAL_LEN*2];
-	u64 MsgHead, MsgTail, BuffHead, BuffTail;
+	u64 Head, Tail;//BuffHead, BuffTail;
+	Message Buffer;
+	u64 DestFill, LabelFill, ContentFill;
+	u8 BufferCRC;
+	enum RecvState
+	{
+		RecvDest,
+		RecvLabel, 
+		RecvContent,
+		RecvCRC,
+	} State;
 	
 };
 
-void InitMessager(MessageHandler *handler, Serial *interface);
+u16 CalcCRC(Message *msg);
+
+void InitMessageHandler(MessageHandler *handler, Serial *interface);
+void DestroyMessageHandler(MessageHandler *handler);
 bool GetNextMessage(MessageHandler *handler, Message *msg);
+void SendMessage(MessageHandler *handler, Message *msg);
+void PrintMessage(Message *msg);
 
 #endif

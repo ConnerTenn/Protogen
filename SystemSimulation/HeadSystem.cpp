@@ -2,6 +2,7 @@
 #include "Global.h"
 
 #include "Devices.h"
+#include "Messaging.h"
 
 
 void *EmotionControllerEntry(void *data)
@@ -13,27 +14,36 @@ void *EmotionControllerEntry(void *data)
 
 	Serial *serial = Serial::Open(device->Open(221));
 
-	char buff[32];
+	MessageHandler messenger;
+	InitMessageHandler(&messenger, serial);
+
 	while (Run)
 	{
 		int logic = (int)GPIO::Read(gpio);
-		if (Serial::Available(serial))
-		{
-			Serial::Read(serial, buff, 32);
-		}
 
 		pthread_mutex_lock(&TermLock);
-		PRINT("Emote GPIO:%d  Serial:\"%s\"\n\n", logic, buff);
+
+		PRINT("Emote GPIO:%d\n", logic);
+
+		Message msg;
+		while(GetNextMessage(&messenger, &msg))
+		{
+			PrintMessage(&msg);
+		}
+
+		PRINT("\n\n");
 		pthread_mutex_unlock(&TermLock);
-		strcpy(buff, "");
+
 		usleep(1000*1000);
 	}
 
-	GPIO::Close(gpio);
-	device->Close(gpio);
+	DestroyMessageHandler(&messenger);
 
 	Serial::Close(serial);
 	device->Close(serial);
+
+	GPIO::Close(gpio);
+	device->Close(gpio);
 
 	PRINTRETFUNC
 	return 0;
@@ -49,25 +59,42 @@ void *HeadControllerEntry(void *data)
 
 	Serial *serial = Serial::Open(device->Open(121));
 
+	MessageHandler messenger;
+	InitMessageHandler(&messenger, serial);
+
 	bool logic=0;
-	char buff[32] = "Hello!";
 	while (Run)
 	{
 		GPIO::Set(gpio, logic?GPIO::High:GPIO::Low);
-		Serial::Write(serial, buff, strlen(buff));
+
 
 		pthread_mutex_lock(&TermLock);
-		PRINT("Status sent:: GPIO:%d  Serial:\"%s\"\n\n", logic, buff);
+
+		Message msg;
+		strcpy(msg.Dest,"Emote");
+		strcpy(msg.Label,"Test");
+		static int cc=0;
+		sprintf((char *)msg.Content,"Works %d", cc++);
+		SendMessage(&messenger, &msg);
+
+		PRINT("Status sent:: GPIO:%d\n", logic);
+		PRINT("Msg: "); PrintMessage(&msg);
+
+		PRINT("\n");
+
 		pthread_mutex_unlock(&TermLock);
+
 		logic=!logic;
 		usleep(1000*1000);
 	}
 
-	GPIO::Close(gpio);
-	device->Close(gpio);
+	DestroyMessageHandler(&messenger);
 
 	Serial::Close(serial);
 	device->Close(serial);
+
+	GPIO::Close(gpio);
+	device->Close(gpio);
 
 	PRINTRETFUNC
 	return 0;
