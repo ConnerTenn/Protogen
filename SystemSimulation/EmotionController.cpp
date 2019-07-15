@@ -2,23 +2,65 @@
 #include "EmotionController.h"
 
 
-Display Display1;
+//Display Display1;
+
+#define _ "\x0"
+#define $ "\x1"
+const char *DispData[] =
+{
+$ $ $ _ \
+$ _ _ _ \
+$ _ _ _ \
+_ _ _ _
+,
+$ $ $ $ \
+_ _ _ _ \
+_ _ _ _ \
+_ _ _ _
+,
+_ $ $ $ \
+_ _ _ $ \
+_ _ _ $ \
+_ _ _ _
+,
+_ _ _ $ \
+_ _ _ $ \
+_ _ _ $ \
+_ _ _ $
+,
+_ _ _ _ \
+_ _ _ $ \
+_ _ _ $ \
+_ $ $ $
+,
+_ _ _ _ \
+_ _ _ _ \
+_ _ _ _ \
+$ $ $ $
+,
+_ _ _ _ \
+$ _ _ _ \
+$ _ _ _ \
+$ $ $ _
+,
+$ _ _ _ \
+$ _ _ _ \
+$ _ _ _ \
+$ _ _ _
+};
+#undef _
+#undef $
 
 void UpdateDisplays()
 {
 	pthread_mutex_lock(&TermLock);
-	PrintDisplay(&Display1, 0, 1);
+	//PrintDisplay(&Display1, 0, 1);
+	static u64 i=0; i++;
+	PrintDisplay((u8 *)DispData[i%8], 4, 4, 0, 1);
+	PRINT(RESET);
 	fflush(stdout);
 	pthread_mutex_unlock(&TermLock);
 }
-
-u8 DispData[] =
-{
-	0, 1, 1, 1,
-	0, 0, 1, 0,
-	1, 1, 1, 0,
-	0, 0, 1, 0,
-};
 
 void *EmotionControllerEntry(void *data)
 {
@@ -30,30 +72,29 @@ void *EmotionControllerEntry(void *data)
 	MessageHandler messenger;
 	InitMessageHandler(&messenger, serial);
 
-	InitDisplay(&Display1, 4, 4);
-	memcpy(Display1.Array, DispData, ARRAYLEN(DispData));
+	//InitDisplay(&Display1, 4, 4);
+	//memcpy(Display1.Array, DispData, ARRAYLEN(DispData));
 
 	while (Run)
 	{
 		pthread_mutex_lock(&LogLock);
-		LOG("%s Update\n", __FUNCTION__);
-
-		Message msg;
+		Message msg; bool print=false;
 		while(GetNextMessage(&messenger, &msg))
 		{
-			LogMessage(&msg);
+			LOG("%s:: ",__FUNCTION__); LogMessage(&msg);
+			print=true;
 		}
 
-		LOGF("\n\n");
+		if (print) { LOGF("\n\n"); }
 		pthread_mutex_unlock(&LogLock);
 
 
 		UpdateDisplays();
 
-		usleep(1000*1000);
+		usleep(50*1000);
 	}
 
-	DestroyDisplay(&Display1);
+	//DestroyDisplay(&Display1);
 
 	DestroyMessageHandler(&messenger);
 

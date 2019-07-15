@@ -18,13 +18,15 @@ void *HeadControllerEntry(void *data)
 	while (Run)
 	{
 		pthread_mutex_lock(&LogLock);
-		LOG("%s Update\n", __FUNCTION__);
-
-		Message msg;
+		Message msg; bool print=false;
 		while(GetNextMessage(&messenger, &msg))
 		{
-			LogMessage(&msg);
+			LOG("%s:: ",__FUNCTION__); LogMessage(&msg); LOGF("\n");
 		}
+
+		if (print) { LOGF("\n\n"); }
+		pthread_mutex_unlock(&LogLock);
+
 
 
 		strcpy(msg.Dest,"Emote");
@@ -33,8 +35,7 @@ void *HeadControllerEntry(void *data)
 		sprintf((char *)msg.Content,"Works %d", cc++);
 		SendMessage(&messenger, &msg);
 
-		LOGF("\n");
-		pthread_mutex_unlock(&LogLock);
+		//LOGF("\n");
 
 		usleep(1000*1000);
 	}

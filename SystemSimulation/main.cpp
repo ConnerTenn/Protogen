@@ -35,16 +35,25 @@ void Init()
 	signal(SIGSEGV, CrashHandler); signal(SIGKILL, InteruptHandler);
 
 	LogFile = fopen("log", "w");
+	LOG("\n\n\n");
+	LOGENTERFUNC
 
 	set_conio_terminal_mode();
 
 	pthread_mutex_init(&TermLock, 0);
 	pthread_mutex_init(&LogLock, 0);
 
-	Array<int,2> dimensions = GetDimensions();
-	FillCharacers(0,0,dimensions[0], dimensions[1], {' ',""});
+	Array<int,2> dim = GetDimensions();
+	for (int y=0; y<dim[1]; y++)
+	{
+		for (int x=0; x<dim[0]; x++) { PRINT(" "); }
+		PRINT("\n");
+	}
+	
+	LOG("Dimensions: %d, %d\n", dim[0], dim[1]);
 
 	InitDevices();
+	LOGRETFUNC
 }
 
 void Close()
