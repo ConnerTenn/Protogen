@@ -7,7 +7,7 @@
 
 void *EmotionControllerEntry(void *data)
 {
-	PRINTENTERFUNC
+	LOGENTERFUNC
 	Device *device = (Device *)data; (void)device;
 
 	Serial *serial = Serial::Open(device->Open(211));
@@ -17,17 +17,17 @@ void *EmotionControllerEntry(void *data)
 
 	while (Run)
 	{
-		pthread_mutex_lock(&TermLock);
-		PRINT("%s Update\n", __FUNCTION__);
+		pthread_mutex_lock(&LogLock);
+		LOG("%s Update\n", __FUNCTION__);
 
 		Message msg;
 		while(GetNextMessage(&messenger, &msg))
 		{
-			PrintMessage(&msg);
+			LogMessage(&msg);
 		}
 
-		PRINT("\n\n");
-		pthread_mutex_unlock(&TermLock);
+		LOGF("\n\n");
+		pthread_mutex_unlock(&LogLock);
 
 		usleep(1000*1000);
 	}
@@ -37,13 +37,13 @@ void *EmotionControllerEntry(void *data)
 	Serial::Close(serial);
 	device->Close(serial);
 
-	PRINTRETFUNC
+	LOGRETFUNC
 	return 0;
 }
 
 void *HeadControllerEntry(void *data)
 {
-	PRINTENTERFUNC
+	LOGENTERFUNC
 	Device *device = (Device *)data; (void)device;
 
 	Serial *serial = Serial::Open(device->Open(111));
@@ -53,13 +53,13 @@ void *HeadControllerEntry(void *data)
 
 	while (Run)
 	{
-		pthread_mutex_lock(&TermLock);
-		PRINT("%s Update\n", __FUNCTION__);
+		pthread_mutex_lock(&LogLock);
+		LOG("%s Update\n", __FUNCTION__);
 
 		Message msg;
 		while(GetNextMessage(&messenger, &msg))
 		{
-			PrintMessage(&msg);
+			LogMessage(&msg);
 		}
 
 
@@ -69,8 +69,8 @@ void *HeadControllerEntry(void *data)
 		sprintf((char *)msg.Content,"Works %d", cc++);
 		SendMessage(&messenger, &msg);
 
-		PRINT("\n");
-		pthread_mutex_unlock(&TermLock);
+		LOGF("\n");
+		pthread_mutex_unlock(&LogLock);
 
 		usleep(1000*1000);
 	}
@@ -80,7 +80,7 @@ void *HeadControllerEntry(void *data)
 	Serial::Close(serial);
 	device->Close(serial);
 
-	PRINTRETFUNC
+	LOGRETFUNC
 	return 0;
 }
 

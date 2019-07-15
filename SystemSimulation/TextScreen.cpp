@@ -88,8 +88,22 @@ Array<int,2> GetDimensions()
 	return {(int)w.ws_col, (int)w.ws_row};
 }
 
-void FillCharacers(int x, int y, int width, int height, char ColourChar)
+void FillCharacers(int x, int y, int width, int height, ColourChar character)
 {
+	//FCOLOUR(character.Foreground.R, character.Foreground.G, character.Foreground.B);
+	//BCOLOUR(character.Background.R, character.Background.G, character.Background.B);
+	PRINT(character.codes);
+
+	for (int i=0; i<height; i++)
+	{
+		MOVETO(x, y+i);
+		//PRINT("%02d", i);
+		for (int j=0; j<width; j++)
+		{
+			PRINT("%c",character.Character);
+		}
+	}
+	PRINTF(RESET);
 	// if (x>=0 && y>=0 && x < Width && y < Height)
 	// {
 	// 	int FR = (int)foreground.R, FG = (int)foreground.G, FB = (int)foreground.B;
@@ -100,7 +114,8 @@ void FillCharacers(int x, int y, int width, int height, char ColourChar)
 
 void ClearTerm()
 {
-	PRINT(MOVETO(Width-1, Height-1) CSI("1","J"));
+	Array<int,2>dimensions = GetDimensions();
+	MOVETO(dimensions[0]-1, dimensions[1]-1);  PRINT(CSI("1","J"));
 }
 
 void SavePosition()

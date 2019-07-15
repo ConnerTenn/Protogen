@@ -51,5 +51,6 @@ void DestroyMessageHandler(MessageHandler *handler);
 bool GetNextMessage(MessageHandler *handler, Message *msg);
 void SendMessage(MessageHandler *handler, Message *msg);
 void PrintMessage(Message *msg);
+void LogMessage(Message *msg);
 
 #endif

@@ -12,25 +12,36 @@
 
 #define CSI(a,c) "\033[" a c
 
-#define RESET   CSI("0","m")
-#define RED     CSI("1;31","m")
-#define GREEN   CSI("1;32","m")
-#define BLUE    CSI("1;34","m")
-#define MAGENTA CSI("1;35","m")
-#define YELLOW  CSI("1;33","m")
-#define CYAN    CSI("1;36","m")
-#define INV     CSI("7","m")
+#define RESET    CSI("0","m")
+#define BLACK    CSI("1;38;5;232","m")
+#define RED      CSI("1;31","m")
+#define GREEN    CSI("1;32","m")
+#define BLUE     CSI("1;34","m")
+#define MAGENTA  CSI("1;35","m")
+#define YELLOW   CSI("1;33","m")
+#define CYAN     CSI("1;36","m")
+#define WHITE    CSI("1;37","m")
+#define INV      CSI("7","m")
+
+#define BBLACK   CSI("1;48;5;232","m")
+#define BRED     CSI("1;41","m")
+#define BGREEN   CSI("1;42","m")
+#define BBLUE    CSI("1;44","m")
+#define BMAGENTA CSI("1;45","m")
+#define BYELLOW  CSI("1;43","m")
+#define BCYAN    CSI("1;46","m")
+#define BWHITE   CSI("1;47","m")
 
 #define CLRLINE CSI("0","K")
 
-#define MOVETO(x,y) CSI(#y ";" #x, "H")
+#define MOVETO(x,y) printf(CSI("%d;%d", "H"),(y)+1,(x)+1)
 //#define MOVEREL(x,y) CSI(<<((y)<0?-(y)+1:0)<<,"A") << CSI(<<((y)>0?(y)+1:0)<<,"B") << CSI(<<((x)>0?(x)+1:0)<<,"C") << CSI(<<((x)<0?-(x)+1:0)<<,"D")
 
-#define FCOLOUR(r,g,b) CSI("38;2;" #r ";" #g ";" #b, "m")
-#define BCOLOUR(r,g,b) CSI("48;2;" #r ";" #g ";" #b, "m")
 #define PRINT(...) printf(__VA_ARGS__) //std::cout<<s<<std::flush
 #define PRINTF(...) PRINT(__VA_ARGS__); fflush(stdout)
 #define ERROR(...) PRINTF(RED "ERROR: " RESET __VA_ARGS__)
+//#define FCOLOUR(r,g,b) PRINT(CSI("38;2;%d;%d;%d","m"),r,g,b)
+//#define BCOLOUR(r,g,b) PRINT(CSI("48;2;%d;%d;%d","m"),r,g,b)
 
 inline void MoveRel(int x, int y)
 {
@@ -49,12 +60,11 @@ int getch();
 struct ColourChar
 {
 	char Character = 0;
-	RGB Foreground = {0,0,0};
-	RGB Background = {0,0,0};
+	const char *codes;
 };
 
 Array<int, 2> GetDimensions();
-void FillCharacers(int x, int y, int width, int height, char ColourChar);
+void FillCharacers(int x, int y, int width, int height, ColourChar character);
 void ClearTerm();
 void SavePosition();
 void RecoverPosition();

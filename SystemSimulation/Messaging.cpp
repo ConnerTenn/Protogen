@@ -79,7 +79,7 @@ bool GetNextMessage(MessageHandler *handler, Message *msg)
 				{
 					PostMessage(handler);
 				}
-				else { ERROR("Msg Corruption\n"); }
+				else { LOGERROR("Msg Corruption\n"); }
 			}
 			else
 			{
@@ -140,5 +140,9 @@ void SendMessage(MessageHandler *handler, Message *msg)
 void PrintMessage(Message *msg)
 {
 	PRINT("%s->%s \"%s\"\n", msg->Label, msg->Dest, msg->Content);
+}
+void LogMessage(Message *msg)
+{
+	LOG("%s->%s \"%s\"\n", msg->Label, msg->Dest, msg->Content);
 }
 

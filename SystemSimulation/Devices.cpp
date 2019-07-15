@@ -40,14 +40,14 @@ PseudoInterface *FindInterface(u32 ID)
 
 void InitDevices()
 {
-	PRINTENTERFUNC
+	LOGENTERFUNC
 
 	for (size_t i=0; i<ARRAYLEN(ConnectionMatrix); i++)
 	{
 		for (size_t j=0; j<ConnectionMatrix[i].size(); j++)
 		{
 			PseudoInterface *iface = FindInterface(ConnectionMatrix[i][j]);
-			if (!iface) { ERROR("Interface Not Found: %d\n", ConnectionMatrix[i][j]); }
+			if (!iface) { LOGERROR("Interface Not Found: %d\n", ConnectionMatrix[i][j]); }
 			else
 			{
 				for (size_t k=0; k<ConnectionMatrix[i].size(); k++)
@@ -67,12 +67,12 @@ void InitDevices()
 		pthread_create(&(device->Entry.ID), 0, device->Entry.Entry, device);
 	}
 
-	PRINTRETFUNC
+	LOGRETFUNC
 }
 
 void DestroyDevices()
 {
-	PRINTENTERFUNC
+	LOGENTERFUNC
 
 	for (size_t i = 0; i < ARRAYLEN(DeviceList); i++)
 	{
@@ -83,7 +83,7 @@ void DestroyDevices()
 		}
 	}
 
-	PRINTRETFUNC
+	LOGRETFUNC
 }
 
 PseudoInterface *Device::Open(u32 interfaceID)
@@ -92,7 +92,7 @@ PseudoInterface *Device::Open(u32 interfaceID)
 	{
 		if (Interfaces[i]->InterfaceID==interfaceID) { return Interfaces[i]; }
 	}
-	ERROR("Interface %d not found for %s\n", interfaceID, Name.c_str());
+	LOGERROR("Interface %d not found for %s\n", interfaceID, Name.c_str());
 	return 0;
 }
 
