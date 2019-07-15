@@ -92,7 +92,7 @@ void FillCharacers(int x, int y, int width, int height, ColourChar character)
 {
 	//FCOLOUR(character.Foreground.R, character.Foreground.G, character.Foreground.B);
 	//BCOLOUR(character.Background.R, character.Background.G, character.Background.B);
-	PRINT(character.codes);
+	PRINT("%s", character.codes);
 
 	for (int i=0; i<height; i++)
 	{

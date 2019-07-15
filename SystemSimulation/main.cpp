@@ -42,7 +42,7 @@ void Init()
 	pthread_mutex_init(&LogLock, 0);
 
 	Array<int,2> dimensions = GetDimensions();
-	FillCharacers(0,0,dimensions[0], dimensions[1], {' ',BBLACK});
+	FillCharacers(0,0,dimensions[0], dimensions[1], {' ',""});
 
 	InitDevices();
 }

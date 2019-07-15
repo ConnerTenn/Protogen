@@ -37,7 +37,7 @@
 #define MOVETO(x,y) printf(CSI("%d;%d", "H"),(y)+1,(x)+1)
 //#define MOVEREL(x,y) CSI(<<((y)<0?-(y)+1:0)<<,"A") << CSI(<<((y)>0?(y)+1:0)<<,"B") << CSI(<<((x)>0?(x)+1:0)<<,"C") << CSI(<<((x)<0?-(x)+1:0)<<,"D")
 
-#define PRINT(...) printf(__VA_ARGS__) //std::cout<<s<<std::flush
+#define PRINT(...) printf(__VA_ARGS__)
 #define PRINTF(...) PRINT(__VA_ARGS__); fflush(stdout)
 #define ERROR(...) PRINTF(RED "ERROR: " RESET __VA_ARGS__)
 //#define FCOLOUR(r,g,b) PRINT(CSI("38;2;%d;%d;%d","m"),r,g,b)

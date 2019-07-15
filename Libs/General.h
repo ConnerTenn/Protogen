@@ -15,6 +15,7 @@
 #define PI M_PIl
 #define TAU (2.0*PI)
 #define MOD(a,b) ((a)%(b)+((a)<0?(b):0))
+#define CEILDIV(a,b) ( (((long int)(a))/((long int)(b))) + (((long int)(a))%((long int)(b))?1:0))
 
 typedef signed char i8;
 typedef signed short i16;
