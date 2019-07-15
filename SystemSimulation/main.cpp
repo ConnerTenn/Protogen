@@ -8,7 +8,7 @@ sem_t RunSem;
 
 
 
-void InteruptHandler(int arg) { printf("\n"); Run=false; sem_post(&RunSem); }
+void InteruptHandler(int arg) { printf(YELLOW "Stopping\n" RESET); Run=false; sem_post(&RunSem); }
 void CrashHandler(int arg) 
 {
 	ERROR("Segfault");
@@ -33,6 +33,8 @@ void Init()
 	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
 	signal(SIGSEGV, CrashHandler); signal(SIGKILL, InteruptHandler);
 
+	set_conio_terminal_mode();
+
 	pthread_mutex_init(&TermLock, 0);
 
 	InitDevices();
@@ -51,7 +53,15 @@ int main()
 
 	Init();
 
-	sem_wait(&RunSem);
+	//sem_wait(&RunSem);
+	while(Run)
+	{
+		while(kbhit() && Run)
+		{
+			int ch = getch();
+			PRINT("PRESS: %d(%X)\n", ch, ch);
+		}
+	}
 	
 	Close();
 

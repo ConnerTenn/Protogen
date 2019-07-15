@@ -9,19 +9,18 @@ Device DeviceList[] =
 	{ 
 		.Name="HeadController",
 		.Entry={0,HeadControllerEntry},
-		.Interfaces={ new GPIO(111), new Serial(121) },
+		.Interfaces={ new Serial(111) },
 	},
 	{ 
 		.Name="EmotionController",
 		.Entry={0,EmotionControllerEntry},
-		.Interfaces={ new GPIO(211), new Serial(221) },
+		.Interfaces={ new Serial(211) },
 	},
 };
 
 std::vector<u32> ConnectionMatrix[] =
 {
 	{111, 211},
-	{121, 221},
 };
 
 PseudoInterface *FindInterface(u32 ID)
