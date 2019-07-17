@@ -137,16 +137,16 @@ void Serial::Close(Serial *interface)
 
 void Serial::Trans(u8 *buff, u64 len)
 {
-	pthread_mutex_lock(&TransLock);
+	LOCKMUTEX(&TransLock);
 	for (size_t i=0; i<Connections.size(); i++)
 	{
 		((Serial *)Connections[i])->Recv(buff, len);
 	}
-	pthread_mutex_unlock(&TransLock);
+	ULOCKMUTEX(&TransLock);
 }
 void Serial::Recv(u8 *buff, u64 len)
 {
-	pthread_mutex_lock(&ReadLock);
+	LOCKMUTEX(&ReadLock);
 	for (u64 i=0; i<len; i++)
 	{
 		Buffer[Tail] = buff[i];
@@ -154,28 +154,28 @@ void Serial::Recv(u8 *buff, u64 len)
 
 		if (Tail==Head) { Head=(Head+1)%SERIAL_BUFF_LEN; }
 	}
-	pthread_mutex_unlock(&ReadLock);
+	ULOCKMUTEX(&ReadLock);
 }
 
 bool Serial::Available(Serial *interface)
 {
 	u64 len = 0;
-	pthread_mutex_lock(&interface->ReadLock);
+	LOCKMUTEX(&interface->ReadLock);
 	if (interface->Tail>=interface->Head) { len = interface->Tail-interface->Head; }
 	else { len = (interface->Tail+SERIAL_BUFF_LEN)-interface->Head; }
-	pthread_mutex_unlock(&interface->ReadLock);
+	ULOCKMUTEX(&interface->ReadLock);
 	return len;
 }
 u64 Serial::Read(Serial *interface, void *buff, u64 len)
 {
-	pthread_mutex_lock(&interface->ReadLock);
+	LOCKMUTEX(&interface->ReadLock);
 	u64 i=0;
 	for (; i<len && interface->Head!=interface->Tail; i++)
 	{
 		(((u8 *)buff)[i]) = interface->Buffer[interface->Head];
 		interface->Head=(interface->Head+1)%SERIAL_BUFF_LEN;
 	}
-	pthread_mutex_unlock(&interface->ReadLock);
+	ULOCKMUTEX(&interface->ReadLock);
 	return i;
 }
 void Serial::Write(Serial *interface, void *buff, u64 len)

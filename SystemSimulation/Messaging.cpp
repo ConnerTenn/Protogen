@@ -35,7 +35,6 @@ void InitMessageHandler(MessageHandler *handler, Serial *interface)
 }
 void DestroyMessageHandler(MessageHandler *handler)
 {
-
 }
 
 

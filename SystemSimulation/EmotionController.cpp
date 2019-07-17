@@ -53,13 +53,13 @@ $ _ _ _
 
 void UpdateDisplays()
 {
-	pthread_mutex_lock(&TermLock);
+	LOCKMUTEX(&TermLock);
 	//PrintDisplay(&Display1, 0, 1);
 	static u64 i=0; i++;
 	PrintDisplay((u8 *)DispData[i%8], 4, 4, 100, 0);
 	PRINT(RESET);
 	fflush(stdout);
-	pthread_mutex_unlock(&TermLock);
+	ULOCKMUTEX(&TermLock);
 }
 
 void *EmotionControllerEntry(void *data)
@@ -77,7 +77,7 @@ void *EmotionControllerEntry(void *data)
 
 	while (Run)
 	{
-		pthread_mutex_lock(&LogLock);
+		LOCKMUTEX(&LogLock);
 		Message msg; bool print=false;
 		while(GetNextMessage(&messenger, &msg))
 		{
@@ -86,7 +86,7 @@ void *EmotionControllerEntry(void *data)
 		}
 
 		if (print) { LOGF("\n\n"); }
-		pthread_mutex_unlock(&LogLock);
+		ULOCKMUTEX(&LogLock);
 
 
 		UpdateDisplays();

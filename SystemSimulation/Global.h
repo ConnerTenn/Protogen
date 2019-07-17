@@ -21,6 +21,9 @@
 
 #define ARRAYLEN(arr) (sizeof(arr)/sizeof(*(arr)))
 
+#define LOCKMUTEX(m) pthread_mutex_lock(m)
+#define ULOCKMUTEX(m) pthread_mutex_unlock(m)
+
 #define LOG(...) fprintf(LogFile, __VA_ARGS__)
 #define LOGF(...) fprintf(LogFile, __VA_ARGS__); fflush(LogFile);
 #define LOGERROR(...)  LOGF(RED "ERROR: " RESET __VA_ARGS__)

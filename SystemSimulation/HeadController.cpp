@@ -34,7 +34,7 @@ void *HeadControllerEntry(void *data)
 
 	while (Run)
 	{
-		pthread_mutex_lock(&LogLock);
+		LOCKMUTEX(&LogLock);
 		HandleUI();
 
 		Message msg; bool print=false;
@@ -44,7 +44,7 @@ void *HeadControllerEntry(void *data)
 		}
 
 		if (print) { LOGF("\n\n"); }
-		pthread_mutex_unlock(&LogLock);
+		ULOCKMUTEX(&LogLock);
 
 
 
