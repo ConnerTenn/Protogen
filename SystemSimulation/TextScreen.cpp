@@ -39,11 +39,11 @@ int kbhit()
 	return select(1, &fds, NULL, NULL, &tv);
 }
 
-int getch()
+u8 getch()
 {
 	int r;
 	unsigned char c;
-	if ((r = read(0, &c, sizeof(c))) < 0) { return r; }
+	if ((r = read(0, &c, sizeof(c))) < 0) { return (u8)r; }
 	else { return c; }
 }
 

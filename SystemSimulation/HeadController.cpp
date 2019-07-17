@@ -3,24 +3,11 @@
 
 #include "Devices.h"
 #include "Messaging.h"
+#include "UI.h"
 
-u8 Battery = 64;
 
-void HandleUI()
-{
-	while(kbhit() && Run)
-	{
-		int ch = getch();
-		LOGF("PRESS: %d(%X)\n", ch, ch);
-	}
-
-	FillCharacers(0,0,100,1,{' ',BGREY});
-	FillCharacers(0,59,100,1,{' ',BGREY});
-	FillCharacers(0,0,1,60,{' ',BGREY});
-	FillCharacers(99,0,1,60,{' ',BGREY});
-
-	MOVETO(0,1);
-}
+u8 Battery = 213;
+float UpdateFreq;
 
 void *HeadControllerEntry(void *data)
 {
@@ -31,33 +18,75 @@ void *HeadControllerEntry(void *data)
 
 	MessageHandler messenger;
 	InitMessageHandler(&messenger, serial);
-
+	
+	InitUI();
+	
+	i64 tp = 0, t1 = 0, td = 0;
 	while (Run)
 	{
+		tp = t1;
+		t1 = GetMilliseconds();
+		td = t1 - tp;
+		UpdateFreq = 1000.0/td;
+		
+		
 		LOCKMUTEX(&LogLock);
-		HandleUI();
+		//HandleUI();
 
 		Message msg; bool print=false;
 		while(GetNextMessage(&messenger, &msg))
 		{
 			LOG("%s:: ",__FUNCTION__); LogMessage(&msg); LOGF("\n");
 		}
+		
+		while(kbhit() && Run)
+		{
+			u8 ch;// = getch();
+			Ksequ sequ = {.val=0};
+			u8 seqc=0;
+			while(kbhit()) { sequ.seq[seqc++]=getch();}sequ.seq[seqc]=0;
+			ch=sequ.seq[0];
+			
+			// if (ch==27) //escape codes
+			// {
+				
+			// }
+			LOGF("PRESS: %d(%X) %llu(%016llX)\n", ch, ch, sequ.val, sequ.val);
+			
+			if (('a'<=ch && ch<='z') || ('a'<=ch && ch<='z') || sequ.val==K_UP || sequ.val==K_DOWN || sequ.val==K_LEFT || sequ.val==K_RIGHT)
+			{
+				UIHandleInput(sequ);
+			}
+			
+		}
 
 		if (print) { LOGF("\n\n"); }
 		ULOCKMUTEX(&LogLock);
+		
+		LOCKMUTEX(&TermLock);
+		UpdateUI();
+		ULOCKMUTEX(&TermLock);
+		
 
 
-
-		strcpy(msg.Dest,"Emote");
-		strcpy(msg.Label,"Test");
-		static int cc=0;
-		sprintf((char *)msg.Content,"Works %d", cc++);
-		SendMessage(&messenger, &msg);
+		static u8 transMsg=0;
+		if (transMsg>40)
+		{
+			strcpy(msg.Dest,"Emote");
+			strcpy(msg.Label,"Test");
+			static int cc=0;
+			sprintf((char *)msg.Content,"Works %d", cc++);
+			SendMessage(&messenger, &msg);
+			transMsg=0;
+		} 
+		transMsg++;
 
 		//LOGF("\n");
 
-		usleep(1000*1000);
+		usleep(50*1000);
 	}
+	
+	DestroyUI();
 
 	DestroyMessageHandler(&messenger);
 

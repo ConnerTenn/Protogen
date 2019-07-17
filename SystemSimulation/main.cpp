@@ -58,6 +58,7 @@ void Init()
 
 void Close()
 {
+	LOGENTERFUNC
 	DestroyDevices();
 
 	pthread_mutex_destroy(&TermLock);
@@ -67,6 +68,7 @@ void Close()
 	MOVETO(0, dim[1]);
 	PRINT("\n");
 
+	LOGRETFUNC
 	fclose(LogFile);
 }
 
