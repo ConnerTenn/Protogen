@@ -62,6 +62,10 @@ void Close()
 
 	pthread_mutex_destroy(&TermLock);
 	pthread_mutex_destroy(&LogLock);
+	
+	Array<int,2> dim = GetDimensions();
+	MOVETO(0, dim[1]);
+	PRINT("\n");
 
 	fclose(LogFile);
 }
@@ -72,15 +76,15 @@ int main()
 
 	Init();
 
-	//sem_wait(&RunSem);
-	while(Run)
-	{
-		while(kbhit() && Run)
-		{
-			int ch = getch();
-			LOGF("PRESS: %d(%X)\n", ch, ch);
-		}
-	}
+	sem_wait(&RunSem);
+	// while(Run)
+	// {
+	// 	while(kbhit() && Run)
+	// 	{
+	// 		int ch = getch();
+	// 		LOGF("PRESS: %d(%X)\n", ch, ch);
+	// 	}
+	// }
 	
 	Close();
 

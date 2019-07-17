@@ -56,7 +56,7 @@ void UpdateDisplays()
 	pthread_mutex_lock(&TermLock);
 	//PrintDisplay(&Display1, 0, 1);
 	static u64 i=0; i++;
-	PrintDisplay((u8 *)DispData[i%8], 4, 4, 0, 1);
+	PrintDisplay((u8 *)DispData[i%8], 4, 4, 100, 0);
 	PRINT(RESET);
 	fflush(stdout);
 	pthread_mutex_unlock(&TermLock);

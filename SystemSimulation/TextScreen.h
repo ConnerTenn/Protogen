@@ -21,7 +21,7 @@
 #define YELLOW   CSI("1;33","m")
 #define CYAN     CSI("1;36","m")
 #define WHITE    CSI("1;37","m")
-#define INV      CSI("7","m")
+#define GREY     CSI("90","m")
 
 #define BBLACK   CSI("1;48;5;232","m")
 #define BRED     CSI("1;41","m")
@@ -31,7 +31,9 @@
 #define BYELLOW  CSI("1;43","m")
 #define BCYAN    CSI("1;46","m")
 #define BWHITE   CSI("1;47","m")
+#define BGREY    CSI("100","m")
 
+#define INV      CSI("7","m")
 #define CLRLINE CSI("0","K")
 
 #define MOVETO(x,y) printf(CSI("%d;%d", "H"),(y)+1,(x)+1)

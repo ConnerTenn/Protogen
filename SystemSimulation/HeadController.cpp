@@ -4,6 +4,23 @@
 #include "Devices.h"
 #include "Messaging.h"
 
+u8 Battery = 64;
+
+void HandleUI()
+{
+	while(kbhit() && Run)
+	{
+		int ch = getch();
+		LOGF("PRESS: %d(%X)\n", ch, ch);
+	}
+
+	FillCharacers(0,0,100,1,{' ',BGREY});
+	FillCharacers(0,59,100,1,{' ',BGREY});
+	FillCharacers(0,0,1,60,{' ',BGREY});
+	FillCharacers(99,0,1,60,{' ',BGREY});
+
+	MOVETO(0,1);
+}
 
 void *HeadControllerEntry(void *data)
 {
@@ -18,6 +35,8 @@ void *HeadControllerEntry(void *data)
 	while (Run)
 	{
 		pthread_mutex_lock(&LogLock);
+		HandleUI();
+
 		Message msg; bool print=false;
 		while(GetNextMessage(&messenger, &msg))
 		{
