@@ -53,10 +53,10 @@ void *HeadControllerEntry(void *data)
 			// }
 			LOGF("PRESS: %d(%X) %llu(%016llX)\n", ch, ch, sequ.val, sequ.val);
 			
-			if (('a'<=ch && ch<='z') || ('a'<=ch && ch<='z') || sequ.val==K_UP || sequ.val==K_DOWN || sequ.val==K_LEFT || sequ.val==K_RIGHT)
-			{
-				UIHandleInput(sequ);
-			}
+			// if (('a'<=ch && ch<='z') || ('a'<=ch && ch<='z') || sequ.val==K_UP || sequ.val==K_DOWN || sequ.val==K_LEFT || sequ.val==K_RIGHT)
+			// {
+			UIHandleInput(sequ, &messenger);
+			// }
 			
 		}
 
@@ -77,6 +77,9 @@ void *HeadControllerEntry(void *data)
 			static int cc=0;
 			msg.ContentLen=sprintf((char *)msg.Content,"Works \x1B[1;36m%d\x1B[m", cc++);
 			SendMessage(&messenger, &msg);
+
+			TermLogWrite("Sent message "+std::to_string(cc-1));
+
 			transMsg=0;
 		} 
 		transMsg++;
