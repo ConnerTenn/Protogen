@@ -75,7 +75,7 @@ void *HeadControllerEntry(void *data)
 			strcpy(msg.Dest,"Emote");
 			strcpy(msg.Label,"Test");
 			static int cc=0;
-			sprintf((char *)msg.Content,"Works %d", cc++);
+			msg.ContentLen=sprintf((char *)msg.Content,"Works \x1B[1;36m%d\x1B[m", cc++);
 			SendMessage(&messenger, &msg);
 			transMsg=0;
 		} 
