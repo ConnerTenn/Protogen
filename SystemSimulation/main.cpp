@@ -8,7 +8,6 @@ sem_t RunSem;
 pthread_mutex_t LogLock;
 FILE *LogFile;
 
-
 void InteruptHandler(int arg) { LOG(YELLOW "Stopping\n" RESET); Run=false; sem_post(&RunSem); }
 void CrashHandler(int arg) 
 {
@@ -79,14 +78,6 @@ int main()
 	Init();
 
 	sem_wait(&RunSem);
-	// while(Run)
-	// {
-	// 	while(kbhit() && Run)
-	// 	{
-	// 		int ch = getch();
-	// 		LOGF("PRESS: %d(%X)\n", ch, ch);
-	// 	}
-	// }
 	
 	Close();
 

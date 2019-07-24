@@ -16,31 +16,8 @@ union Ksequ
 	u64 val;
 };
 
-// struct Event
-// {
-// 	enum 
-// 	{
-// 		ButtonPress,
-// 		Click,
-// 		Move,
-// 	} Action;
-	
-// 	Ksequ Key;
-// 	void *Data;
-// };
 
-// struct UIElem
-// {
-// 	int X, Y;
-// 	void (* Draw)(int x, int y);
-// 	void (* Focus)();
-// 	void (* Unfocus)();
-// 	void (* Event)(Event event);
-// };
-
-// extern std::vector<UIElem> UIElementList;
 extern u32 FocusedPane;
-
 
 void InitUI();
 void DestroyUI();

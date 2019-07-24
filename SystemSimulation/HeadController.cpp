@@ -31,7 +31,6 @@ void *HeadControllerEntry(void *data)
 		
 		
 		LOCKMUTEX(&LogLock);
-		//HandleUI();
 
 		Message msg; bool print=false;
 		while(GetNextMessage(&messenger, &msg))
@@ -47,17 +46,9 @@ void *HeadControllerEntry(void *data)
 			while(kbhit()) { sequ.seq[seqc++]=getch();}sequ.seq[seqc]=0;
 			ch=sequ.seq[0];
 			
-			// if (ch==27) //escape codes
-			// {
-				
-			// }
 			LOGF("PRESS: %d(%X) %llu(%016llX)\n", ch, ch, sequ.val, sequ.val);
 			
-			// if (('a'<=ch && ch<='z') || ('a'<=ch && ch<='z') || sequ.val==K_UP || sequ.val==K_DOWN || sequ.val==K_LEFT || sequ.val==K_RIGHT)
-			// {
 			UIHandleInput(sequ, &messenger);
-			// }
-			
 		}
 
 		if (print) { LOGF("\n\n"); }
@@ -67,24 +58,6 @@ void *HeadControllerEntry(void *data)
 		UpdateUI();
 		ULOCKMUTEX(&TermLock);
 		
-
-
-		static u8 transMsg=0;
-		if (transMsg>40)
-		{
-			strcpy(msg.Dest,"Emote");
-			strcpy(msg.Label,"Test");
-			static int cc=0;
-			msg.ContentLen=sprintf((char *)msg.Content,"Works \x1B[1;36m%d\x1B[m", cc++);
-			SendMessage(&messenger, &msg);
-
-			TermLogWrite("Sent message "+std::to_string(cc-1));
-
-			transMsg=0;
-		} 
-		transMsg++;
-
-		//LOGF("\n");
 
 		usleep(50*1000);
 	}

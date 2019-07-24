@@ -3,7 +3,7 @@
 #define _KEYBOARD_H_
 
 #include <General.h>
-#include <Colour.h>
+//#include <Colour.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>

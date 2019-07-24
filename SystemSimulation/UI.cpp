@@ -17,7 +17,6 @@ void DrawEmotionPane(int x, int y)
 	
 	for (i32 i=0; i<(i32)ExpressionList.size(); i++)
 	{
-		
 		//FillCharacers(x, y+i*3+2*3,3,3,{' ',BBLACK});
 		
 		MOVETO(x, y+i*3+2*3);
@@ -37,9 +36,6 @@ void DrawEmotionPane(int x, int y)
 		PRINT(RESET);
 	}
 }
-// // void EmotionPaneEvent(Event event)
-// // {
-// // }
 
 
 extern u8 Battery;
@@ -51,9 +47,6 @@ void DrawInfoPane(int x, int y)
 	PRINT("UpdateRate: %.1fu/s  ", UpdateFreq);
 	PRINT("Battery: %d%%", (100*Battery)/255);
 }
-// void InfoPaneEvent(Event event)
-// {
-// }
 
 
 std::vector<std::string> TerminalLog;
@@ -70,30 +63,7 @@ void DrawControlPane(int x, int y)
 		PRINT("%s", TerminalLog[i].c_str());
 	}
 }
-// void ControlPaneEvent(Event event)
-// {
-// }
 
-
-
-// std::vector<UIElem> UIElementList = 
-// {
-// 	UIElem{ 
-// 		.X=50, .Y=2,
-// 		.Draw=EmotionPaneDraw,
-// 		.Event=EmotionPaneEvent,
-// 	},
-// 	UIElem{ 
-// 		.X=1, .Y=2,
-// 		.Draw=ControlPaneDraw,
-// 		.Event=ControlPaneEvent,
-// 	},
-// 	UIElem{ 
-// 		.X=1, .Y=1,
-// 		.Draw=InfoPaneDraw,
-// 		.Event=InfoPaneEvent,
-// 	},
-// };
 
 void InitUI()
 {
@@ -116,12 +86,6 @@ void UpdateUI()
 	FillCharacers(0,0,1,60,{' ',BGREY});
 	FillCharacers(99,0,1,60,{' ',BGREY});
 
-	
-	// for (size_t i=0; i<UIElementList.size(); i++)
-	// {
-	// 	UIElem *elem = &UIElementList[i];
-	// 	elem->Draw(elem->X, elem->Y);
-	// }
 
 	DrawInfoPane(1,1);
 
@@ -134,7 +98,12 @@ void UIHandleInput(Ksequ key, MessageHandler *messenger)
 {
 	if (key.val == K_UP && EmoteCursor>-2) { EmoteCursor--; }
 	if (key.val == K_DOWN && EmoteCursor<(i32)ExpressionList.size()-1) { EmoteCursor++; }
-	if (key.val == K_ENTER) { SelectedEmote=EmoteCursor; SendExpressionState(messenger); }
+	if (key.val == K_ENTER) 
+	{ 
+		SelectedEmote=EmoteCursor; 
+		SendExpressionState(messenger);
+		TermLogWrite("SendExpressionState");
+	}
 }
 
 void TermLogWrite(std::string msg)

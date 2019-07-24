@@ -1,6 +1,24 @@
 
 #include "EmotionController.h"
 
+ExpressionState ExprState;
+
+void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
+{
+	for (u8 y=0; y<height; y++)
+	{
+		MOVETO(dx, dy+y);
+		for (u8 x=0; x<width; x++)
+		{
+			u16 idx=y*(width/8)+(x/8);
+			u8 bit = x%8;
+			u8 mask = 0x80>>bit;
+			u8 pixel = (display[idx] & mask)>>(7-bit);
+			PRINT("%s  ",(pixel?BWHITE:BBLACK));
+		}	
+	}
+	PRINT("\n");
+}
 
 void UpdateDisplays()
 {
