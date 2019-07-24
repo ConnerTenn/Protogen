@@ -68,6 +68,12 @@
 // 	PRINT("\n");
 // }
 
+struct ExpressionState
+{
+	u16 LeftEye;
+	u16 RightEye;
+} ExprState;
+
 void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
 {
 	for (u8 y=0; y<height; y++)
@@ -75,7 +81,10 @@ void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
 		MOVETO(dx, dy+y);
 		for (u8 x=0; x<width; x++)
 		{
-			u8 pixel = display[y*width+x];
+			u16 idx=y*(width/8)+(x/8);
+			u8 bit = x%8;
+			u8 mask = 0x80>>bit;
+			u8 pixel = (display[idx] & mask)>>(7-bit);
 			PRINT("%s  ",(pixel?BWHITE:BBLACK));
 		}	
 	}

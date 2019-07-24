@@ -1,7 +1,6 @@
 
 #include "UI.h"
 
-#include "Expressions.h"
 
 u32 FocusedPane = 0;
 
@@ -135,7 +134,7 @@ void UIHandleInput(Ksequ key, MessageHandler *messenger)
 {
 	if (key.val == K_UP && EmoteCursor>-2) { EmoteCursor--; }
 	if (key.val == K_DOWN && EmoteCursor<(i32)ExpressionList.size()-1) { EmoteCursor++; }
-	if (key.val == K_ENTER) { SelectedEmote=EmoteCursor; UpdateEmotionState(messenger); }
+	if (key.val == K_ENTER) { SelectedEmote=EmoteCursor; SendExpressionState(messenger); }
 }
 
 void TermLogWrite(std::string msg)

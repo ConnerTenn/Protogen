@@ -1,4 +1,7 @@
 
+#ifndef _EXPRESSIONS_H_
+#define _EXPRESSIONS_H_
+
 #include "Global.h"
 #include "Messaging.h"
 
@@ -29,56 +32,15 @@ struct Expression
 };
 
 
-ExprFrag EL1{"EL1",1};
-ExprFrag EL2{"EL2",2};
-ExprFrag ER1{"ER1",3};
-ExprFrag ER2{"ER2",4};
-ExprFrag ML1{"ML1",5};
-ExprFrag ML2{"ML2",6};
-ExprFrag MR1{"MR1",7};
-ExprFrag MR2{"MR2",8};
-ExprFrag MC1{"MC1",9};
-ExprFrag MC2{"MC2",10};
-ExprFrag N1{"N1",11};
-ExprFrag N2{"N2",12};
-ExprFrag B1{"B1",13};
-ExprFrag B2{"B2",14};
-
-
-std::vector<Expression> ExpressionList =
+struct ExpressionState
 {
-	{
-		.Name="Neutral",
-		.Frags={&EL1,&ER1,&ML1,&MR1,&MC1,&N1,&B1}
-	},
-	{
-		.Name="Happy",
-		.Frags={&EL2,&ER2,&ML1,&MR1,&MC1,&N1,&B1}
-	},
-	{
-		.Name="Concern",
-		.Frags={&EL1,&ER2,&ML2,&MR2,&MC1,&N1,&B1}
-	},
+	u16 LeftEye;
+	u16 RightEye;
 };
 
-i32 SelectedEmote=0;
+extern std::vector<Expression> ExpressionList;
+extern i32 SelectedEmote;
 
-void UpdateEmotionState(MessageHandler *messenger)
-{
-	Message msg;
-	strcpy(msg.Dest,"Emote");
-	strcpy(msg.Label,"Update");
+void SendExpressionState(MessageHandler *messenger);
 
-	Expression *expr=&ExpressionList[SelectedEmote];
-	u16 buff[7];
-	for (u8 i=0; i<7; i++)
-	{
-		if (expr->Frags[i]) { buff[i]=expr->Frags[i]->ID; }
-		else { buff[i]=-1; }
-	}
-	msg.ContentLen=sizeof(buff);
-	memcpy(msg.Content, buff, msg.ContentLen);
-
-	SendMessage(messenger, &msg);
-}
-
+#endif

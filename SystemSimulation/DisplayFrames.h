@@ -5,6 +5,9 @@
 // Nose: 8 x 8
 
 // Encoding
+/*
+Bytes record horizontal pixel data in rows. Each bit represents 1 pixel
+*/
 
 struct Frame
 {
@@ -19,7 +22,13 @@ Frame Frames[]=
 	// [0]={},
 	// [1]=
 	{
-		.Data=(u8 *)"\x10"
+		.Data=(u8 *)"\x00\x00\x00\x00\x00\x00\x00\x00"
+	},
+	{
+		.Data=(u8 *)"\xe1\x81\xe1\x81\xe1\x49\x92\x49"
+	},
+	{
+		.Data=(u8 *)"\xe7\x81\xe7\x84\xe7\x49\x92\x49"
 	},
 };
 

@@ -2,61 +2,10 @@
 #include "EmotionController.h"
 
 
-//Display Display1;
-
-#define _ "\x0"
-#define $ "\x1"
-const char *DispData[] =
-{
-$ $ $ _ \
-$ _ _ _ \
-$ _ _ _ \
-_ _ _ _
-,
-$ $ $ $ \
-_ _ _ _ \
-_ _ _ _ \
-_ _ _ _
-,
-_ $ $ $ \
-_ _ _ $ \
-_ _ _ $ \
-_ _ _ _
-,
-_ _ _ $ \
-_ _ _ $ \
-_ _ _ $ \
-_ _ _ $
-,
-_ _ _ _ \
-_ _ _ $ \
-_ _ _ $ \
-_ $ $ $
-,
-_ _ _ _ \
-_ _ _ _ \
-_ _ _ _ \
-$ $ $ $
-,
-_ _ _ _ \
-$ _ _ _ \
-$ _ _ _ \
-$ $ $ _
-,
-$ _ _ _ \
-$ _ _ _ \
-$ _ _ _ \
-$ _ _ _
-};
-#undef _
-#undef $
-
 void UpdateDisplays()
 {
 	LOCKMUTEX(&TermLock);
-	//PrintDisplay(&Display1, 0, 1);
-	static u64 i=0; i++;
-	PrintDisplay((u8 *)DispData[i%8], 4, 4, 100, 0);
+	PrintDisplay(Frames[ExprState.LeftEye].Data, 8, 8, 100, 0);
 	PRINT(RESET);
 	fflush(stdout);
 	ULOCKMUTEX(&TermLock);
@@ -82,6 +31,11 @@ void *EmotionControllerEntry(void *data)
 		while(GetNextMessage(&messenger, &msg))
 		{
 			LOG("%s:: ",__FUNCTION__); LogMessage(&msg);
+
+			if (strcmp(msg.Dest,"Emote")==0 && strcmp(msg.Label,"Update")==0)
+			{
+				ExprState=*((ExpressionState *)msg.Content);
+			}
 			print=true;
 		}
 
