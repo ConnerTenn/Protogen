@@ -46,6 +46,7 @@ for line in file:
 					bit=7
 					buff+="\\x{0:02X}".format(byte)
 					byte=0
+					
 if (len(buff)>0): print("\""+buff+"\"\n")	
 
 file.close()

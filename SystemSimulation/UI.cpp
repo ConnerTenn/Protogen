@@ -27,7 +27,7 @@ void DrawEmotionPane(int x, int y)
 		PRINT(RESET);
 
 		MOVETO(x, y+i*3+2*3+1);
-		for (i32 j=0; j<5; j++)
+		for (i32 j=0; j<7; j++)
 		{
 			//FillCharacers(x+4+j*3, y+i*3+2*3+1,2,2,{' ',BBLACK});
 			PRINT("%s ",ExpressionList[i].Frags[j]->Name.c_str());
@@ -81,17 +81,17 @@ void DestroyUI()
 
 void UpdateUI()
 {
-	FillCharacers(0,0,100,1,{' ',BGREY});
-	FillCharacers(0,59,100,1,{' ',BGREY});
+	FillCharacers(0,0,80,1,{' ',BGREY});
+	FillCharacers(0,60-1,80,1,{' ',BGREY});
 	FillCharacers(0,0,1,60,{' ',BGREY});
-	FillCharacers(99,0,1,60,{' ',BGREY});
+	FillCharacers(80-1,0,1,60,{' ',BGREY});
 
 
 	DrawInfoPane(1,1);
 
 	DrawControlPane(1,2);
 
-	DrawEmotionPane(50,2);
+	DrawEmotionPane(80/2,2);
 }
 
 void UIHandleInput(Ksequ key, MessageHandler *messenger)

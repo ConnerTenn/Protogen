@@ -25,11 +25,11 @@ std::vector<Expression> ExpressionList =
 	},
 	{
 		.Name="Happy",
-		.Frags={&EL2,&ER2,&ML1,&MR1,&MC1,&N1,&B1}
+		.Frags={&EL2,&ER2,&ML2,&MR2,&MC1,&N1,&B1}
 	},
 	{
 		.Name="Concern",
-		.Frags={&EL1,&ER2,&ML2,&MR2,&MC1,&N1,&B1}
+		.Frags={&EL1,&ER2,&ML2,&MR2,&MC2,&N2,&B2}
 	},
 };
 
@@ -48,6 +48,11 @@ void SendExpressionState(MessageHandler *messenger)
 	
 	state.LeftEye=expr->Frags[0]->ID;
 	state.RightEye=expr->Frags[1]->ID;
+	state.LeftMouth=expr->Frags[2]->ID;
+	state.RightMouth=expr->Frags[3]->ID;
+	state.CenterMouth=expr->Frags[4]->ID;
+	state.Nose=expr->Frags[5]->ID;
+	state.Body=expr->Frags[6]->ID;
 
 	msg.ContentLen=sizeof(ExpressionState);
 	memcpy(msg.Content, &state, msg.ContentLen);

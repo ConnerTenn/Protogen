@@ -14,7 +14,7 @@ void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
 			u8 bit = x%8;
 			u8 mask = 0x80>>bit;
 			u8 pixel = (display[idx] & mask)>>(7-bit);
-			PRINT("%s  ",(pixel?BWHITE:BBLACK));
+			PRINT("%s ",(pixel?BWHITE:BBLACK));
 		}	
 	}
 	PRINT("\n");
@@ -23,7 +23,14 @@ void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
 void UpdateDisplays()
 {
 	LOCKMUTEX(&TermLock);
-	PrintDisplay(Frames[ExprState.LeftEye].Data, 8, 8, 100, 0);
+	PrintDisplay(Frames[ExprState.LeftEye].Data, 16, 8, 80+16, 0);
+	PrintDisplay(Frames[ExprState.RightEye].Data, 16, 8, 80+16*2+8+2, 0);
+	PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+8, 8+1);
+	PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+16+8+2, 8+1);
+	PrintDisplay(Frames[ExprState.LeftMouth].Data, 32, 8, 80, (8+1)*2);
+	PrintDisplay(Frames[ExprState.RightMouth].Data, 32, 8, 80+32+8+2, (8+1)*2);
+	PrintDisplay(Frames[ExprState.CenterMouth].Data, 8, 8, 80+32+1, (8+1)*2+1);
+	PrintDisplay(Frames[ExprState.Body].Data, 8, 8, 80, (8+1)*3+4);
 	PRINT(RESET);
 	fflush(stdout);
 	ULOCKMUTEX(&TermLock);
@@ -38,6 +45,8 @@ void *EmotionControllerEntry(void *data)
 
 	MessageHandler messenger;
 	InitMessageHandler(&messenger, serial);
+
+	memset(&ExprState, 0, sizeof(ExprState));
 
 	//InitDisplay(&Display1, 4, 4);
 	//memcpy(Display1.Array, DispData, ARRAYLEN(DispData));
