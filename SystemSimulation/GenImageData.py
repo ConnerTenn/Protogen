@@ -22,16 +22,16 @@ else:
 	file=sys.stdin
 
 
-print("\"",end='')
-lineflop=False; begin=False
+buff=""
 for line in file:
 	line.replace(" ", "")
 	if line=="\n":
-		if not lineflop and begin: 
-			lineflop=True
+		if (len(buff)>0): print("\""+buff+"\"\n")
+		else: print()
+		buff=""
+	elif line[0]==';':
+		print(line[1:],end='')
 	else:
-		if lineflop: print("\"\n\"",end=''); lineflop=False
-		begin=True
 		byte=0x00
 		bit=7
 		for chr in line:
@@ -44,10 +44,8 @@ for line in file:
 				bit-=1
 				if bit==-1: 
 					bit=7
-					print("\\{0}".format(hex(byte)[1:]),end='')
+					buff+="\\x{0:02X}".format(byte)
 					byte=0
-
-print("\"")
-		
+if (len(buff)>0): print("\""+buff+"\"\n")	
 
 file.close()
