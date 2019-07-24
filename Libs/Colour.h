@@ -20,12 +20,12 @@ struct HSLA
 	RGB operator()();
 };
 
-#define RED (0.0)
-#define YELLOW (1.0/6.0)
-#define GREEN (2.0/6.0)
-#define CYAN (3.0/6.0)
-#define BLUE (4.0/6.0)
-#define MAGENTA (5.0/6.0)
+#define RED_VAL (0.0)
+#define YELLOW_VAL (1.0/6.0)
+#define GREEN_VAL (2.0/6.0)
+#define CYAN_VAL (3.0/6.0)
+#define BLUE_VAL (4.0/6.0)
+#define MAGENTA_VAL (5.0/6.0)
 
 
 
