@@ -9,6 +9,18 @@
 Bytes record horizontal pixel data in rows. Each bit represents 1 pixel
 */
 
+/*
+Eye sequence
+-2-2 -1-2 +0-2 +1-2 +2-2
+-2-1 -1-1 +0-1 +1-1 +2-1
+-2+0 -1+0 +0+0 +1+0 +2+0
+-2+1 -1+1 +0+1 +1+1 +2+1
+-2+2 -1+2 +0+2 +1+2 +2+2
+
+x+y
+*/
+
+
 struct Frame
 {
 	u8 *Data;
