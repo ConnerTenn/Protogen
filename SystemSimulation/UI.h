@@ -26,7 +26,7 @@ void UpdateUI();
 
 void UIHandleInput(Ksequ key, MessageHandler *messenger);
 
-void TermLogWrite(std::string msg);
+void TermLogWrite(char *msg);
 
 
 

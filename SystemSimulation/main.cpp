@@ -42,14 +42,15 @@ void Init()
 	pthread_mutex_init(&TermLock, 0);
 	pthread_mutex_init(&LogLock, 0);
 
-	Array<int,2> dim = GetDimensions();
-	for (int y=0; y<dim[1]; y++)
+	u16 dimx, dimy;
+	GetDimensions(&dimx, &dimy);
+	for (int y=0; y<dimy; y++)
 	{
-		for (int x=0; x<dim[0]; x++) { PRINT(" "); }
+		for (int x=0; x<dimx; x++) { PRINT(" "); }
 		PRINT("\n");
 	}
 	
-	LOG("Dimensions: %d, %d\n", dim[0], dim[1]);
+	LOG("Dimensions: %d, %d\n", (int)dimx, (int)dimy);
 
 	InitDevices();
 	LOGRETFUNC
@@ -63,8 +64,9 @@ void Close()
 	pthread_mutex_destroy(&TermLock);
 	pthread_mutex_destroy(&LogLock);
 	
-	Array<int,2> dim = GetDimensions();
-	MOVETO(0, dim[1]);
+	u16 dimx, dimy;
+	GetDimensions(&dimx, &dimy);
+	MOVETO(0, (int)dimy);
 	PRINT("\n");
 
 	LOGRETFUNC

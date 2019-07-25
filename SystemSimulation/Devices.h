@@ -17,7 +17,7 @@ void DestroyDevices();
 class Device
 {
 public:
-	std::string Name;
+	const char *Name;
 	Thread Entry;
 	std::vector<PseudoInterface *> Interfaces;
 

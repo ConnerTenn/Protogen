@@ -22,7 +22,7 @@ void DrawEmotionPane(int x, int y)
 		MOVETO(x, y+i*3+2*3);
 		if (i==EmoteCursor) { PRINT(CYAN); }
 		if (i==SelectedEmote) { PRINT(INV); }
-		PRINT("Emote %s", ExpressionList[i].Name.c_str());
+		PRINT("Emote %s", ExpressionList[i].Name);
 
 		PRINT(RESET);
 
@@ -30,7 +30,7 @@ void DrawEmotionPane(int x, int y)
 		for (i32 j=0; j<7; j++)
 		{
 			//FillCharacers(x+4+j*3, y+i*3+2*3+1,2,2,{' ',BBLACK});
-			PRINT("%s ",ExpressionList[i].Frags[j]->Name.c_str());
+			PRINT("%s ",ExpressionList[i].Frags[j]->Name);
 		}
 
 		PRINT(RESET);
@@ -49,7 +49,9 @@ void DrawInfoPane(int x, int y)
 }
 
 
-std::vector<std::string> TerminalLog;
+const u16 TermLogLen=20;
+char TerminalLog[TermLogLen][64];
+u8 TermLogHead=0;
 void DrawControlPane(int x, int y)
 {
 	MOVETO(x,y);
@@ -57,10 +59,10 @@ void DrawControlPane(int x, int y)
 
 	MOVETO(x,y+30);
 	PRINT("Terminal Log");
-	for (size_t i=0; i<TerminalLog.size(); i++)
+	for (u16 i=0; i<TermLogLen; i++)
 	{
 		MOVETO(x,(int)(y+31+i));
-		PRINT("%s", TerminalLog[i].c_str());
+		PRINT("%s", TerminalLog[(i+TermLogHead)%TermLogLen]);
 	}
 }
 
@@ -102,12 +104,13 @@ void UIHandleInput(Ksequ key, MessageHandler *messenger)
 	{ 
 		SelectedEmote=EmoteCursor; 
 		SendExpressionState(messenger);
-		TermLogWrite("SendExpressionState");
+		TermLogWrite((char *)"SendExpressionState");
 	}
 }
 
-void TermLogWrite(std::string msg)
+void TermLogWrite(char *msg)
 {
-	TerminalLog.push_back(msg);
-	if(TerminalLog.size()>20) { TerminalLog.erase(TerminalLog.begin()); }
+	if (TermLogHead==0) { TermLogHead=TermLogLen-1; }
+	else { TermLogHead--; }
+	strncpy(TerminalLog[TermLogHead], msg, 64);
 }

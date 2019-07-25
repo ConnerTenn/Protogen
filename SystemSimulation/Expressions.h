@@ -18,7 +18,7 @@
 
 struct ExprFrag
 {
-	std::string Name;
+	const char *Name;
 	//ExpressionMask Mask;
 	u16 ID;
 };
@@ -26,7 +26,7 @@ struct ExprFrag
 
 struct Expression
 {
-	std::string Name;
+	const char *Name;
 	ExprFrag *Frags[7];
 	//i32 DurationMin, DurationMax;
 };

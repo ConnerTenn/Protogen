@@ -92,7 +92,7 @@ PseudoInterface *Device::Open(u32 interfaceID)
 	{
 		if (Interfaces[i]->InterfaceID==interfaceID) { return Interfaces[i]; }
 	}
-	LOGERROR("Interface %d not found for %s\n", interfaceID, Name.c_str());
+	LOGERROR("Interface %d not found for %s\n", interfaceID, Name);
 	return 0;
 }
 

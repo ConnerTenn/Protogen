@@ -48,7 +48,7 @@ u8 getch()
 }
 
 
-Array<int,2> GetDimensions()
+void GetDimensions(u16 *x, u16 *y)
 {
 	//Array<int,2> dimensions;
 	
@@ -85,7 +85,9 @@ Array<int,2> GetDimensions()
 	struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-	return {(int)w.ws_col, (int)w.ws_row};
+	//return {(int)w.ws_col, (int)w.ws_row};
+	*x=w.ws_col;
+	*y=w.ws_row;
 }
 
 void FillCharacers(int x, int y, int width, int height, ColourChar character)
@@ -114,8 +116,9 @@ void FillCharacers(int x, int y, int width, int height, ColourChar character)
 
 void ClearTerm()
 {
-	Array<int,2>dimensions = GetDimensions();
-	MOVETO(dimensions[0]-1, dimensions[1]-1);  PRINT(CSI("1","J"));
+	u16 dimx, dimy;
+	GetDimensions(&dimx,&dimy);
+	MOVETO((int)dimx-1, (int)dimy-1);  PRINT(CSI("1","J"));
 }
 
 void SavePosition()

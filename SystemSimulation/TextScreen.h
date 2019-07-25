@@ -2,7 +2,7 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
-#include <General.h>
+#include "Global.h"
 //#include <Colour.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -65,7 +65,7 @@ struct ColourChar
 	const char *codes;
 };
 
-Array<int, 2> GetDimensions();
+void GetDimensions(u16 *x, u16 *y);
 void FillCharacers(int x, int y, int width, int height, ColourChar character);
 void ClearTerm();
 void SavePosition();
