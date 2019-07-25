@@ -43,9 +43,10 @@ struct ExpressionState
 	u16 Body;
 };
 
-extern std::vector<Expression> ExpressionList;
 extern i32 SelectedEmote;
 
 void SendExpressionState(MessageHandler *messenger);
+
+#include "ExpressionData.h"
 
 #endif

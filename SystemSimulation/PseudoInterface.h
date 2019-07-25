@@ -3,7 +3,7 @@
 #define _PSEUDO_INTERFACE_H_
 
 #include "Global.h"
-
+#include <vector>
 
 class PseudoInterface
 {

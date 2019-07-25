@@ -10,11 +10,11 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include <vector>
-#include <string>
+//#include <vector>
+#include <string.h>
 
-#include <General.h>
-#include <Colour.h>
+//#include <General.h>
+//#include <Colour.h>
 #include "TextScreen.h"
 //#include "PseudoInterface.h"
 //#include "Devices.h"

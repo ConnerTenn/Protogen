@@ -1,33 +1,5 @@
 
-// Eyes: 16 x 8
-// Mouth: 32 x 8
-// Mouth Center: 8 x 8
-// Nose: 8 x 8
-
-// Encoding
-/*
-Bytes record horizontal pixel data in rows. Each bit represents 1 pixel
-*/
-
-/*
-Eye sequence
--2-2 -1-2 +0-2 +1-2 +2-2
--2-1 -1-1 +0-1 +1-1 +2-1
--2+0 -1+0 +0+0 +1+0 +2+0
--2+1 -1+1 +0+1 +1+1 +2+1
--2+2 -1+2 +0+2 +1+2 +2+2
-
-x+y
-*/
-
-
-struct Frame
-{
-	u8 *Data;
-	u8 DelayMin, DelayMax;
-	u8 Next;
-};
-
+#include "FrameData.h"
 
 Frame Frames[]=
 {
@@ -79,6 +51,3 @@ Frame Frames[]=
 		.Data=(u8 *)"\x24\x24\xE7\x18\x18\xE7\x24\x24"
 	},
 };
-
-
-

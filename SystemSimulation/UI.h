@@ -1,5 +1,6 @@
 
 #include "Global.h"
+#include "TextScreen.h"
 #include "Messaging.h"
 #include "Expressions.h"
 

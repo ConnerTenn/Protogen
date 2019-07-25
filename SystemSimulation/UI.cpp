@@ -15,7 +15,7 @@ void DrawEmotionPane(int x, int y)
 	// MOVETO(x, y+1*3);
 	// PRINT("Groups" RESET);
 	
-	for (i32 i=0; i<(i32)ExpressionList.size(); i++)
+	for (i32 i=0; i<(i32)ARRAYLEN(ExpressionList); i++)
 	{
 		//FillCharacers(x, y+i*3+2*3,3,3,{' ',BBLACK});
 		
@@ -97,7 +97,7 @@ void UpdateUI()
 void UIHandleInput(Ksequ key, MessageHandler *messenger)
 {
 	if (key.val == K_UP && EmoteCursor>-2) { EmoteCursor--; }
-	if (key.val == K_DOWN && EmoteCursor<(i32)ExpressionList.size()-1) { EmoteCursor++; }
+	if (key.val == K_DOWN && EmoteCursor<(i32)ARRAYLEN(ExpressionList)-1) { EmoteCursor++; }
 	if (key.val == K_ENTER) 
 	{ 
 		SelectedEmote=EmoteCursor; 
