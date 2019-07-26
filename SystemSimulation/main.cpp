@@ -1,6 +1,9 @@
 
+extern "C"
+{
 #include <execinfo.h>
 #include "Global.h"
+}
 #include "Devices.h"
 
 bool Run = true;

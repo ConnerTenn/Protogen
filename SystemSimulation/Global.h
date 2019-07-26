@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/time.h>
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -54,6 +55,9 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long long u64;
+#ifndef __cplusplus
+typedef u8 bool;
+#endif
 
 
 extern bool Run;

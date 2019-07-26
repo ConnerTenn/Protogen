@@ -1,5 +1,6 @@
 
-CC=g++ -Wall -std=c++17 #c11
+GPP=g++ -std=c++17 #c11
+GCC=gcc -std=c11
 
 #GENERALLIBS=../Libs/General.o ../Libs/Colour.o
 #LAUDIO=../libportaudio.a -lasound -ljack -pthread
@@ -8,16 +9,19 @@ CC=g++ -Wall -std=c++17 #c11
 #LPIXTERM=-L ../../PixelTerm -lPixelTerm $(LXTERMLIBS)
 LIBS= -lpthread #$(GENERALLIBS) $(LXTERMLIBS)
 OBJS= main.o Global.o TextScreen.o HeadController.o EmotionController.o PseudoInterface.o Devices.o Messaging.o UI.o Expressions.o ExpressionData.o FrameData.o
-CFLAGS= -O3 #-I ../Libs/
+CFLAGS= -Wall -O3 #-I ../Libs/
 
 all: program
 
 program: $(OBJS)
 	@echo
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(GPP) $(CFLAGS) $^ $(LIBS) -o $@
 	
 %.o: %.cpp clean #make sure clean is called first
-	$(CC) $(CFLAGS) $< -c -o $@
+	$(GPP) $(CFLAGS) $< -c -o $@
+
+%.o: %.c clean #make sure clean is called first
+	$(GCC) $(CFLAGS) $< -c -o $@
 
 force: clean all
 

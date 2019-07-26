@@ -1,6 +1,5 @@
 
 #include "Global.h"
-#include <sys/time.h>
 
 i64 GetMilliseconds()
 {

@@ -25,13 +25,12 @@ Eye sequence
 x+y
 */
 
-
-struct Frame
+typedef struct Frame_t
 {
 	u8 *Data;
 	u8 DelayMin, DelayMax;
 	u8 Next;
-};
+} Frame;
 
 #include "FrameData.h"
 

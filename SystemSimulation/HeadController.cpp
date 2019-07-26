@@ -1,10 +1,10 @@
-
+extern "C"
+{
 #include "Global.h"
-
-#include "Devices.h"
-#include "Messaging.h"
+}
 #include "UI.h"
-
+#include "Messaging.h"
+#include "Devices.h"
 
 u8 Battery = 213;
 float UpdateFreq;
