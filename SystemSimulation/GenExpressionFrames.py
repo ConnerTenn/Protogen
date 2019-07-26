@@ -2,19 +2,19 @@
 
 
 
-f=None
-fframes="Frames.dat"
-fexpr="Expressions.dat"
-fExpressionDataH=None #"ExpressionData.h"
-fExpressionDataCpp=None #"ExpressionData.cpp"
-fFrameDataH=None #"FrameData.h"
-fFrameDataCpp=None #"FrameData.cpp"
-try: f = open(fframes, 'r')
-except: print("Error opening file \"{0}\"".format(fframes)); exit(-1)
-fframes=f
-try: f = open(fexpr, 'r')
-except: print("Error opening file \"{0}\"".format(fexpr)); exit(-1)
-fexpr=f
+F=None
+Fframes="Frames.dat"
+Fexpr="Expressions.dat"
+FExpressionDataH=None #"ExpressionData.h"
+FExpressionDataCpp=None #"ExpressionData.cpp"
+FFrameDataH=None #"FrameData.h"
+FFrameDataCpp=None #"FrameData.cpp"
+try: F = open(Fframes, 'r')
+except: print("Error opening file \"{0}\"".format(Fframes)); exit(-1)
+Fframes=F
+try: F = open(Fexpr, 'r')
+except: print("Error opening file \"{0}\"".format(Fexpr)); exit(-1)
+Fexpr=F
 
 # try: f = open(fExpressionDataH, 'w')
 # except: print("Error opening file \"{0}\"".format(fExpressionDataH)); exit(-1)
@@ -50,51 +50,46 @@ def EndImageData():
 	if len(ImgDataTmp):
 		ImgData+=[ImgDataTmp]
 		ImgDataTmp=""
-	
-
-Name=""
-Type="Default"
-Delay=0
-Next=""
-Continue=True
-while Continue:
-	line=fframes.readline()
-	#print("\"{0}\"".format(line[:-1]))
-	if len(line):
-		line=line.split("\\")[0].rstrip() #Remove comments
-		
-		keyval=line.split("=")
-		#if len(tag)==2 and len(tag[0]) and len(tag[1]):
-		if keyval[0]=="Name": Name = (keyval[1] if len(keyval)==2 else "")
-		if keyval[0]=="Type": Type = (keyval[1] if len(keyval)==2 else "")
-		if keyval[0]=="Delay": Delay = (keyval[1] if len(keyval)==2 else "")
-		if keyval[0]=="Next": Next = (keyval[1] if len(keyval)==2 else "")
-
-		if line=="":
-			EndImageData()
-		elif line[0]=="." or line[0]=="#":
-			ParseImageData(line)
-
-		if line==";":
-			EndImageData()
-			print("Name:{0}\nType:{1}\nDelay:{2}\nNext:{3}\nImgData:\n".format(Name,Type,Delay,Next),end='')
-			for img in ImgData:
-				print(img)
-			print()
-			Name=""
-			Type="Default"
-			Delay=0
-			Next=""
-			ImgData=[]
-			pass
-			# Finish
-	else:
-		Continue=False
 
 
+def Parse(f, fields):
+	global ImgData
+	cont=True
+	while cont:
+		line=f.readline()
 
-fframes.close()
-fexpr.close()
+		if len(line):
+			line=line.split("\\")[0].rstrip()
+			
+			keyval=line.split("=")
+			
+			for field in fields:
+				if keyval[0]==field: fields[field] = (keyval[1] if len(keyval)==2 else "")
+			
+			if line=="":
+				EndImageData()
+			elif line[0]=="." or line[0]=="#":
+				ParseImageData(line)
+
+			if line==";":
+				EndImageData()
+				for field in fields:
+					print("{0}={1}".format(field,fields[field]))
+					fields[field]=""
+				if len(ImgData): print("ImgData:")
+				for img in ImgData:
+					print(img)
+				ImgData=[]
+				print()
+		else:
+			cont=False
+
+Parse(Fframes, { "Name":"", "Type":"", "Delay":"", "Next":"" })
+Parse(Fexpr, { "Name":"", "EL":"", "ER":"", "ML":"", "MR":"", "MC":"", "N":"", "B":"" })
+
+
+Fframes.close()
+Fexpr.close()
 # fExpressionDataH.close()
 # fExpressionDataCpp.close()
 # fFrameDataH.close()
