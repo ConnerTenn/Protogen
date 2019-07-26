@@ -11,6 +11,7 @@ sem_t RunSem;
 pthread_mutex_t LogLock;
 FILE *LogFile;
 
+
 void InteruptHandler(int arg) { LOG(YELLOW "Stopping\n" RESET); Run=false; sem_post(&RunSem); }
 void CrashHandler(int arg) 
 {
