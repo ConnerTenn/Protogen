@@ -25,14 +25,33 @@ Eye sequence
 x+y
 */
 
+/*
+Binary Data Format
+Header:
+Frame Header
+	u8 Type
+	u8 Delay (frames)
+	u16 Next
+	u64 DataOffset
+Data:
+...
+
+*/
+
 typedef struct Frame_t
 {
-	u8 *Data;
-	u8 DelayMin, DelayMax;
-	u8 Next;
+	// u8 Delay;
+	// u8 Next;
+	u64 DataOffset;
 } Frame;
 
-#include "FrameData.h"
+
+extern const char _binary_FrameData_bin_start;
+extern const char _binary_FrameData_bin_end;
+const u8 *FrameData = (const u8 *)(&_binary_FrameData_bin_start);
+const u8 *FrameDataEnd = (const u8 *)(&_binary_FrameData_bin_end);
+
+//#include "FrameData.h"
 
 #endif
 

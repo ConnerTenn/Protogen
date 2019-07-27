@@ -3,7 +3,7 @@
 
 ExpressionState ExprState;
 
-void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
+void PrintDisplay(const u8 *display, u8 width, u8 height, int dx, int dy)
 {
 	for (u8 y=0; y<height; y++)
 	{
@@ -20,17 +20,30 @@ void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
 	PRINT("\n");
 }
 
+void UpdateDisplay(u16 *frameIdx, u8 width, u8 height, int dx, int dy)
+{
+	LOGENTERFUNC
+	Frame *frame = &((Frame *)FrameData)[*frameIdx];
+	//*frameIdx = frame->Next;
+	PrintDisplay(FrameData + frame->DataOffset, width, height, dx, dy);
+	//PrintDisplay(
+	LOGRETFUNC
+}
+
 void UpdateDisplays()
 {
 	LOCKMUTEX(&TermLock);
-	PrintDisplay(Frames[ExprState.LeftEye].Data, 16, 8, 80+16, 0);
-	PrintDisplay(Frames[ExprState.RightEye].Data, 16, 8, 80+16*2+8+2, 0);
-	PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+8, 8+1);
-	PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+16+8+2, 8+1);
-	PrintDisplay(Frames[ExprState.LeftMouth].Data, 32, 8, 80, (8+1)*2);
-	PrintDisplay(Frames[ExprState.RightMouth].Data, 32, 8, 80+32+8+2, (8+1)*2);
-	PrintDisplay(Frames[ExprState.CenterMouth].Data, 8, 8, 80+32+1, (8+1)*2+1);
-	PrintDisplay(Frames[ExprState.Body].Data, 8, 8, 80, (8+1)*3+4);
+
+	u16 idx=0;
+	UpdateDisplay(&idx, 8, 8, 80, 0);
+	// PrintDisplay(Frames[ExprState.LeftEye].Data, 16, 8, 80+16, 0);
+	// PrintDisplay(Frames[ExprState.RightEye].Data, 16, 8, 80+16*2+8+2, 0);
+	// PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+8, 8+1);
+	// PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+16+8+2, 8+1);
+	// PrintDisplay(Frames[ExprState.LeftMouth].Data, 32, 8, 80, (8+1)*2);
+	// PrintDisplay(Frames[ExprState.RightMouth].Data, 32, 8, 80+32+8+2, (8+1)*2);
+	// PrintDisplay(Frames[ExprState.CenterMouth].Data, 8, 8, 80+32+1, (8+1)*2+1);
+	// PrintDisplay(Frames[ExprState.Body].Data, 8, 8, 80, (8+1)*3+4);
 	PRINT(RESET);
 	fflush(stdout);
 	ULOCKMUTEX(&TermLock);

@@ -18,4 +18,4 @@ struct ExpressionState
 };
 extern ExpressionState ExprState;
 
-void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy);
+void PrintDisplay(const u8 *display, u8 width, u8 height, int dx, int dy);

@@ -77,6 +77,7 @@ void Close()
 	fclose(LogFile);
 }
 
+
 int main()
 {
 	PRINTENTERFUNC
