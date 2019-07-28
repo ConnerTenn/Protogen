@@ -2,7 +2,7 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
-#include <General.h>
+#include "Global.h"
 //#include <Colour.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -59,13 +59,13 @@ void set_conio_terminal_mode();
 int kbhit();
 u8 getch();
 
-struct ColourChar
+typedef struct ColourChar_t
 {
-	char Character = 0;
+	char Character;
 	const char *codes;
-};
+} ColourChar;
 
-Array<int, 2> GetDimensions();
+void GetDimensions(u16 *x, u16 *y);
 void FillCharacers(int x, int y, int width, int height, ColourChar character);
 void ClearTerm();
 void SavePosition();

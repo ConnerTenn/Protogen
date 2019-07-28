@@ -1,5 +1,9 @@
 
+extern "C"
+{
 #include "Global.h"
+#include "TextScreen.h"
+}
 #include "Messaging.h"
 #include "Expressions.h"
 
@@ -25,7 +29,7 @@ void UpdateUI();
 
 void UIHandleInput(Ksequ key, MessageHandler *messenger);
 
-void TermLogWrite(std::string msg);
+void TermLogWrite(char *msg);
 
 
 

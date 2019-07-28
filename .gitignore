@@ -1,5 +1,7 @@
 .vscode/
 *.o
 program
+test
 Modeling/
 log
+*.bin
