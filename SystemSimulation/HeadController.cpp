@@ -18,6 +18,8 @@ void *HeadControllerEntry(void *data)
 
 	MessageHandler messenger;
 	InitMessageHandler(&messenger, serial);
+
+	InitExpressions();
 	
 	InitUI();
 	

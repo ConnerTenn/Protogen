@@ -18,7 +18,7 @@
 
 struct ExprFrag
 {
-	const char *Name;
+	const char Name[16];
 	//ExpressionMask Mask;
 	u16 ID;
 };
@@ -26,8 +26,8 @@ struct ExprFrag
 
 struct Expression
 {
-	const char *Name;
-	ExprFrag *Frags[7];
+	const char Name[16];
+	u16 Frags[8];
 	//i32 DurationMin, DurationMax;
 };
 
@@ -47,6 +47,32 @@ extern i32 SelectedEmote;
 
 void SendExpressionState(MessageHandler *messenger);
 
-#include "ExpressionData.h"
+//#include "ExpressionData.h"
+/*
+Expression Data
+u16 NumFrags
+u16 NumExpressions
+{
+	char Name[16]
+	u16 ID;
+}[]
+{
+	char Name[16]
+	u16 Frags[8]
+}[]
+*/
+
+extern const char _binary_ExpressionData_bin_start;
+extern const char _binary_ExpressionData_bin_end;
+extern const u8 *ExpressionData;
+extern const u8 *ExpressionDataEnd;
+
+extern u16 NumExprFrags;
+extern u16 NumExpressions;
+
+extern ExprFrag *ExprFrags;
+extern Expression *Expressions;
+
+void InitExpressions();
 
 #endif

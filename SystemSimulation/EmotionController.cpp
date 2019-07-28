@@ -34,8 +34,8 @@ void UpdateDisplays()
 {
 	LOCKMUTEX(&TermLock);
 
-	u16 idx=0;
-	UpdateDisplay(&idx, 8, 8, 80, 0);
+	u16 idx=3;
+	UpdateDisplay(&idx, 16, 8, 80, 0);
 	// PrintDisplay(Frames[ExprState.LeftEye].Data, 16, 8, 80+16, 0);
 	// PrintDisplay(Frames[ExprState.RightEye].Data, 16, 8, 80+16*2+8+2, 0);
 	// PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+8, 8+1);

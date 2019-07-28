@@ -14,24 +14,32 @@ void DrawEmotionPane(int x, int y)
 	// if (Selected==-1) { PRINT(INV); }
 	// MOVETO(x, y+1*3);
 	// PRINT("Groups" RESET);
-	
-	for (i32 i=0; i<(i32)ARRAYLEN(ExpressionList); i++)
+	int ypos=y+2*3;
+	for (i16 i=0; i<NumExpressions; i++)
 	{
 		//FillCharacers(x, y+i*3+2*3,3,3,{' ',BBLACK});
 		
-		MOVETO(x, y+i*3+2*3);
+		MOVETO(x, ypos);
 		if (i==EmoteCursor) { PRINT(CYAN); }
 		if (i==SelectedEmote) { PRINT(INV); }
-		PRINT("Emote %s", ExpressionList[i].Name);
+		PRINT("Emote %s", Expressions[i].Name);
+		ypos+=1;
 
 		PRINT(RESET);
 
-		MOVETO(x, y+i*3+2*3+1);
+		u8 linelen=0;
 		for (i32 j=0; j<7; j++)
 		{
-			//FillCharacers(x+4+j*3, y+i*3+2*3+1,2,2,{' ',BBLACK});
-			PRINT("%s ",ExpressionList[i].Frags[j]->Name);
+			const char *name=ExprFrags[Expressions[i].Frags[j]].Name;
+			u8 len =strlen(name)+1;
+			if (linelen+len > 80/2-1) { linelen=0; ypos+=1; }
+
+			MOVETO(x+linelen, ypos);
+			PRINT("%s ",name);
+			linelen+=len;
 		}
+		ypos+=1;
+		ypos+=1;
 
 		PRINT(RESET);
 	}
@@ -99,7 +107,7 @@ void UpdateUI()
 void UIHandleInput(Ksequ key, MessageHandler *messenger)
 {
 	if (key.val == K_UP && EmoteCursor>-2) { EmoteCursor--; }
-	if (key.val == K_DOWN && EmoteCursor<(i32)ARRAYLEN(ExpressionList)-1) { EmoteCursor++; }
+	if (key.val == K_DOWN && EmoteCursor<NumExpressions-1) { EmoteCursor++; }
 	if (key.val == K_ENTER) 
 	{ 
 		SelectedEmote=EmoteCursor; 

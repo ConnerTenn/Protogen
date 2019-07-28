@@ -26,20 +26,19 @@ x+y
 */
 
 /*
-Binary Data Format
+FrameData.bin Format
 Header:
-Frame Header
-	u8 Type
-	u8 Delay (frames)
-	u16 Next
+{
 	u64 DataOffset
+}[]
 Data:
-...
+u8 FrameData[]
 
 */
 
 typedef struct Frame_t
 {
+	// u8 Type;
 	// u8 Delay;
 	// u8 Next;
 	u64 DataOffset;

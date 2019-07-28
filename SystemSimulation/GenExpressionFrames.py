@@ -3,35 +3,25 @@
 
 
 F=None
-Fframes="Frames.dat"
-Fexpr="Expressions.dat"
+FFrames="Frames.dat"
+FExpr="Expressions.dat"
 FFrameData="FrameData.bin"
-# FExpressionDataH=None #"ExpressionData.h"
-# FExpressionDataCpp=None #"ExpressionData.cpp"
-# FFrameDataH=None #"FrameData.h"
-# FFrameDataCpp=None #"FrameData.cpp"
-try: F = open(Fframes, 'r')
-except: print("Error opening file \"{0}\"".format(Fframes)); exit(-1)
-Fframes=F
-try: F = open(Fexpr, 'r')
-except: print("Error opening file \"{0}\"".format(Fexpr)); exit(-1)
-Fexpr=F
+FExpressionData="ExpressionData.bin"
+
+try: F = open(FFrames, 'r')
+except: print("Error opening file \"{0}\"".format(FFrames)); exit(-1)
+FFrames=F
+try: F = open(FExpr, 'r')
+except: print("Error opening file \"{0}\"".format(FExpr)); exit(-1)
+FExpr=F
 
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
 FFrameData=f
-# try: f = open(fExpressionDataH, 'w')
-# except: print("Error opening file \"{0}\"".format(fExpressionDataH)); exit(-1)
-# fExpressionDataH=f
-# try: f = open(fExpressionDataCpp, 'w')
-# except: print("Error opening file \"{0}\"".format(fExpressionDataCpp)); exit(-1)
-# fFrameDataH=f
-# try: f = open(fFrameDataH, 'w')
-# except: print("Error opening file \"{0}\"".format(fFrameDataH)); exit(-1)
-# fFrameDataCpp=f
-# try: f = open(fFrameDataCpp, 'w')
-# except: print("Error opening file \"{0}\"".format(fFrameDataCpp)); exit(-1)
-# fFrameDataCpp=f
+try: f = open(FExpressionData, 'wb')
+except: print("Error opening file \"{0}\"".format(FExpressionData)); exit(-1)
+FExpressionData=f
+
 
 def Hx(val, length):
 	return val.to_bytes(length, byteorder="little")
@@ -45,11 +35,14 @@ def Hx(val, length):
 # 		length-=1
 # 	return out
 
-# def Hxstr(string):
-# 	out=b''
-# 	for ch in string:
-# 		out+="\\x{0:02X}".format(ord(ch) & 0xFF)
-# 	return out
+def HxtoStr(hx):
+	out=""
+	for val in hx:
+		out+="\\x{0:02X}".format(val & 0xFF)
+	return out
+
+def StrtoHx(string):
+	return bytes(string, "utf8")
 
 ImgData=[]
 ImgDataTmp=b""
@@ -77,7 +70,8 @@ def EndImageData():
 def Parse(f, fields):
 	global ImgData
 	cont=True
-	outData=[]
+	outData={}
+	index=0
 	while cont:
 		line=f.readline()
 
@@ -105,9 +99,12 @@ def Parse(f, fields):
 				dat["ImgData"]=[]
 				for img in ImgData:
 					dat["ImgData"]+=[img]
+				dat["Index"]=index
 				#	print(img)
+				outData[dat["Name"]]=dat
+
 				ImgData=[]
-				outData+=[dat]
+				index+=1
 				#print(dat)
 				#print()
 		else:
@@ -117,14 +114,14 @@ def Parse(f, fields):
 
 
 
-#TypeMap={""}
+FrameData=Parse(FFrames, { "Name":"", "Type":"", "Delay":"", "Next":"" })
+
 DataStr=b""
 HeaderStr=b""
 FrameStr=b""
-FrameData=Parse(Fframes, { "Name":"", "Type":"", "Delay":"", "Next":"" })
-Header=[]
 FrameOffset=len(FrameData)*8
-for frame in FrameData:
+for name in FrameData:
+	frame=FrameData[name]
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
 	#Data+=hx(int(frame["Delay"]), 1)
 	#Data+=hx(int(frame["Next"]), 2)
@@ -132,20 +129,36 @@ for frame in FrameData:
 	for imgDat in frame["ImgData"]:
 		FrameStr+=imgDat
 		FrameOffset+=len(imgDat)
-#print(HeaderStr)
-#print(FrameStr)
-DataStr=HeaderStr+FrameStr
 
-print(DataStr)
+DataStr=HeaderStr+FrameStr
 FFrameData.write(DataStr)
 
 
-Parse(Fexpr, { "Name":"", "EL":"", "ER":"", "ML":"", "MR":"", "MC":"", "N":"", "B":"" })
+ExpressionData=Parse(FExpr, { "Name":"", "EL":"", "ER":"", "ML":"", "MR":"", "MC":"", "N":"", "B":"" })
 
+DataStr=b""
+DataStr+=Hx(len(FrameData),2)
+DataStr+=Hx(len(ExpressionData),2)
+for name in FrameData:
+	frame=FrameData[name]
+	DataStr+=StrtoHx(name+'\x00'*(15-len(name))+"\0")
+	DataStr+=Hx(frame["Index"],2)
 
-Fframes.close()
-Fexpr.close()
-# fExpressionDataH.close()
-# fExpressionDataCpp.close()
-# fFrameDataH.close()
-# fFrameDataCpp.close()
+for name in ExpressionData:
+	expr=ExpressionData[name]
+	DataStr+=StrtoHx(name+'\x00'*(15-len(name))+"\0")
+	DataStr+=Hx(FrameData[expr["EL"]]["Index"], 2)
+	DataStr+=Hx(FrameData[expr["ER"]]["Index"], 2)
+	DataStr+=Hx(FrameData[expr["ML"]]["Index"], 2)
+	DataStr+=Hx(FrameData[expr["MR"]]["Index"], 2)
+	DataStr+=Hx(FrameData[expr["MC"]]["Index"], 2)
+	DataStr+=Hx(FrameData[expr["N"]]["Index"], 2)
+	DataStr+=Hx(FrameData[expr["B"]]["Index"], 2)
+	DataStr+=Hx(0, 2)
+FExpressionData.write(DataStr)
+
+FFrames.close()
+FExpr.close()
+FFrameData.close()
+FExpressionData.close()
+
