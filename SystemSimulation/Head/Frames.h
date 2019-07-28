@@ -4,6 +4,18 @@
 
 #include "Global.h"
 
+struct ExpressionState
+{
+	u16 LeftEye;
+	u16 RightEye;
+	u16 LeftMouth;
+	u16 RightMouth;
+	u16 CenterMouth;
+	u16 Nose;
+	u16 Body;
+};
+struct ExpressionState ExprState;
+
 // Eyes: 16 x 8
 // Mouth: 32 x 8
 // Mouth Center: 8 x 8
@@ -51,10 +63,10 @@ typedef struct Frame_t
 } Frame;
 
 
-extern const char _binary_FrameData_bin_start;
-extern const char _binary_FrameData_bin_end;
-const u8 *FrameData = (const u8 *)(&_binary_FrameData_bin_start);
-const u8 *FrameDataEnd = (const u8 *)(&_binary_FrameData_bin_end);
+extern const char _binary_Head_FrameData_bin_start;
+extern const char _binary_Head_FrameData_bin_end;
+const u8 *FrameData = (const u8 *)(&_binary_Head_FrameData_bin_start);
+const u8 *FrameDataEnd = (const u8 *)(&_binary_Head_FrameData_bin_end);
 
 //#include "FrameData.h"
 

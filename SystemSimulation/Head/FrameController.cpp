@@ -1,7 +1,9 @@
 
-#include "EmotionController.h"
+#include "Devices.h"
+#include "Messaging.h"
+#include "Frames.h"
 
-ExpressionState ExprState;
+//ExpressionState ExprState;
 
 void PrintDisplay(const u8 *display, u8 width, u8 height, int dx, int dy)
 {

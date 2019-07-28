@@ -62,8 +62,8 @@ u16 NumExpressions
 }[]
 */
 
-extern const char _binary_ExpressionData_bin_start;
-extern const char _binary_ExpressionData_bin_end;
+extern const char _binary_Head_ExpressionData_bin_start;
+extern const char _binary_Head_ExpressionData_bin_end;
 extern const u8 *ExpressionData;
 extern const u8 *ExpressionDataEnd;
 

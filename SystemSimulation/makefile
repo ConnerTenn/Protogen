@@ -8,35 +8,42 @@ GCC=gcc -std=c11
 #LXTERMLIBS=-pthread #-lgdk_pixbuf_xlib-2.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype  -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lfontconfig -lfreetype -lX11
 #LPIXTERM=-L ../../PixelTerm -lPixelTerm $(LXTERMLIBS)
 LIBS= -lpthread #$(GENERALLIBS) $(LXTERMLIBS)
-OBJS= Global.o TextScreen.o HeadController.o EmotionController.o PseudoInterface.o Devices.o Messaging.o UI.o Expressions.o FrameData.o ExpressionData.o
-CFLAGS= -Wall -O3 #-I ../Libs/
+HEADOBJS= Head/HeadController.o Head/UI.o Head/Expressions.o Head/FrameController.o Head/FrameData.o Head/ExpressionData.o Head/FrameData.o Head/ExpressionData.o
+IFACEOBJS=PseudoInterface/PseudoInterface.o PseudoInterface/Devices.o PseudoInterface/Messaging.o
+GLOBALOBJS= Global.o TextScreen.o
+OBJS= $(GLOBALOBJS) $(HEADOBJS) $(IFACEOBJS)
+CFLAGS= -Wall -O3 -I./ -IHead/ -IBack/ -IChest/ -IPseudoInterface/ #-I ../Libs/
 
 .PHONY: bin
 
-all: program test
+all: postclean
 
 program: main.o $(OBJS)
 	@echo
 	$(GPP) $(CFLAGS) $^ $(LIBS) -o $@
 
-test: test.o FrameData.o
+test: test.o Head/FrameData.o
 	@echo
 	$(GCC) $(CFLAGS) $^ $(LIBS) -o $@
 	
-%.o: %.cpp clean #make sure clean is called first
+%.o: %.cpp clean
 	$(GPP) $(CFLAGS) $< -c -o $@
 
-%.o: %.c clean #make sure clean is called first
+%.o: %.c clean
 	$(GCC) $(CFLAGS) $< -c -o $@
 
-%.o: %.bin clean
+Head/%.o: Head/%.bin clean
 	ld -r -b binary $< -o $@
+	
 
-FrameData.bin ExpressionData.bin: bin
+Head/FrameData.bin Head/ExpressionData.bin: bin
 bin: clean
-	python GenExpressionFrames.py
+	cd Head; python GenExpressionFrames.py
 
 force: clean all
 
 clean: 
-	rm *.o *.bin program test -f
+	rm *.o $(OBJS) Head/*.bin program test -f
+
+postclean: program test
+	rm *.o $(OBJS) Head/*.bin -f

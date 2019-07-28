@@ -4,8 +4,8 @@
 
 i32 SelectedEmote=0;
 
-const u8 *ExpressionData = (const u8 *)(&_binary_ExpressionData_bin_start);
-const u8 *ExpressionDataEnd = (const u8 *)(&_binary_ExpressionData_bin_end);
+const u8 *ExpressionData = (const u8 *)(&_binary_Head_ExpressionData_bin_start);
+const u8 *ExpressionDataEnd = (const u8 *)(&_binary_Head_ExpressionData_bin_end);
 
 u16 NumExprFrags;
 u16 NumExpressions;
