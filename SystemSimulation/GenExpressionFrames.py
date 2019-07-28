@@ -119,12 +119,15 @@ FrameData=Parse(FFrames, { "Name":"", "Type":"", "Delay":"", "Next":"" })
 DataStr=b""
 HeaderStr=b""
 FrameStr=b""
-FrameOffset=len(FrameData)*8
+FrameOffset=len(FrameData)*(2+1+1+(4)+8)
 for name in FrameData:
 	frame=FrameData[name]
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
-	#Data+=hx(int(frame["Delay"]), 1)
-	#Data+=hx(int(frame["Next"]), 2)
+	frameNext = int(FrameData[frame["Next"]]["Index"]) if len(frame["Next"]) else frame["Index"]
+	frameDelay = int(frame["Delay"]) if len(frame["Delay"]) else frame["Index"]
+	HeaderStr+=Hx(frameNext, 2)
+	HeaderStr+=Hx(frameDelay, 1)
+	HeaderStr+=Hx(0, 5)
 	HeaderStr+=Hx(FrameOffset, 8)
 	for imgDat in frame["ImgData"]:
 		FrameStr+=imgDat

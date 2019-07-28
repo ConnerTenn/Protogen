@@ -16,9 +16,10 @@ Bytes record horizontal pixel data in rows. Each bit represents 1 pixel
 
 /*
 Eye sequence
++0+0
 -2-2 -1-2 +0-2 +1-2 +2-2
 -2-1 -1-1 +0-1 +1-1 +2-1
--2+0 -1+0 +0+0 +1+0 +2+0
+-2+0 -1+0      +1+0 +2+0
 -2+1 -1+1 +0+1 +1+1 +2+1
 -2+2 -1+2 +0+2 +1+2 +2+2
 
@@ -29,6 +30,9 @@ x+y
 FrameData.bin Format
 Header:
 {
+	u8 Next
+	u8 Delay
+	u8 DelayCounter
 	u64 DataOffset
 }[]
 Data:
@@ -39,8 +43,10 @@ u8 FrameData[]
 typedef struct Frame_t
 {
 	// u8 Type;
-	// u8 Delay;
-	// u8 Next;
+	u16 Next;
+	u8 Delay;
+	u8 DelayCounter;
+	//u8 _padding[5];
 	u64 DataOffset;
 } Frame;
 

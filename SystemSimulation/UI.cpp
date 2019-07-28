@@ -32,7 +32,7 @@ void DrawEmotionPane(int x, int y)
 		{
 			const char *name=ExprFrags[Expressions[i].Frags[j]].Name;
 			u8 len =strlen(name)+1;
-			if (linelen+len > 80/2-1) { linelen=0; ypos+=1; }
+			if (linelen+len > 100/2-1) { linelen=0; ypos+=1; }
 
 			MOVETO(x+linelen, ypos);
 			PRINT("%s ",name);
@@ -91,17 +91,17 @@ void DestroyUI()
 
 void UpdateUI()
 {
-	FillCharacers(0,0,80,1,{' ',BGREY});
-	FillCharacers(0,60-1,80,1,{' ',BGREY});
+	FillCharacers(0,0,100,1,{' ',BGREY});
+	FillCharacers(0,60-1,100,1,{' ',BGREY});
 	FillCharacers(0,0,1,60,{' ',BGREY});
-	FillCharacers(80-1,0,1,60,{' ',BGREY});
+	FillCharacers(100-1,0,1,60,{' ',BGREY});
 
 
 	DrawInfoPane(1,1);
 
 	DrawControlPane(1,2);
 
-	DrawEmotionPane(80/2,2);
+	DrawEmotionPane(100/2,2);
 }
 
 void UIHandleInput(Ksequ key, MessageHandler *messenger)
