@@ -1,23 +1,33 @@
 
+Name=Blank
+EL=16x8
+ER=16x8
+ML=32x8
+MR=32x8
+MC=8x8
+N=8x8
+B=8x8
+;
+
 Name=Neutral
-EL=Eye1
-ER=Eye1
-ML=BodyA
-MR=BodyA
-MC=BodyA
-N=BodyBB
-B=BodyA
+EL=EL1
+ER=ER1
+ML=ML1
+MR=MR1
+MC=MC1
+N=N1
+B=B1
 ;
 
 
 Name=Happy
-EL=Eye2
-ER=Eye2
-ML=BodyA
-MR=BodyA
-MC=BodyA
-N=BodyA
-B=BodyA
+EL=EL2
+ER=ER2
+ML=ML2
+MR=MR2
+MC=MC2
+N=N2
+B=B2
 ;
 
 

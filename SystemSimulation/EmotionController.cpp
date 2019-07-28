@@ -34,16 +34,14 @@ void UpdateDisplays()
 {
 	LOCKMUTEX(&TermLock);
 
-	u16 idx=3;
-	UpdateDisplay(&idx, 16, 8, 80, 0);
-	// PrintDisplay(Frames[ExprState.LeftEye].Data, 16, 8, 80+16, 0);
-	// PrintDisplay(Frames[ExprState.RightEye].Data, 16, 8, 80+16*2+8+2, 0);
-	// PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+8, 8+1);
-	// PrintDisplay(Frames[ExprState.Nose].Data, 8, 8, 80+16+16+8+2, 8+1);
-	// PrintDisplay(Frames[ExprState.LeftMouth].Data, 32, 8, 80, (8+1)*2);
-	// PrintDisplay(Frames[ExprState.RightMouth].Data, 32, 8, 80+32+8+2, (8+1)*2);
-	// PrintDisplay(Frames[ExprState.CenterMouth].Data, 8, 8, 80+32+1, (8+1)*2+1);
-	// PrintDisplay(Frames[ExprState.Body].Data, 8, 8, 80, (8+1)*3+4);
+	UpdateDisplay(&ExprState.LeftEye, 16, 8, 80+16, 0);
+	UpdateDisplay(&ExprState.RightEye, 16, 8, 80+16*2+8+2, 0);
+	UpdateDisplay(&ExprState.Nose, 8, 8, 80+16+8, 8+1);
+	UpdateDisplay(&ExprState.Nose, 8, 8, 80+16+16+8+2, 8+1);
+	UpdateDisplay(&ExprState.LeftMouth, 32, 8, 80, (8+1)*2);
+	UpdateDisplay(&ExprState.RightMouth, 32, 8, 80+32+8+2, (8+1)*2);
+	UpdateDisplay(&ExprState.CenterMouth, 8, 8, 80+32+1, (8+1)*2+1);
+	UpdateDisplay(&ExprState.Body, 8, 8, 80, (8+1)*3+4);
 	PRINT(RESET);
 	fflush(stdout);
 	ULOCKMUTEX(&TermLock);

@@ -57,6 +57,7 @@ void Init()
 	LOG("Dimensions: %d, %d\n", (int)dimx, (int)dimy);
 
 	InitDevices();
+	
 	LOGRETFUNC
 }
 
