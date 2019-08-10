@@ -35,13 +35,13 @@ def Hx(val, length):
 # 		length-=1
 # 	return out
 
-def HxtoStr(hx):
+def HxToStr(hx):
 	out=""
 	for val in hx:
 		out+="\\x{0:02X}".format(val & 0xFF)
 	return out
 
-def StrtoHx(string):
+def StrToHx(string):
 	return bytes(string, "utf8")
 
 ImgData=[]
@@ -119,15 +119,18 @@ FrameData=Parse(FFrames, { "Name":"", "Type":"", "Delay":"", "Next":"" })
 DataStr=b""
 HeaderStr=b""
 FrameStr=b""
-FrameOffset=len(FrameData)*(2+1+1+(4)+8)
+TypeMap={"":0, "EyeMove":1, "EyeMask":2, "EyeFrames":3}
+FrameOffset=len(FrameData)*(2+1+1+(1)+(3)+8)
 for name in FrameData:
 	frame=FrameData[name]
-	#Data+=hx(0,1) #TypeMap[frame["Type"]]
+	#Data+=hx(0,1) #
 	frameNext = int(FrameData[frame["Next"]]["Index"]) if len(frame["Next"]) else frame["Index"]
 	frameDelay = int(frame["Delay"]) if len(frame["Delay"]) else frame["Index"]
 	HeaderStr+=Hx(frameNext, 2)
 	HeaderStr+=Hx(frameDelay, 1)
-	HeaderStr+=Hx(0, 5)
+	HeaderStr+=Hx(TypeMap[frame["Type"]],1)
+	HeaderStr+=Hx(0, 1) #DelayCounter
+	HeaderStr+=Hx(0, 3)
 	HeaderStr+=Hx(FrameOffset, 8)
 	for imgDat in frame["ImgData"]:
 		FrameStr+=imgDat
@@ -144,12 +147,12 @@ DataStr+=Hx(len(FrameData),2)
 DataStr+=Hx(len(ExpressionData),2)
 for name in FrameData:
 	frame=FrameData[name]
-	DataStr+=StrtoHx(name+'\x00'*(15-len(name))+"\0")
+	DataStr+=StrToHx(name+'\x00'*(15-len(name))+"\0")
 	DataStr+=Hx(frame["Index"],2)
 
 for name in ExpressionData:
 	expr=ExpressionData[name]
-	DataStr+=StrtoHx(name+'\x00'*(15-len(name))+"\0")
+	DataStr+=StrToHx(name+'\x00'*(15-len(name))+"\0")
 	DataStr+=Hx(FrameData[expr["EL"]]["Index"], 2)
 	DataStr+=Hx(FrameData[expr["ER"]]["Index"], 2)
 	DataStr+=Hx(FrameData[expr["ML"]]["Index"], 2)

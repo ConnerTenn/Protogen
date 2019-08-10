@@ -5,7 +5,9 @@
 
 //ExpressionState ExprState;
 
-void PrintDisplay(const u8 *display, u8 width, u8 height, int dx, int dy)
+u8 Temp32x8[32*8];
+
+void PrintDisplay(u8 *display, u8 width, u8 height, int dx, int dy)
 {
 	for (u8 y=0; y<height; y++)
 	{
@@ -22,11 +24,28 @@ void PrintDisplay(const u8 *display, u8 width, u8 height, int dx, int dy)
 	PRINT("\n");
 }
 
+void ApplyMask(u8 *frame, u8 *mask, u8 *dest, u8 width, u8 height)
+{
+
+}
+
+void TransformFrame(u8 *frame, u8 *dest, u8 width, u8 height, int dx, int dy)
+{
+	for (u8 y=0; y<height; y++)
+	{
+		for (u8 x=0; x<width/8; x++)
+		{
+			// u16 srcIdx=(y+dy)*(width/8)+(x+dx)/8;
+			// u8 mask = 0xFF;
+		}
+	}
+}
+
 void UpdateDisplay(u16 *frameIdx, u8 width, u8 height, int dx, int dy)
 {
 	LOGENTERFUNC
 	Frame *frame = &((Frame *)FrameData)[*frameIdx];
-	PrintDisplay(FrameData + frame->DataOffset, width, height, dx, dy);
+	PrintDisplay((u8 *)FrameData + frame->DataOffset, width, height, dx, dy);
 	frame->DelayCounter++;
 	if (frame->DelayCounter >= frame->Delay) 
 	{

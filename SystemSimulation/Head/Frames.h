@@ -42,6 +42,7 @@ x+y
 FrameData.bin Format
 Header:
 {
+	u8 Type
 	u8 Next
 	u8 Delay
 	u8 DelayCounter
@@ -54,17 +55,17 @@ u8 FrameData[]
 
 typedef struct Frame_t
 {
-	// u8 Type;
 	u16 Next;
 	u8 Delay;
+	u8 Type;
 	u8 DelayCounter;
-	//u8 _padding[5];
+	//u8 _padding[3];
 	u64 DataOffset;
 } Frame;
 
 
-extern const char _binary_Head_FrameData_bin_start;
-extern const char _binary_Head_FrameData_bin_end;
+extern const u8 _binary_Head_FrameData_bin_start;
+extern const u8 _binary_Head_FrameData_bin_end;
 const u8 *FrameData = (const u8 *)(&_binary_Head_FrameData_bin_start);
 const u8 *FrameDataEnd = (const u8 *)(&_binary_Head_FrameData_bin_end);
 

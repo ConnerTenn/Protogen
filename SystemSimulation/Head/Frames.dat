@@ -32,7 +32,7 @@ Name=32x8
 ;
 
 Name=Eye1
-Type=Eye
+Type=EyeFrames
 #......#
 ........
 ........
@@ -56,7 +56,7 @@ Type=Eye
 ;
 
 Name=Eye2
-Type=MovEye
+Type=EyeMove
 ........
 ........
 ........
@@ -70,7 +70,7 @@ Type=MovEye
 
 
 Name=Eye3
-Type=MaskEye
+Type=EyeMask
 ........
 ........
 ........
