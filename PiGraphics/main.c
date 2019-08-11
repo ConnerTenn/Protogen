@@ -16,13 +16,13 @@
 
 #define FB_SIZE (480*800*4)
 
-static int xioctl(int fd, int request, void *arg)
-{
-	int r;
-	do { r = ioctl (fd, request, arg); }
-	while (-1 == r && EINTR == errno);
-	return r;
-}
+// static int xioctl(int fd, int request, void *arg)
+// {
+// 	int r;
+// 	do { r = ioctl (fd, request, arg); }
+// 	while (-1 == r && EINTR == errno);
+// 	return r;
+// }
 
 int main()
 {

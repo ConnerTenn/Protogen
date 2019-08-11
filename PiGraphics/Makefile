@@ -13,7 +13,7 @@ camera: camera.c clean
 	$(GCC) $(CFLAGS) -lv4l2 $< -o $@
 
 clean:
-	rm -f main
+	rm -f main camera
 
 update:
 	if [ -n "$(shell git status -s)" ]; then git fetch --all; git reset --hard origin/PiGraphics; fi
