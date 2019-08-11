@@ -44,10 +44,10 @@ int main()
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width       = 640;
 	fmt.fmt.pix.height      = 480;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24; //V4L2_PIX_FMT_BGR32
+	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_BGR24; //V4L2_PIX_FMT_RGB24
 	fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
 	if (xioctl(camfd, VIDIOC_S_FMT, &fmt)==-1) { perror("Setting Pixel Format"); exit(-1); }
-	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_RGB24) { printf("Libv4l didn't accept RGB24 format. Can't proceed.\n"); exit(EXIT_FAILURE); }
+	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_BGR24) { printf("Libv4l didn't accept format. Can't proceed.\n"); exit(EXIT_FAILURE); }
 	if ((fmt.fmt.pix.width != 640) || (fmt.fmt.pix.height != 480)) { printf("Warning: driver is sending image at %dx%d\n", fmt.fmt.pix.width, fmt.fmt.pix.height); }
 
 
@@ -106,17 +106,10 @@ int main()
 			{
 				u_int32_t col=0x00000000;//[4]="\xff\x00\x00\x00";
 				
-				col=buffer[y*800*3+x*3];
+				if (x<640) { col=*(u_int32_t *)(buffer+y*640*3+x*3); }
 				*(u_int32_t *)(fb0+y*800*4+x*4)=col;
 			}
 		}
-		// char out_name[256];
-		// sprintf(out_name, "out%03d.ppm", i);
-		// FILE *fout = fopen(out_name, "w");
-		// if (!fout) { perror("Cannot open image"); exit(EXIT_FAILURE); }
-		// fprintf(fout, "P6\n%d %d 255\n", fmt.fmt.pix.width, fmt.fmt.pix.height);
-		// fwrite(buffers[buf.index].start, buf.bytesused, 1, fout);
-		// fclose(fout);
 
 		if( xioctl(camfd, VIDIOC_QBUF, &buf)==-1) { perror("Queue Buffer"); exit(-1); }
 	}
