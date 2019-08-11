@@ -102,7 +102,7 @@ int main()
 		// fflush(fbf);
 	}
 
-	munmap(fb0, 480*800*4);
+	munmap(fb0, FB_SIZE);
 
 	//fclose(fbf);
 

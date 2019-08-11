@@ -21,11 +21,11 @@ struct buffer
 	size_t length;
 };
 
-static void xioctl(int fh, int request, void *arg)
+static void xioctl(int fd, int request, void *arg)
 {
 	int r;
 
-	do { r = v4l2_ioctl(fh, request, arg); } 
+	do { r = v4l2_ioctl(fd, request, arg); } 
 	while (r == -1 && ((errno == EINTR) || (errno == EAGAIN)));
 
 	if (r == -1) { fprintf(stderr, "error %d, %s\n", errno, strerror(errno)); exit(EXIT_FAILURE); }

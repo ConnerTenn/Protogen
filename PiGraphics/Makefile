@@ -3,8 +3,8 @@ SHELL := /bin/bash
 GCC=gcc
 CFLAGS=-Wall -O3
 
-.PHONY: all main camera clean update
-all: main camera
+.PHONY: all main camera camDisp clean update
+all: main camera camDisp
 
 main: main.c clean
 	$(GCC) $(CFLAGS) $< -o $@
@@ -12,9 +12,12 @@ main: main.c clean
 camera: camera.c clean
 	$(GCC) $(CFLAGS) -lv4l2 $< -o $@
 
+camDisp: camDisp.c clean
+	$(GCC) $(CFLAGS) -lv4l2 $< -o $@
+
 clean:
-	rm -f main camera
+	rm -f main camera camDisp
 
 update:
-	if [ -n "$(shell git status -s)" ]; then git fetch --all; git reset --hard origin/PiGraphics; fi
+	git fetch --all; git reset --hard origin/PiGraphics;
 
