@@ -15,6 +15,14 @@
 
 #define FB_SIZE (480*800*4)
 
+struct PixelData
+{
+	unsigned char B;
+	unsigned char G;
+	unsigned char R;
+	unsigned char Empty;
+};
+
 static int xioctl(int fd, int request, void *arg)
 {
 	int r;
@@ -104,10 +112,18 @@ int main()
 		{
 			for (unsigned int x=0; x<800; x++)
 			{
-				u_int32_t col=0x00000000;//[4]="\xff\x00\x00\x00";
+				struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
-				if (x<640) { col=*(u_int32_t *)(buffer+y*640*3+x*3); }
-				*(u_int32_t *)(fb0+y*800*4+x*4)=col;
+				if (x<640) { col=*(struct PixelData *)(buffer+y*640*3+x*3); }
+
+				unsigned char val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
+
+
+				const unsigned int steps = 10;
+				val = (((steps*val)/256)*(255/(steps-1)));
+
+				col = (struct PixelData){val, val, val, 0};
+				*(struct PixelData *)(fb0+y*800*4+x*4)=col;
 			}
 		}
 
