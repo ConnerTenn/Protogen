@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <termios.h>
+#include <signal.h>
 
 #include <linux/videodev2.h>
 #include <libv4l2.h>
@@ -15,13 +17,62 @@
 
 #define FB_SIZE (480*800*4)
 
+
 struct PixelData
 {
-	unsigned char B;
-	unsigned char G;
-	unsigned char R;
-	unsigned char Empty;
+	uint8_t B;
+	uint8_t G;
+	uint8_t R;
+	uint8_t Empty;
 };
+
+union Ksequ
+{
+	uint8_t seq[8];
+	uint64_t val;
+};
+
+struct termios orig_termios;
+
+void reset_terminal_mode()
+{
+	tcsetattr(0, TCSANOW, &orig_termios);
+}
+
+void set_conio_terminal_mode()
+{
+	struct termios new_termios;
+
+	// take two copies - one for now, one for later
+	tcgetattr(0, &orig_termios);
+	memcpy(&new_termios, &orig_termios, sizeof(new_termios));
+
+	// register cleanup handler, and set the new terminal mode
+	atexit(reset_terminal_mode);
+	//cfmakeraw(&new_termios);
+	new_termios.c_lflag &= ~(ECHO | ECHONL| ICANON | IEXTEN);
+	
+	//new_termios.c_oflag |= ONLCR;
+	//new_termios.c_lflag |= ISIG;
+	tcsetattr(0, TCSANOW, &new_termios);
+}
+
+int kbhit()
+{
+	struct timeval tv = { 0L, 0L };
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(0, &fds);
+	return select(1, &fds, NULL, NULL, &tv);
+}
+
+uint8_t getch()
+{
+	int r;
+	uint8_t c;
+	if ((r = read(0, &c, sizeof(c))) < 0) { return (uint8_t)r; }
+	else { return c; }
+}
 
 static int xioctl(int fd, int request, void *arg)
 {
@@ -33,13 +84,20 @@ static int xioctl(int fd, int request, void *arg)
 	return r;
 }
 
+uint8_t Run = 1;
+
+void InteruptHandler(int arg) { reset_terminal_mode(); Run=0; }
+
 int main()
 {
+	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
+
+	set_conio_terminal_mode();
 
 	int dispfd = open("/dev/fb0", O_RDWR);
 	printf("Display File Descriptor: %d\n", dispfd);
 
-	unsigned char *fb0 = 0;
+	uint8_t *fb0 = 0;
 	fb0 = mmap(0, FB_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED|MAP_POPULATE|MAP_LOCKED,dispfd,0);
 	close(dispfd);
 
@@ -74,7 +132,7 @@ int main()
 	xioctl(camfd, VIDIOC_QUERYBUF, &buf);
 
 	size_t bufferLen = buf.length;
-	unsigned char *buffer = v4l2_mmap(NULL, bufferLen, PROT_READ | PROT_WRITE, MAP_SHARED, camfd, buf.m.offset);
+	uint8_t *buffer = v4l2_mmap(NULL, bufferLen, PROT_READ | PROT_WRITE, MAP_SHARED, camfd, buf.m.offset);
 	if (buffer == MAP_FAILED) { perror("mmap"); exit(EXIT_FAILURE); }
 
 	memset(&buf, 0, sizeof(buf));
@@ -87,8 +145,27 @@ int main()
 	enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	if (xioctl(camfd, VIDIOC_STREAMON, &type)==-1) { perror("Start Capture"); exit(-1); }
 
-	while(1)
+	
+	int threshold = 127;
+
+	while(Run)
 	{
+		while(kbhit())
+		{
+			uint8_t ch;// = getch();
+			union Ksequ sequ = {.val=0};
+			uint8_t seqc=0;
+			while(kbhit()) { sequ.seq[seqc++]=getch();}sequ.seq[seqc]=0;
+			ch=sequ.seq[0];
+			
+			printf("PRESS: %d(%X)\n%llu(%08llX)\n", ch, ch, sequ.val, sequ.val);
+
+			if (sequ.val==0x415B1B) { threshold+=5; }
+			if (sequ.val==0x425B1B) { threshold-=5; }
+			if (threshold<0) { threshold=0; }
+			if (threshold>255) { threshold=255; }
+		}
+
 		int r;
 		do 
 		{
@@ -110,17 +187,18 @@ int main()
 
 		for (unsigned int y=0; y<480; y++)
 		{
-			for (unsigned int x=0; x<800; x++)
+			for (unsigned int x=160; x<800; x++)
 			{
 				struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
-				if (x<640) { col=*(struct PixelData *)(buffer+y*640*3+x*3); }
+				if (x-160<640) { col=*(struct PixelData *)(buffer+y*640*3+(x-160)*3); }
 
-				unsigned char val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
+				uint8_t val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
 
 
-				const unsigned int steps = 10;
-				val = (((steps*val)/256)*(255/(steps-1)));
+				// const unsigned int steps = 10;
+				// val = (((steps*val)/256)*(255/(steps-1)));
+				val = val>=(uint8_t)threshold ? 255 : 0;
 
 				col = (struct PixelData){val, val, val, 0};
 				*(struct PixelData *)(fb0+y*800*4+x*4)=col;
@@ -137,6 +215,8 @@ int main()
 
 	
 	munmap(fb0, FB_SIZE);
+
+	printf("\n Done\n");
 
 	return 0;
 }
