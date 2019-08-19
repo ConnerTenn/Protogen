@@ -160,8 +160,8 @@ int main()
 			
 			printf("PRESS: %d(%X)\n%llu(%08llX)\n", ch, ch, sequ.val, sequ.val);
 
-			if (sequ.val==0x415B1B) { threshold+=5; }
-			if (sequ.val==0x425B1B) { threshold-=5; }
+			if (sequ.val==0x415B1B) { threshold-=5; }
+			if (sequ.val==0x425B1B) { threshold+=5; }
 			if (threshold<0) { threshold=0; }
 			if (threshold>255) { threshold=255; }
 		}
@@ -200,7 +200,7 @@ int main()
 				// val = (((steps*val)/256)*(255/(steps-1)));
 				val = val>=(uint8_t)threshold ? 255 : 0;
 
-				col = (struct PixelData){val, val, val, 0};
+				col = (!val ? (struct PixelData){0, 0, 0, 0} : (struct PixelData){col.B, col.G, col.R, 0});
 				*(struct PixelData *)(fb0+y*800*4+x*4)=col;
 			}
 		}
