@@ -29,15 +29,31 @@ void ApplyMask(u8 *frame, u8 *mask, u8 *dest, u8 width, u8 height)
 
 }
 
-void TransformFrame(u8 *frame, u8 *dest, u8 width, u8 height, int dx, int dy)
+void TransformFrame(u8 *src, u8 *dest, u8 width, u8 height, i8 dx, i8 dy)
 {
-	for (u8 y=0; y<height; y++)
+	if (width == 8)
 	{
-		for (u8 x=0; x<width/8; x++)
+		for (u8 y=0; y<height; y++)
 		{
-			// u16 srcIdx=(y+dy)*(width/8)+(x+dx)/8;
-			// u8 mask = 0xFF;
+			//If y + dy is within range, then use the value, else use 0
+			//If dx >= 0, shift right, else shift left
+			*(dest+y+dy)=(0<=(dy+y)&&(dy+y)<height  ?  (dx>=0 ? (*(src+y)>>dx) : (*(src+y)<<(-dx)) )  :  0);
 		}
+	}
+	else if (width == 16)
+	{
+		for (u8 y=0; y<height; y++)
+		{
+			// If y + dy is within range, then use the value, else use 0
+			// If dx >= 0, shift right, else shift lefts
+			// *((u16 *)(dest+(y+dy)*2))=(0<=(dy+y)&&(dy+y)<height  ?  (dx>=0 ? ((*((u16 *)(src+y*2)))>>dx) : ((*((u16 *)(src+y*2)))<<(-dx)) )  :  (u16)0);
+			*((u16 *)(dest+y*2)) = ((u16)0x000f);//<<(-dx);//(u16)((*((u16 *)(src+y*2)))<<(-dx));
+
+			//Issue is little endian and order that the pixles are stored
+		}
+	}
+	else if (width == 32)
+	{
 	}
 }
 
@@ -46,13 +62,14 @@ void UpdateDisplay(u16 *frameIdx, u8 width, u8 height, int dx, int dy)
 	LOGENTERFUNC
 	Frame *frame = &((Frame *)FrameData)[*frameIdx];
 	PrintDisplay((u8 *)FrameData + frame->DataOffset, width, height, dx, dy);
+	
 	frame->DelayCounter++;
 	if (frame->DelayCounter >= frame->Delay) 
 	{
 		*frameIdx = frame->Next;
 		frame->DelayCounter=0;
 	}
-	//PrintDisplay(
+	
 	LOGRETFUNC
 }
 
@@ -68,6 +85,13 @@ void UpdateDisplays()
 	UpdateDisplay(&ExprState.RightMouth, 32, 8, 100+32+8+2, (8+1)*2);
 	UpdateDisplay(&ExprState.CenterMouth, 8, 8, 100+32+1, (8+1)*2+1);
 	UpdateDisplay(&ExprState.Body, 8, 8, 100, (8+1)*3+4);
+
+	u8 buff8[8], buff16[16];
+	TransformFrame((u8 *)FrameData+((Frame *)FrameData)[ExprState.Body].DataOffset,buff8, 8,8,2,-1);
+	PrintDisplay(buff8, 8, 8, 100+16*2, (8+1)*3+4);
+	TransformFrame((u8 *)FrameData+((Frame *)FrameData)[ExprState.LeftEye].DataOffset,buff16, 16,8,-2,0);
+	PrintDisplay(buff16, 16, 8, 100+16*2, (8+1)*3+4+8);
+
 	PRINT(RESET);
 	fflush(stdout);
 	ULOCKMUTEX(&TermLock);
