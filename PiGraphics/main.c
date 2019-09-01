@@ -9,12 +9,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <math.h>
 
-#include <linux/videodev2.h>
-#include <libv4l2.h>
-#include <errno.h>
-
-#define FB_SIZE (480*800*4)
 
 // static int xioctl(int fd, int request, void *arg)
 // {
@@ -26,56 +22,36 @@
 
 int main()
 {
+	unsigned int width=0, height=0, fbsize=0;
+
+	int sizefd = open("/sys/class/graphics/fb0/virtual_size", O_RDONLY);
+	char sizebuff[32];
+	read(sizefd, sizebuff, 32);
+	width=atoi(sizebuff);
+	height=atoi(sizebuff+(int)log10(width)+2);
+	fbsize=width*height*4;
+	close(sizefd);
+	printf("Width:%d Height:%d Size:%d\n", width, height, fbsize);
+
 	//FILE *fbf = fopen("/dev/fb0", "wb");
 	int dispfd = open("/dev/fb0", O_RDWR);
 	printf("Display File Descriptor: %d\n", dispfd);
 
 	unsigned char *fb0 = 0;//
 	//unsigned char fb1[FB_SIZE];
-	fb0 = mmap(0, FB_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED|MAP_POPULATE|MAP_LOCKED,dispfd,0);
+	fb0 = mmap(0, fbsize, PROT_WRITE|PROT_READ, MAP_SHARED|MAP_POPULATE|MAP_LOCKED,dispfd,0);
+	printf("mmap Address: %p\n", fb0);
+	if (fb0==MAP_FAILED) { perror("Error: mmap failed: "); exit(1); }
 	close(dispfd);
 	
-	// {
-	// 	int camfd = open("/dev/video0", O_RDWR);
-	// 	printf("Camera File Descriptor: %d\n", camfd);
-
-
-	// 	printf("MMaped Address: %p\n", fb0);
-	// 	struct v4l2_capability caps = {0};
-	// 	if (-1 == xioctl(camfd, VIDIOC_QUERYCAP, &caps)) { perror("Querying Capabilites"); exit(-1); }
-
-
-	// 	struct v4l2_format fmt = {0};
-	// 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	// 	fmt.fmt.pix.width = 320;
-	// 	fmt.fmt.pix.height = 240;
-	// 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-	// 	fmt.fmt.pix.field = V4L2_FIELD_NONE;
-	// 	if (-1 == xioctl(camfd, VIDIOC_S_FMT, &fmt)) { perror("Setting Pixel Format"); return 1; }
-
-	// 	struct v4l2_requestbuffers req = {0};
-	// 	req.count = 1;
-	// 	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	// 	req.memory = V4L2_MEMORY_MMAP;
-	// 	if (-1 == xioctl(camfd, VIDIOC_REQBUFS, &req)) { perror("Requesting Buffer"); return 1; }
-
-	// 	struct v4l2_buffer buf = {0};
-	// 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	// 	buf.memory = V4L2_MEMORY_MMAP;
-	// 	buf.index = 0;
-	// 	if(-1 == xioctl(camfd, VIDIOC_QUERYBUF, &buf)) { perror("Querying Buffer"); return 1; }
-
-	// 	void *buffer = mmap (NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, camfd, buf.m.offset);
-	// }
-
 	printf("Starting Main Loop...\n");
 	unsigned int i = 0;
 	while(1)
 	{
 
-		for (unsigned int y=0; y<480; y++)
+		for (unsigned int y=0; y<height; y++)
 		{
-			for (unsigned int x=0; x<800; x++)
+			for (unsigned int x=0; x<width; x++)
 			{
 				u_int32_t col=0x00000000;//[4]="\xff\x00\x00\x00";
 				switch (((y+i)/60)%3)
@@ -89,7 +65,7 @@ int main()
 				}
 				//fwrite(col, 4, 1, fbf);
 				//memcpy(fb+y*800*4+x*4, col, 4);
-				*(u_int32_t *)(fb0+y*800*4+x*4)=col;
+				*(u_int32_t *)(fb0+y*width*4+x*4)=col;
 			}
 		}
 
@@ -102,7 +78,7 @@ int main()
 		// fflush(fbf);
 	}
 
-	munmap(fb0, FB_SIZE);
+	munmap(fb0, fbsize);
 
 	//fclose(fbf);
 
