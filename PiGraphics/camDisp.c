@@ -18,6 +18,11 @@
 
 #define FB_SIZE (480*800*4)
 
+#define ARRACC(b,x,y,w,s,t) *(t)((b)+(y)*(w)*(s)+(x)*(s))
+#define FBACC(b,x,y) (ARRACC((b), (x), (y), 800, 4, struct PixelData *))
+#define CAMACC(b,x,y) (ARRACC((b), (x), (y), 640, 3, u_int32_t *)&0xFFFFFF)
+#define MIN(a,b) ((a)<=(b)?(a):(b))
+#define MAX(a,b) ((a)>=(b)?(a):(b))
 
 struct PixelData
 {
@@ -189,11 +194,11 @@ int main()
 
 		for (unsigned int y=0; y<480; y++)
 		{
-			for (unsigned int x=160; x<800; x++)
+			for (unsigned int x=0; x<800; x++)
 			{
 				struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
-				if (x-160<640) { col=*(struct PixelData *)(buffer+y*640*3+(x-160)*3); }
+				if (x>=160) { *(uint32_t *)&col=CAMACC(buffer, x-160, y); }
 
 				uint8_t val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
 
@@ -203,7 +208,8 @@ int main()
 				val = val>=(uint8_t)threshold ? 255 : 0;
 
 				col = (!val ? (struct PixelData){0, 0, 0, 0} : (struct PixelData){col.B, col.G, col.R, 0});
-				*(struct PixelData *)(fb0+y*800*4+x*4)=col;
+				//*(struct PixelData *)(fb0+y*800*4+x*4)=col;
+				FBACC(fb0, x, y) = col;
 			}
 		}
 

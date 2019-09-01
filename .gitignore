@@ -3,6 +3,8 @@
 program
 test
 main
+camera
+camDisp
 Modeling/
 log
 *.bin
