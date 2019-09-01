@@ -11,6 +11,9 @@
 #include <sys/ioctl.h>
 #include <math.h>
 
+#include <linux/videodev2.h>
+//#include <libv4l2.h>
+#include <errno.h>
 
 // static int xioctl(int fd, int request, void *arg)
 // {

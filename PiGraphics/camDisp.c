@@ -10,6 +10,7 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <signal.h>
+#include <sys/kd.h>
 
 #include <linux/videodev2.h>
 #include <libv4l2.h>
@@ -92,6 +93,7 @@ int main()
 {
 	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
 
+	ioctl(0, KDSETMODE, KD_GRAPHICS);
 	set_conio_terminal_mode();
 
 	int dispfd = open("/dev/fb0", O_RDWR);
@@ -215,6 +217,8 @@ int main()
 
 	
 	munmap(fb0, FB_SIZE);
+
+	ioctl(0, KDSETMODE, KD_TEXT);
 
 	printf("\n Done\n");
 
