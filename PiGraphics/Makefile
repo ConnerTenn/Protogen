@@ -8,7 +8,7 @@ LIBV4L2=-Ilibv4l2 libv4l2/libv4l2.so libv4l2/libv4lconvert.so libv4l2/libjpeg.so
 all: main camera camDisp
 
 main: main.c clean
-	$(GCC) $(CFLAGS) $< -o $@
+	$(GCC) $(CFLAGS) -lm $< -o $@
 
 camera: camera.c clean
 	$(GCC) $(CFLAGS) $(LIBV4L2) $< -o $@
