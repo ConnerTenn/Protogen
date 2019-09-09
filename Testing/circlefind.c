@@ -28,6 +28,67 @@
 // 	return r;
 // }
 
+
+void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_int8_t **circmap, u_int32_t **regionmap, u_int32_t *maxregion)
+{
+	int region=0;
+	
+	
+	for (unsigned int y=0; y<height; y++)
+	{
+		for (unsigned int x=0; x<width; x++) 
+		{ 
+			
+			//printf("(%d %d) %d %d\n", x, y, circmap[y][x], procarr[y][x][0]);
+			if (circmap[y][x]==1 && regionmap[y][x]==0)
+			{ 
+				//printf("Accepted\n");
+				region++;
+				//Flood Fill
+				
+				unsigned int yf = y, xf = x; char f = 1;
+				while(f)
+				{
+					
+					if (yf<height-1 && circmap[yf+1][xf] && regionmap[yf+1][xf]==0) { yf++; } //Fall
+					else if (xf>0 && circmap[yf][xf-1] && regionmap[yf][xf-1]==0) { xf--; } //Left Align
+					else if (circmap[yf][xf] && regionmap[yf][xf]==0)
+					{
+						regionmap[yf][xf] = region; 
+						*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+					}
+					else if (xf<width-1 && circmap[yf][xf+1] && regionmap[yf][xf+1]==0) { xf++; } //Step Right
+					else if (yf>0 && circmap[yf-1][xf] && regionmap[yf-1][xf]==0) { yf--; } //Climb
+					else if (xf<width-1 && circmap[yf][xf-1]) { xf--; } //Backtrack
+					else { f = 0; } //Done
+					
+					//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFFFF0000;
+					//usleep(1);
+				}
+			}
+			
+		}
+	}
+	
+	u_int32_t regionarea[region];
+	
+	for (unsigned int i=0; i<region; i++) { regionarea[i] = 0; }
+	
+	for (unsigned int y=0; y<height; y++)
+	{
+		for (unsigned int x=0; x<width; x++) 
+		{
+			regionarea[regionmap[y][x]]++;
+		}
+	}
+	
+	printf("Areas\n");
+	*maxregion=0; u_int32_t maxregionarea = 0;
+	for (int i=0; i<region; i++) { printf("%d: %u\n", i, regionarea[i]); if (i>0 && regionarea[i]>maxregionarea) { *maxregion=i; maxregionarea=regionarea[i]; } }
+	printf("Max region: %d: %u\n", *maxregion, maxregionarea);
+	
+}
+
 int main()
 {
 	unsigned int width=0, height=0, fbsize=0;
@@ -87,31 +148,7 @@ int main()
 		}
 	}
 	
-	
-	printf("Processing Data\n");
-	int region=0;
-	u_int32_t ***procarr = malloc(sizeof(u_int32_t **)*height);//[height][width][2]; //Region Count
-	
-	for (int y=0; y<height; y++)
-	{
-		procarr[y] = malloc(sizeof(u_int32_t *)*width);
-		for (int x=0; x<width; x++) 
-		{ 
-			procarr[y][x] = malloc(sizeof(u_int32_t)*2);
-			procarr[y][x][1] = procarr[y][x][0] = 0; 
-		}
-	}
-	
-	// for (int y=0; y<height; y++)
-	// {
-	// 	for (int x=0; x<width; x++)
-	// 	{
-	// 		procarr[y][x][0] = 0;
-	// 		procarr[y][x][1] = 0;
-	// 	}
-	// }
-	
-	printf("Drawing Frame\n");
+	printf("Drawing Circles\n");
 	
 	for (int y=0; y<height; y++)
 	{
@@ -122,18 +159,41 @@ int main()
 	}
 	
 	
-	printf("Cleanup\n");
+	printf("Processing Data\n");
+	
+	u_int32_t **regionmap = malloc(sizeof(u_int32_t **)*height);//[height][width][2]; //Region Count
+	
+	for (int y=0; y<height; y++)
+	{
+		regionmap[y] = malloc(sizeof(u_int32_t *)*width);
+		for (int x=0; x<width; x++) 
+		{ 
+			regionmap[y][x] = 0; 
+		}
+	}
+	
+	int maxregion=0;
+	FindMaxArea(width, height, fb0, circmap, regionmap, &maxregion);
+	
+	
+	printf("Drawing Processed Data\n");
 	for (int y=0; y<height; y++)
 	{
 		for (int x=0; x<width; x++)
 		{
-			free(procarr[y][x]);
+			*(u_int32_t *)(fb0+y*width*4+x*4) = regionmap[y][x] == maxregion ? 0xFF00FF00 : (regionmap[y][x] ? 0xFF00FFFF : (circmap[y][x] ? 0xFFFFFFFF : 0) );
 		}
-		free(procarr[y]);
+	}
+	
+	
+	printf("Cleanup\n");
+	for (int y=0; y<height; y++)
+	{
+		free(regionmap[y]);
 		free(circmap[y]);
 	}
 	
-	free(procarr);
+	free(regionmap);
 	free(circmap);
 	
 	// printf("Starting Main Loop...\n");
