@@ -1,10 +1,12 @@
 .vscode/
+Modeling/
+log
+*.bin
+
 *.o
 program
 test
 main
 camera
 camDisp
-Modeling/
-log
-*.bin
+circlefind
