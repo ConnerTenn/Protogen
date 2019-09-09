@@ -58,13 +58,11 @@ int main()
 	
 	printf("Generating Circles\n");
 	
-	u_int8_t *circmap = malloc(width*height);
+	u_int8_t **circmap = malloc(sizeof(u_int8_t *)*height);
 	for (int y=0; y<height; y++)
 	{
-		for (int x=0; x<width; x++)
-		{
-			circmap[y*width+x]=0;
-		}
+		circmap[y] = malloc(sizeof(u_int8_t)*width);
+		for (int x=0; x<width; x++) { circmap[y][x]=0; }
 	}
 	//
 	
@@ -83,15 +81,26 @@ int main()
 				if (sqrt(pow(x-xi,2)+pow(y-yi,2)) <= s)
 				{
 					//*(u_int32_t *)(fb0+yi*width*4+xi*4)=0xFFFFFFFF;
-					circmap[yi*width+xi]=1;
+					circmap[yi][xi]=1;
 				}
 			}
 		}
 	}
 	
 	
-	// printf("Processing Data\n");
-	// int procarr[height][width][2];
+	printf("Processing Data\n");
+	int region=0;
+	u_int32_t ***procarr = malloc(sizeof(u_int32_t **)*height);//[height][width][2]; //Region Count
+	
+	for (int y=0; y<height; y++)
+	{
+		procarr[y] = malloc(sizeof(u_int32_t *)*width);
+		for (int x=0; x<width; x++) 
+		{ 
+			procarr[y][x] = malloc(sizeof(u_int32_t)*2);
+			procarr[y][x][1] = procarr[y][x][0] = 0; 
+		}
+	}
 	
 	// for (int y=0; y<height; y++)
 	// {
@@ -108,10 +117,23 @@ int main()
 	{
 		for (int x=0; x<width; x++)
 		{
-			*(u_int32_t *)(fb0+y*width*4+x*4) = circmap[y*width+x] ? 0xFFFFFFFF : 0;
+			*(u_int32_t *)(fb0+y*width*4+x*4) = circmap[y][x] ? 0xFFFFFFFF : 0;
 		}
 	}
 	
+	
+	printf("Cleanup\n");
+	for (int y=0; y<height; y++)
+	{
+		for (int x=0; x<width; x++)
+		{
+			free(procarr[y][x]);
+		}
+		free(procarr[y]);
+		free(circmap[y]);
+	}
+	
+	free(procarr);
 	free(circmap);
 	
 	// printf("Starting Main Loop...\n");
