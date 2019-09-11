@@ -28,43 +28,93 @@
 // 	return r;
 // }
 
+struct FloodFillLine
+{
+	struct FloodFillLine *Next;
+	unsigned int X, Y;
+};
+
+void AddFloodLine(struct FloodFillLine **stack, unsigned int x, unsigned int y)
+{
+	struct FloodFillLine *newline = malloc(sizeof(struct FloodFillLine));
+	newline->Next=*stack;
+	newline->X=x; newline->Y=y;
+	*stack=newline;
+}
 
 void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_int8_t **circmap, u_int32_t **regionmap, u_int32_t *maxregion)
 {
-	int region=0;
+	u_int32_t region=0;
 	
+	struct FloodFillLine *lineStack=0;
 	
 	for (unsigned int y=0; y<height; y++)
 	{
 		for (unsigned int x=0; x<width; x++) 
 		{ 
 			
-			//printf("(%d %d) %d %d\n", x, y, circmap[y][x], procarr[y][x][0]);
 			if (circmap[y][x]==1 && regionmap[y][x]==0)
 			{ 
-				//printf("Accepted\n");
-				region++;
-				//Flood Fill
 				
-				unsigned int yf = y, xf = x; char f = 1;
-				while(f)
+				printf("R %u  (%u %u)\n", region, x, y);
+				//Flood Fill
+				region++;
+				
+				AddFloodLine(&lineStack, x, y);
+				
+				unsigned int yf=0, xf=0;
+				while(lineStack)
 				{
-					
-					if (yf<height-1 && circmap[yf+1][xf] && regionmap[yf+1][xf]==0) { yf++; } //Fall
-					else if (xf>0 && circmap[yf][xf-1] && regionmap[yf][xf-1]==0) { xf--; } //Left Align
-					else if (circmap[yf][xf] && regionmap[yf][xf]==0)
 					{
-						regionmap[yf][xf] = region; 
-						*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+						struct FloodFillLine *curr=lineStack;
+						xf=curr->X;
+						yf=curr->Y;
+						lineStack=curr->Next;
+						free(curr);
 					}
-					else if (xf<width-1 && circmap[yf][xf+1] && regionmap[yf][xf+1]==0) { xf++; } //Step Right
-					else if (yf>0 && circmap[yf-1][xf] && regionmap[yf-1][xf]==0) { yf--; } //Climb
-					else if (xf<width-1 && circmap[yf][xf-1]) { xf--; } //Backtrack
-					else { f = 0; } //Done
 					
-					//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFFFF0000;
-					//usleep(1);
+					char ue=1, le=1; 
+					
+					
+					while(xf>0 && circmap[yf][xf-1]) { xf--; }
+					
+					while(xf<width && circmap[yf][xf])
+					{
+						regionmap[yf][xf] = region;
+						*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+						
+						if (yf>0 && circmap[yf-1][xf]) { if (ue && !regionmap[yf-1][xf]) { AddFloodLine(&lineStack, xf, yf-1); ue=0; } }
+						else { ue = 1; }
+						if (yf<height-1 && circmap[yf+1][xf]) { if (le && !regionmap[yf+1][xf]) { AddFloodLine(&lineStack, xf, yf+1); le=0; } }
+						else { le = 1; }
+						
+						xf++; 
+					}
+					
 				}
+				
+				
+				//usleep(1000*1000);
+				
+				
+				// while(f)
+				// {
+					
+				// 	if (yf<height-1 && circmap[yf+1][xf] && regionmap[yf+1][xf]==0) { yf++; } //Fall
+				// 	else if (xf>0 && circmap[yf][xf-1] && regionmap[yf][xf-1]==0) { xf--; } //Left Align
+				// 	else if (circmap[yf][xf] && regionmap[yf][xf]==0)
+				// 	{
+				// 		regionmap[yf][xf] = region; 
+				// 		*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+				// 	}
+				// 	else if (xf<width-1 && circmap[yf][xf+1] && regionmap[yf][xf+1]==0) { xf++; } //Step Right
+				// 	else if (yf>0 && circmap[yf-1][xf] && regionmap[yf-1][xf]==0) { yf--; } //Climb
+				// 	else if (xf<width-1 && circmap[yf][xf-1]) { xf--; } //Backtrack
+				// 	else { f = 0; } //Done
+					
+				// 	//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFFFF0000;
+				// 	//usleep(1);
+				// }
 			}
 			
 		}
@@ -84,7 +134,7 @@ void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_
 	
 	printf("Areas\n");
 	*maxregion=0; u_int32_t maxregionarea = 0;
-	for (int i=0; i<region; i++) { printf("%d: %u\n", i, regionarea[i]); if (i>0 && regionarea[i]>maxregionarea) { *maxregion=i; maxregionarea=regionarea[i]; } }
+	for (u_int32_t i=0; i<region; i++) { printf("%d: %u\n", i, regionarea[i]); if (i>0 && regionarea[i]>maxregionarea) { *maxregion=i; maxregionarea=regionarea[i]; } }
 	printf("Max region: %d: %u\n", *maxregion, maxregionarea);
 	
 }
