@@ -232,9 +232,10 @@ int main()
 			
 			struct FloodFillLine lineStack[HEIGHT]; u_int32_t lineStackP=-1;
 
-			for (unsigned int y=0; y<HEIGHT; y++)
+			const unsigned int crop=40;
+			for (unsigned int y=crop; y<HEIGHT-crop; y++)
 			{
-				for (unsigned int x=0; x<CAMWIDTH; x++)
+				for (unsigned int x=crop; x<CAMWIDTH-crop; x++)
 				{
 					if (camFrame[y][x]==0 && regionmap[y][x]==0)
 					{ 
@@ -247,29 +248,35 @@ int main()
 						
 						unsigned int yf=0, xf=0;
 						
+						//Handle every line that is part of the region
 						while(lineStackP<-1)
 						{
+							//Pop off of stack
 							xf=lineStack[lineStackP].X;
 							yf=lineStack[lineStackP].Y;
 							lineStackP--;
 							
 							
+							//Check if line is incomplete
 							if (regionmap[yf][xf]==0)
 							{
 								char ue=1, le=1; 
 								
+								//Move to the beginning of the line
+								while(xf>crop && camFrame[yf][xf-1]==0) { xf--; }
 								
-								while(xf>0 && camFrame[yf][xf-1]==0) { xf--; }
-								
-								while(xf<CAMWIDTH && camFrame[yf][xf]==0)
+								//Loop forward through the line
+								while(xf<CAMWIDTH-crop && camFrame[yf][xf]==0)
 								{
 									regionmap[yf][xf] = region;
 									//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
 									regionarea++;
 									
-									if (yf>0 && camFrame[yf-1][xf]==0) { if (ue && !regionmap[yf-1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf-1}; ue=0; } }
+									//Check if line above or below is unaccounted for. If so, add it to the stack.
+									//Only do this at the beginning of a line or after a non-region above/below 
+									if (yf>crop && camFrame[yf-1][xf]==0) { if (ue && !regionmap[yf-1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf-1}; ue=0; } }
 									else { ue = 1; }
-									if (yf<HEIGHT-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
+									if (yf<HEIGHT-crop-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
 									else { le = 1; }
 									
 									xf++; 
@@ -299,22 +306,7 @@ int main()
 		{
 			for (unsigned int x=0; x<FBWIDTH; x++)
 			{
-				//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
-				
-				// if (x>=160) { *(uint32_t *)&col=CAMACC(buffer, x-160, y); }
 
-				// uint8_t val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
-
-
-				// // const unsigned int steps = 10;
-				// // val = (((steps*val)/256)*(255/(steps-1)));
-				// val = val>=(uint8_t)threshold ? 255 : 0;
-
-				// col = (!val ? (struct PixelData){0, 0, 0, 0} : (struct PixelData){col.B, col.G, col.R, 0});
-
-				//*((struct PixelData *)(void *)&(camFrame[y][x]));
-
-				//*(struct PixelData *)(fb0+y*FBWIDTH*4+x*4)=col;
 				uint32_t col = 0;
 				if (x>=160)
 				{
@@ -323,6 +315,12 @@ int main()
 					else { col = camFrame[y][x-160]; } 
 				}
 				else { col = 0x00000000; }
+
+	
+				if (abs((int)(x-160)-(int)avgX) <= 5 && abs((int)y-(int)avgY) <= 5)
+				{
+					col = 0x00FF0000;
+				}
 
 				FBACC(fb0, x, y) = col;
 			}
