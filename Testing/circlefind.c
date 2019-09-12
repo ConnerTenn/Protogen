@@ -30,23 +30,19 @@
 
 struct FloodFillLine
 {
-	struct FloodFillLine *Next;
 	unsigned int X, Y;
 };
 
-void AddFloodLine(struct FloodFillLine **stack, unsigned int x, unsigned int y)
-{
-	struct FloodFillLine *newline = malloc(sizeof(struct FloodFillLine));
-	newline->Next=*stack;
-	newline->X=x; newline->Y=y;
-	*stack=newline;
-}
 
 void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_int8_t **circmap, u_int32_t **regionmap, u_int32_t *maxregion)
 {
 	u_int32_t region=0;
 	
-	struct FloodFillLine *lineStack=0;
+	*maxregion=0; 
+	u_int32_t maxregionarea = 0;
+	
+	struct FloodFillLine lineStack[height]; u_int32_t lineStackP=-1;
+	
 	
 	for (unsigned int y=0; y<height; y++)
 	{
@@ -58,19 +54,17 @@ void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_
 				
 				//Flood Fill
 				region++;
+				u_int32_t regionarea = 0;
 				
-				AddFloodLine(&lineStack, x, y);
+				lineStack[++lineStackP] = (struct FloodFillLine){x,y};
 				
 				unsigned int yf=0, xf=0;
-				while(lineStack)
+				
+				while(lineStackP<-1)
 				{
-					{
-						struct FloodFillLine *curr=lineStack;
-						xf=curr->X;
-						yf=curr->Y;
-						lineStack=curr->Next;
-						free(curr);
-					}
+					xf=lineStack[lineStackP].X;
+					yf=lineStack[lineStackP].Y;
+					lineStackP--;
 					
 					
 					if (regionmap[yf][xf]==0)
@@ -84,10 +78,11 @@ void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_
 						{
 							regionmap[yf][xf] = region;
 							//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+							regionarea++;
 							
-							if (yf>0 && circmap[yf-1][xf]) { if (ue && !regionmap[yf-1][xf]) { AddFloodLine(&lineStack, xf, yf-1); ue=0; } }
+							if (yf>0 && circmap[yf-1][xf]) { if (ue && !regionmap[yf-1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf-1}; ue=0; } }
 							else { ue = 1; }
-							if (yf<height-1 && circmap[yf+1][xf]) { if (le && !regionmap[yf+1][xf]) { AddFloodLine(&lineStack, xf, yf+1); le=0; } }
+							if (yf<height-1 && circmap[yf+1][xf]) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
 							else { le = 1; }
 							
 							xf++; 
@@ -96,57 +91,26 @@ void FindMaxArea(unsigned int width, unsigned int height, unsigned char *fb0, u_
 					
 				}
 				
+				if (regionarea > maxregionarea) { maxregionarea=regionarea; *maxregion=region; }
 				
-				//usleep(1000*1000);
-				
-				
-				// while(f)
-				// {
-					
-				// 	if (yf<height-1 && circmap[yf+1][xf] && regionmap[yf+1][xf]==0) { yf++; } //Fall
-				// 	else if (xf>0 && circmap[yf][xf-1] && regionmap[yf][xf-1]==0) { xf--; } //Left Align
-				// 	else if (circmap[yf][xf] && regionmap[yf][xf]==0)
-				// 	{
-				// 		regionmap[yf][xf] = region; 
-				// 		*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
-				// 	}
-				// 	else if (xf<width-1 && circmap[yf][xf+1] && regionmap[yf][xf+1]==0) { xf++; } //Step Right
-				// 	else if (yf>0 && circmap[yf-1][xf] && regionmap[yf-1][xf]==0) { yf--; } //Climb
-				// 	else if (xf<width-1 && circmap[yf][xf-1]) { xf--; } //Backtrack
-				// 	else { f = 0; } //Done
-					
-				// 	//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFFFF0000;
-				// 	//usleep(1);
-				// }
 			}
 			
 		}
 	}
-	
-	u_int32_t regionarea[region];
-	
-	for (unsigned int i=0; i<region; i++) { regionarea[i] = 0; }
-	
-	for (unsigned int y=0; y<height; y++)
-	{
-		for (unsigned int x=0; x<width; x++) 
-		{
-			regionarea[regionmap[y][x]]++;
-		}
-	}
-	
-	printf("Areas\n");
-	*maxregion=0; u_int32_t maxregionarea = 0;
-	for (u_int32_t i=0; i<region; i++) { printf("%d: %u\n", i, regionarea[i]); if (i>0 && regionarea[i]>maxregionarea) { *maxregion=i; maxregionarea=regionarea[i]; } }
-	printf("Max region: %d: %u\n", *maxregion, maxregionarea);
-	
+}
+
+u_int64_t Time()
+{
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	return 1000000 * tv.tv_sec + tv.tv_usec;
 }
 
 int main()
 {
 	unsigned int width=0, height=0, fbsize=0;
 	
-	srand(time(0));
+	srand(Time());
 
 	int sizefd = open("/sys/class/graphics/fb0/virtual_size", O_RDONLY);
 	char sizebuff[32];
@@ -192,31 +156,13 @@ int main()
 		{
 			int xl = s-sqrt(s*s - pow(y-yi,2));
 			
-			for (int xi=xl+x; xi<2*s-xl+1+x; xi++)
+			for (int xi=xl+x; xi<MIN(2*s-xl+1+x, width-1); xi++)
 			{
 				circmap[yi][xi]=1;
 			}
-			
-			// for (int xi=MAX(x-s,0); xi<MIN(x+s,width-1); xi++)
-			// {
-			// 	if (sqrt(pow(x-xi,2)+pow(y-yi,2)) <= s)
-			// 	{
-			// 		//*(u_int32_t *)(fb0+yi*width*4+xi*4)=0xFFFFFFFF;
-			// 		circmap[yi][xi]=1;
-			// 	}
-			// }
 		}
 	}
 	
-	printf("Drawing Circles\n");
-	
-	for (int y=0; y<height; y++)
-	{
-		for (int x=0; x<width; x++)
-		{
-			*(u_int32_t *)(fb0+y*width*4+x*4) = circmap[y][x] ? 0xFFFFFFFF : 0;
-		}
-	}
 	
 	
 	printf("Processing Data\n");
@@ -232,6 +178,7 @@ int main()
 		}
 	}
 	
+	u_int64_t t1 = Time();
 	int maxregion=0;
 	FindMaxArea(width, height, fb0, circmap, regionmap, &maxregion);
 	
@@ -245,8 +192,10 @@ int main()
 	}
 	avgX=avgX/avgC;
 	avgY=avgY/avgC;
+	u_int64_t t2 = Time();
 	printf("Average: (%lu %lu)\n", avgX, avgY);
 	
+	printf("Process time %lluus\n", t2-t1);
 	
 	printf("Drawing Processed Data\n");
 	for (int y=0; y<height; y++)
