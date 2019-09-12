@@ -16,11 +16,16 @@
 #include <libv4l2.h>
 #include <errno.h>
 
-#define FB_SIZE (480*800*4)
+
+#define CAMWIDTH 640
+#define FBWIDTH 800
+#define HEIGHT 480
+
+#define FB_SIZE (HEIGHT*FBWIDTH*4)
 
 #define ARRACC(b,x,y,w,s,t) *(t)((b)+(y)*(w)*(s)+(x)*(s))
-#define FBACC(b,x,y) (ARRACC((b), (x), (y), 800, 4, u_int32_t *))
-#define CAMACC(b,x,y) (ARRACC((b), (x), (y), 640, 3, u_int32_t *)&0xFFFFFF)
+#define FBACC(b,x,y) (ARRACC((b), (x), (y), FBWIDTH, 4, u_int32_t *))
+#define CAMACC(b,x,y) (ARRACC((b), (x), (y), CAMWIDTH, 3, u_int32_t *)&0xFFFFFF)
 #define MIN(a,b) ((a)<=(b)?(a):(b))
 #define MAX(a,b) ((a)>=(b)?(a):(b))
 
@@ -120,13 +125,13 @@ int main()
 
 	struct v4l2_format fmt = {0};
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	fmt.fmt.pix.width       = 640;
-	fmt.fmt.pix.height      = 480;
+	fmt.fmt.pix.width       = CAMWIDTH;
+	fmt.fmt.pix.height      = HEIGHT;
 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_BGR24; //V4L2_PIX_FMT_RGB24
 	fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
 	if (xioctl(camfd, VIDIOC_S_FMT, &fmt)==-1) { perror("Setting Pixel Format"); exit(-1); }
 	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_BGR24) { printf("Libv4l didn't accept format. Can't proceed.\n"); exit(EXIT_FAILURE); }
-	if ((fmt.fmt.pix.width != 640) || (fmt.fmt.pix.height != 480)) { printf("Warning: driver is sending image at %dx%d\n", fmt.fmt.pix.width, fmt.fmt.pix.height); }
+	if ((fmt.fmt.pix.width != CAMWIDTH) || (fmt.fmt.pix.height != HEIGHT)) { printf("Warning: driver is sending image at %dx%d\n", fmt.fmt.pix.width, fmt.fmt.pix.height); }
 
 
 	struct v4l2_requestbuffers req ={0};
@@ -196,10 +201,10 @@ int main()
 		buf.memory = V4L2_MEMORY_MMAP;
 		xioctl(camfd, VIDIOC_DQBUF, &buf);
 
-		u_int32_t camFrame[480][640];
-		for (unsigned int y=0; y<480; y++)
+		u_int32_t camFrame[HEIGHT][CAMWIDTH];
+		for (unsigned int y=0; y<HEIGHT; y++)
 		{
-			for (unsigned int x=0; x<640; x++)
+			for (unsigned int x=0; x<CAMWIDTH; x++)
 			{
 				//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
@@ -213,8 +218,8 @@ int main()
 			}
 		}
 
-		u_int32_t regionmap[480][640];
-		memset(regionmap, 0, 640*480*sizeof(u_int32_t));
+		u_int32_t regionmap[HEIGHT][CAMWIDTH];
+		memset(regionmap, 0, CAMWIDTH*HEIGHT*sizeof(u_int32_t));
 
 		u_int32_t maxregion;
 		u_int32_t avgX=0, avgY=0, avgC=0;
@@ -225,11 +230,11 @@ int main()
 			maxregion=0;
 			u_int32_t maxregionarea = 0;
 			
-			struct FloodFillLine lineStack[480]; u_int32_t lineStackP=-1;
+			struct FloodFillLine lineStack[HEIGHT]; u_int32_t lineStackP=-1;
 
-			for (unsigned int y=0; y<480; y++)
+			for (unsigned int y=0; y<HEIGHT; y++)
 			{
-				for (unsigned int x=0; x<640; x++)
+				for (unsigned int x=0; x<CAMWIDTH; x++)
 				{
 					if (camFrame[y][x]==0 && regionmap[y][x]==0)
 					{ 
@@ -256,7 +261,7 @@ int main()
 								
 								while(xf>0 && camFrame[yf][xf-1]==0) { xf--; }
 								
-								while(xf<640 && camFrame[yf][xf]==0)
+								while(xf<CAMWIDTH && camFrame[yf][xf]==0)
 								{
 									regionmap[yf][xf] = region;
 									//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
@@ -264,7 +269,7 @@ int main()
 									
 									if (yf>0 && camFrame[yf-1][xf]==0) { if (ue && !regionmap[yf-1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf-1}; ue=0; } }
 									else { ue = 1; }
-									if (yf<480-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
+									if (yf<HEIGHT-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
 									else { le = 1; }
 									
 									xf++; 
@@ -279,9 +284,9 @@ int main()
 				}
 			}
 
-			for (int y=0; y<480; y++)
+			for (int y=0; y<HEIGHT; y++)
 			{
-				for (int x=0; x<640; x++)
+				for (int x=0; x<CAMWIDTH; x++)
 				{
 					if (regionmap[y][x] == maxregion) { avgX+=x; avgY+=y; avgC++; }
 				}
@@ -290,11 +295,9 @@ int main()
 			avgY=avgY/avgC;
 		}
 
-		printf("Max Region %u\n", maxregion);
-
-		for (unsigned int y=0; y<480; y++)
+		for (unsigned int y=0; y<HEIGHT; y++)
 		{
-			for (unsigned int x=0; x<800; x++)
+			for (unsigned int x=0; x<FBWIDTH; x++)
 			{
 				//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
@@ -311,7 +314,7 @@ int main()
 
 				//*((struct PixelData *)(void *)&(camFrame[y][x]));
 
-				//*(struct PixelData *)(fb0+y*800*4+x*4)=col;
+				//*(struct PixelData *)(fb0+y*FBWIDTH*4+x*4)=col;
 				uint32_t col = 0;
 				if (x>=160)
 				{
