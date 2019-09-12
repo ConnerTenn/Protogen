@@ -19,18 +19,18 @@
 #define FB_SIZE (480*800*4)
 
 #define ARRACC(b,x,y,w,s,t) *(t)((b)+(y)*(w)*(s)+(x)*(s))
-#define FBACC(b,x,y) (ARRACC((b), (x), (y), 800, 4, struct PixelData *))
+#define FBACC(b,x,y) (ARRACC((b), (x), (y), 800, 4, u_int32_t *))
 #define CAMACC(b,x,y) (ARRACC((b), (x), (y), 640, 3, u_int32_t *)&0xFFFFFF)
 #define MIN(a,b) ((a)<=(b)?(a):(b))
 #define MAX(a,b) ((a)>=(b)?(a):(b))
 
-struct PixelData
-{
-	uint8_t B;
-	uint8_t G;
-	uint8_t R;
-	uint8_t Empty;
-};
+// struct PixelData
+// {
+// 	uint8_t B;
+// 	uint8_t G;
+// 	uint8_t R;
+// 	uint8_t Empty;
+// };
 
 union Ksequ
 {
@@ -90,6 +90,11 @@ static int xioctl(int fd, int request, void *arg)
 	return r;
 }
 
+struct FloodFillLine
+{
+	unsigned int X, Y;
+};
+
 uint8_t Run = 1;
 
 void InteruptHandler(int arg) { reset_terminal_mode(); Run=0; }
@@ -98,7 +103,7 @@ int main()
 {
 	signal(SIGINT, InteruptHandler); signal(SIGKILL, InteruptHandler);
 
-	ioctl(0, KDSETMODE, KD_GRAPHICS);
+	//ioctl(0, KDSETMODE, KD_GRAPHICS);
 	set_conio_terminal_mode();
 
 	int dispfd = open("/dev/fb0", O_RDWR);
@@ -191,24 +196,131 @@ int main()
 		buf.memory = V4L2_MEMORY_MMAP;
 		xioctl(camfd, VIDIOC_DQBUF, &buf);
 
+		u_int32_t camFrame[480][640];
+		for (unsigned int y=0; y<480; y++)
+		{
+			for (unsigned int x=0; x<640; x++)
+			{
+				//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
+				
+				uint32_t col = CAMACC(buffer, x, y);
+
+				uint8_t val = (((col>>24)&0xFF) + ((col>>16)&0xFF) + (col&0xFF))/3;
+
+				if (val<(uint8_t)threshold) { col = 0x00000000; }
+				
+				camFrame[y][x] = col;
+			}
+		}
+
+		u_int32_t regionmap[480][640];
+		memset(regionmap, 0, 640*480*sizeof(u_int32_t));
+
+		u_int32_t maxregion;
+		u_int32_t avgX=0, avgY=0, avgC=0;
+
+		{		
+			u_int32_t region=0;
+			
+			maxregion=0;
+			u_int32_t maxregionarea = 0;
+			
+			struct FloodFillLine lineStack[480]; u_int32_t lineStackP=-1;
+
+			for (unsigned int y=0; y<480; y++)
+			{
+				for (unsigned int x=0; x<640; x++)
+				{
+					if (camFrame[y][x]==0 && regionmap[y][x]==0)
+					{ 
+						
+						//Flood Fill
+						region++;
+						u_int32_t regionarea = 0;
+						
+						lineStack[++lineStackP] = (struct FloodFillLine){x,y};
+						
+						unsigned int yf=0, xf=0;
+						
+						while(lineStackP<-1)
+						{
+							xf=lineStack[lineStackP].X;
+							yf=lineStack[lineStackP].Y;
+							lineStackP--;
+							
+							
+							if (regionmap[yf][xf]==0)
+							{
+								char ue=1, le=1; 
+								
+								
+								while(xf>0 && camFrame[yf][xf-1]==0) { xf--; }
+								
+								while(xf<640 && camFrame[yf][xf]==0)
+								{
+									regionmap[yf][xf] = region;
+									//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+									regionarea++;
+									
+									if (yf>0 && camFrame[yf-1][xf]==0) { if (ue && !regionmap[yf-1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf-1}; ue=0; } }
+									else { ue = 1; }
+									if (yf<480-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
+									else { le = 1; }
+									
+									xf++; 
+								}
+							}
+							
+						}
+						
+						if (regionarea > maxregionarea) { maxregionarea=regionarea; maxregion=region; }
+						
+					}
+				}
+			}
+
+			for (int y=0; y<480; y++)
+			{
+				for (int x=0; x<640; x++)
+				{
+					if (regionmap[y][x] == maxregion) { avgX+=x; avgY+=y; avgC++; }
+				}
+			}
+			avgX=avgX/avgC;
+			avgY=avgY/avgC;
+		}
+
+		printf("Max Region %u\n", maxregion);
 
 		for (unsigned int y=0; y<480; y++)
 		{
 			for (unsigned int x=0; x<800; x++)
 			{
-				struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
+				//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
-				if (x>=160) { *(uint32_t *)&col=CAMACC(buffer, x-160, y); }
+				// if (x>=160) { *(uint32_t *)&col=CAMACC(buffer, x-160, y); }
 
-				uint8_t val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
+				// uint8_t val = ((unsigned int)col.R + (unsigned int)col.G + (unsigned int)col.B)/3;
 
 
-				// const unsigned int steps = 10;
-				// val = (((steps*val)/256)*(255/(steps-1)));
-				val = val>=(uint8_t)threshold ? 255 : 0;
+				// // const unsigned int steps = 10;
+				// // val = (((steps*val)/256)*(255/(steps-1)));
+				// val = val>=(uint8_t)threshold ? 255 : 0;
 
-				col = (!val ? (struct PixelData){0, 0, 0, 0} : (struct PixelData){col.B, col.G, col.R, 0});
+				// col = (!val ? (struct PixelData){0, 0, 0, 0} : (struct PixelData){col.B, col.G, col.R, 0});
+
+				//*((struct PixelData *)(void *)&(camFrame[y][x]));
+
 				//*(struct PixelData *)(fb0+y*800*4+x*4)=col;
+				uint32_t col = 0;
+				if (x>=160)
+				{
+					if (maxregion && regionmap[y][x-160]==maxregion) { col = 0x0000FF00; }
+					else if (regionmap[y][x-160]) { col = 0x0000FFFF; }
+					else { col = camFrame[y][x-160]; } 
+				}
+				else { col = 0x00000000; }
+
 				FBACC(fb0, x, y) = col;
 			}
 		}
@@ -224,7 +336,7 @@ int main()
 	
 	munmap(fb0, FB_SIZE);
 
-	ioctl(0, KDSETMODE, KD_TEXT);
+	//ioctl(0, KDSETMODE, KD_TEXT);
 
 	printf("\n Done\n");
 

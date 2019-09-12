@@ -23,5 +23,5 @@ update:
 	git fetch --all; git reset --hard origin/PiGraphics;
 
 upload:
-	sshpass -p "pipass" scp main camera camDisp root@192.168.0.132:/root/Dev/Protogen/PiGraphics
+	sshpass -p "pipass" scp main camera camDisp root@192.168.0.131:/root/Dev/Protogen/PiGraphics
 
