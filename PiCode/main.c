@@ -3,8 +3,11 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <asm-generic/mman.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/select.h>
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -13,12 +16,10 @@
 #include <signal.h>
 #include <sys/kd.h>
 
-#include <linux/videodev2.h>
-#include <libv4l2.h>
-#include <errno.h>
+#include "globals.h"
+#include "camera.h"
 
 
-#define CAMWIDTH 640
 #define FBWIDTH 800
 #define HEIGHT 480
 
@@ -32,16 +33,16 @@
 
 // struct PixelData
 // {
-// 	uint8_t B;
-// 	uint8_t G;
-// 	uint8_t R;
-// 	uint8_t Empty;
+// 	u8 B;
+// 	u8 G;
+// 	u8 R;
+// 	u8 Empty;
 // };
 
 union Ksequ
 {
-	uint8_t seq[8];
-	uint64_t val;
+	u8 seq[8];
+	u32 val;
 };
 
 struct termios orig_termios;
@@ -78,30 +79,22 @@ int kbhit()
 	return select(1, &fds, NULL, NULL, &tv);
 }
 
-uint8_t getch()
+u8 getch()
 {
 	int r;
-	uint8_t c;
-	if ((r = read(0, &c, sizeof(c))) < 0) { return (uint8_t)r; }
+	u8 c;
+	if ((r = read(0, &c, sizeof(c))) < 0) { return (u8)r; }
 	else { return c; }
 }
 
-static int xioctl(int fd, int request, void *arg)
-{
-	int r;
 
-	do { r = v4l2_ioctl(fd, request, arg); } 
-	while (r == -1 && ((errno == EINTR) || (errno == EAGAIN)));
-
-	return r;
-}
 
 struct FloodFillLine
 {
 	unsigned int X, Y;
 };
 
-uint8_t Run = 1;
+u8 Run = 1;
 
 void InteruptHandler(int arg) { reset_terminal_mode(); Run=0; }
 
@@ -115,54 +108,12 @@ int main()
 	int dispfd = open("/dev/fb0", O_RDWR);
 	printf("Display File Descriptor: %d\n", dispfd);
 
-	uint8_t *fb0 = 0;
+	u8 *fb0 = 0;
 	fb0 = mmap(0, FB_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED|MAP_POPULATE|MAP_LOCKED,dispfd,0);
 	close(dispfd);
 
-
-	
-	int camfd = v4l2_open("/dev/video0", O_RDWR | O_NONBLOCK, 0);
-	if (camfd < 0) { perror("Cannot open device"); exit(EXIT_FAILURE); }
-
-	struct v4l2_format fmt = {0};
-	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	fmt.fmt.pix.width       = CAMWIDTH;
-	fmt.fmt.pix.height      = HEIGHT;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_BGR24; //V4L2_PIX_FMT_RGB24
-	fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
-	if (xioctl(camfd, VIDIOC_S_FMT, &fmt)==-1) { perror("Setting Pixel Format"); exit(-1); }
-	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_BGR24) { printf("Libv4l didn't accept format. Can't proceed.\n"); exit(EXIT_FAILURE); }
-	if ((fmt.fmt.pix.width != CAMWIDTH) || (fmt.fmt.pix.height != HEIGHT)) { printf("Warning: driver is sending image at %dx%d\n", fmt.fmt.pix.width, fmt.fmt.pix.height); }
-
-
-	struct v4l2_requestbuffers req ={0};
-	req.count = 1;
-	req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	req.memory = V4L2_MEMORY_MMAP;
-	if (xioctl(camfd, VIDIOC_REQBUFS, &req)==-1) { perror("Requesting Buffer"); exit(-1); }
-
-
-	struct v4l2_buffer buf = {0};
-	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	buf.memory = V4L2_MEMORY_MMAP;
-	buf.index = 0;
-
-	xioctl(camfd, VIDIOC_QUERYBUF, &buf);
-
-	size_t bufferLen = buf.length;
-	uint8_t *buffer = v4l2_mmap(NULL, bufferLen, PROT_READ | PROT_WRITE, MAP_SHARED, camfd, buf.m.offset);
-	if (buffer == MAP_FAILED) { perror("mmap"); exit(EXIT_FAILURE); }
-
-	memset(&buf, 0, sizeof(buf));
-	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	buf.memory = V4L2_MEMORY_MMAP;
-	buf.index = 0;
-	if( xioctl(camfd, VIDIOC_QBUF, &buf)==-1) { perror("Queue Buffer"); exit(-1); }
-	
-	
-	enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	if (xioctl(camfd, VIDIOC_STREAMON, &type)==-1) { perror("Start Capture"); exit(-1); }
-
+	int camfd; u8 *cambuff;
+	InitCamera(&camfd, &cambuff);
 	
 	int threshold = 127;
 
@@ -170,13 +121,13 @@ int main()
 	{
 		while(kbhit())
 		{
-			uint8_t ch;// = getch();
+			u8 ch;// = getch();
 			union Ksequ sequ = {.val=0};
-			uint8_t seqc=0;
+			u8 seqc=0;
 			while(kbhit()) { sequ.seq[seqc++]=getch();}sequ.seq[seqc]=0;
 			ch=sequ.seq[0];
 			
-			printf("PRESS: %d(%X)\n%llu(%08llX)\n", ch, ch, sequ.val, sequ.val);
+			printf("PRESS: %d(%X)\n%u(%08X)\n", ch, ch, sequ.val, sequ.val);
 
 			if (sequ.val==0x415B1B) { threshold-=5; }
 			if (sequ.val==0x425B1B) { threshold+=5; }
@@ -197,10 +148,7 @@ int main()
 
 		if (r == -1) { perror("Waiting for Frame"); exit(errno); }
 
-		memset(&buf, 0, sizeof(buf));
-		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		buf.memory = V4L2_MEMORY_MMAP;
-		xioctl(camfd, VIDIOC_DQBUF, &buf);
+		DeQueueBuffer(camfd);
 
 		u_int32_t camFrame[HEIGHT][CAMWIDTH];
 		for (unsigned int y=0; y<HEIGHT; y++)
@@ -209,11 +157,11 @@ int main()
 			{
 				//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 				
-				uint32_t col = CAMACC(buffer, x, y);
+				u32 col = CAMACC(cambuff, x, y);
 
-				uint8_t val = (((col>>24)&0xFF) + ((col>>16)&0xFF) + (col&0xFF))/3;
+				u8 val = (((col>>24)&0xFF) + ((col>>16)&0xFF) + (col&0xFF))/3;
 
-				if (val<(uint8_t)threshold) { col = 0x00000000; }
+				if (val<(u8)threshold) { col = 0x00000000; }
 				
 				camFrame[y][x] = col;
 			}
@@ -308,7 +256,7 @@ int main()
 			for (unsigned int x=0; x<FBWIDTH; x++)
 			{
 
-				uint32_t col = 0;
+				u32 col = 0;
 				if (x>=160)
 				{
 					if (maxregion && regionmap[y][x-160]==maxregion) { col = 0x0000FF00; }
@@ -327,13 +275,10 @@ int main()
 			}
 		}
 
-		if( xioctl(camfd, VIDIOC_QBUF, &buf)==-1) { perror("Queue Buffer"); exit(-1); }
+		QueueBuffer(camfd);
 	}
 
-	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	if (xioctl(camfd, VIDIOC_STREAMOFF, &type)==-1) { perror("Stop Capture"); exit(-1); }
-	v4l2_munmap(buffer, bufferLen);
-	v4l2_close(camfd);
+	DestroyCamera(camfd, &cambuff);
 
 	
 	munmap(fb0, FB_SIZE);
