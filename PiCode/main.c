@@ -1,43 +1,29 @@
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <asm-generic/mman.h>
+// #include <sys/mman.h>
+// #include <asm-generic/mman.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
 #include <sys/select.h>
 
-#include <fcntl.h>
-#include <unistd.h>
+//#include <fcntl.h>
+
 #include <string.h>
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
 #include <termios.h>
 #include <signal.h>
+
 #include <sys/kd.h>
 
 #include "globals.h"
 #include "camera.h"
+#include "graphics.h"
 
-
-#define FBWIDTH 800
-#define HEIGHT 480
-
-#define FB_SIZE (HEIGHT*FBWIDTH*4)
 
 #define ARRACC(b,x,y,w,s,t) *(t)((b)+(y)*(w)*(s)+(x)*(s))
 #define FBACC(b,x,y) (ARRACC((b), (x), (y), FBWIDTH, 4, u_int32_t *))
 #define CAMACC(b,x,y) (ARRACC((b), (x), (y), CAMWIDTH, 3, u_int32_t *)&0xFFFFFF)
-#define MIN(a,b) ((a)<=(b)?(a):(b))
-#define MAX(a,b) ((a)>=(b)?(a):(b))
 
-// struct PixelData
-// {
-// 	u8 B;
-// 	u8 G;
-// 	u8 R;
-// 	u8 Empty;
-// };
 
 union Ksequ
 {
@@ -105,12 +91,9 @@ int main()
 	//ioctl(0, KDSETMODE, KD_GRAPHICS);
 	set_conio_terminal_mode();
 
-	int dispfd = open("/dev/fb0", O_RDWR);
-	printf("Display File Descriptor: %d\n", dispfd);
 
 	u8 *fb0 = 0;
-	fb0 = mmap(0, FB_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED|MAP_POPULATE|MAP_LOCKED,dispfd,0);
-	close(dispfd);
+	InitDisplay(&fb0);
 
 	int camfd; u8 *cambuff;
 	InitCamera(&camfd, &cambuff);
@@ -135,23 +118,15 @@ int main()
 			if (threshold>255) { threshold=255; }
 		}
 
-		int r;
-		do 
-		{
-			fd_set fds;
-			FD_ZERO(&fds);
-			FD_SET(camfd, &fds);
 
-			r = select(camfd + 1, &fds, NULL, NULL, &(struct timeval){.tv_sec=2, .tv_usec=0});
-		} 
-		while ((r == -1 && (errno = EINTR)));
+		QueueBuffer(camfd);
 
-		if (r == -1) { perror("Waiting for Frame"); exit(errno); }
+		WaitForFrame(camfd);
 
 		DeQueueBuffer(camfd);
 
-		u_int32_t camFrame[HEIGHT][CAMWIDTH];
-		for (unsigned int y=0; y<HEIGHT; y++)
+		u_int32_t camFrame[CAMHEIGHT][CAMWIDTH];
+		for (unsigned int y=0; y<CAMHEIGHT; y++)
 		{
 			for (unsigned int x=0; x<CAMWIDTH; x++)
 			{
@@ -167,8 +142,8 @@ int main()
 			}
 		}
 
-		u_int32_t regionmap[HEIGHT][CAMWIDTH];
-		memset(regionmap, 0, CAMWIDTH*HEIGHT*sizeof(u_int32_t));
+		u_int32_t regionmap[CAMHEIGHT][CAMWIDTH];
+		memset(regionmap, 0, CAMWIDTH*CAMHEIGHT*sizeof(u_int32_t));
 
 		u_int32_t maxregion;
 		u_int32_t avgX=0, avgY=0, avgC=0;
@@ -179,10 +154,10 @@ int main()
 			maxregion=0;
 			u_int32_t maxregionarea = 0;
 			
-			struct FloodFillLine lineStack[HEIGHT]; u_int32_t lineStackP=-1;
+			struct FloodFillLine lineStack[CAMHEIGHT]; u_int32_t lineStackP=-1;
 
 			const unsigned int crop=40;
-			for (unsigned int y=crop; y<HEIGHT-crop; y++)
+			for (unsigned int y=crop; y<CAMHEIGHT-crop; y++)
 			{
 				for (unsigned int x=crop; x<CAMWIDTH-crop; x++)
 				{
@@ -225,7 +200,7 @@ int main()
 									//Only do this at the beginning of a line or after a non-region above/below 
 									if (yf>crop && camFrame[yf-1][xf]==0) { if (ue && !regionmap[yf-1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf-1}; ue=0; } }
 									else { ue = 1; }
-									if (yf<HEIGHT-crop-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
+									if (yf<CAMHEIGHT-crop-1 && camFrame[yf+1][xf]==0) { if (le && !regionmap[yf+1][xf]) { lineStack[++lineStackP] = (struct FloodFillLine){xf,yf+1}; le=0; } }
 									else { le = 1; }
 									
 									xf++; 
@@ -240,7 +215,7 @@ int main()
 				}
 			}
 
-			for (int y=0; y<HEIGHT; y++)
+			for (int y=0; y<CAMHEIGHT; y++)
 			{
 				for (int x=0; x<CAMWIDTH; x++)
 				{
@@ -251,7 +226,7 @@ int main()
 			avgY=avgY/avgC;
 		}
 
-		for (unsigned int y=0; y<HEIGHT; y++)
+		for (unsigned int y=0; y<FBHEIGHT; y++)
 		{
 			for (unsigned int x=0; x<FBWIDTH; x++)
 			{
@@ -274,18 +249,15 @@ int main()
 				FBACC(fb0, x, y) = col;
 			}
 		}
-
-		QueueBuffer(camfd);
 	}
 
-	DestroyCamera(camfd, &cambuff);
+	CloseCamera(camfd, &cambuff);
 
 	
-	munmap(fb0, FB_SIZE);
+	CloseDisplay(fb0);
 
 	//ioctl(0, KDSETMODE, KD_TEXT);
 
 	printf("\n Done\n");
-
 	return 0;
 }

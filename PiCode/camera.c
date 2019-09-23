@@ -58,18 +58,17 @@ void InitCamera(int *camfd, u_int8_t **buffer)
 	*buffer = v4l2_mmap(NULL, bufferLen, PROT_READ | PROT_WRITE, MAP_SHARED, *camfd, buf.m.offset);
 	if (*buffer == MAP_FAILED) { perror("mmap"); exit(EXIT_FAILURE); }
 
-	memset(&buf, 0, sizeof(buf));
-	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	buf.memory = V4L2_MEMORY_MMAP;
-	buf.index = 0;
-	if( xioctl(*camfd, VIDIOC_QBUF, &buf)==-1) { perror("Queue Buffer"); exit(-1); }
-	
+	// memset(&buf, 0, sizeof(buf));
+	// buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	// buf.memory = V4L2_MEMORY_MMAP;
+	// buf.index = 0;
+	// if( xioctl(*camfd, VIDIOC_QBUF, &buf)==-1) { perror("Queue Buffer"); exit(-1); }
 	
 	enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	if (xioctl(*camfd, VIDIOC_STREAMON, &type)==-1) { perror("Start Capture"); exit(-1); }
 }
 
-void DestroyCamera(int camfd, u_int8_t **buffer)
+void CloseCamera(int camfd, u_int8_t **buffer)
 {
 	struct v4l2_buffer buf = {0};
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -108,4 +107,20 @@ void DeQueueBuffer(int camfd)
 	buf.index = 0;
 
 	xioctl(camfd, VIDIOC_DQBUF, &buf);
+}
+
+void WaitForFrame(int camfd)
+{
+	int r;
+	do 
+	{
+		fd_set fds;
+		FD_ZERO(&fds);
+		FD_SET(camfd, &fds);
+
+		r = select(camfd + 1, &fds, NULL, NULL, &(struct timeval){.tv_sec=2, .tv_usec=0});
+	} 
+	while ((r == -1 && (errno = EINTR)));
+
+	if (r == -1) { perror("Waiting for Frame"); exit(errno); }
 }

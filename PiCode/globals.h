@@ -1,6 +1,13 @@
 
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include <errno.h>
+
+#define MIN(a,b) ((a)<=(b)?(a):(b))
+#define MAX(a,b) ((a)>=(b)?(a):(b))
 
 typedef u_int8_t u8;
 typedef u_int16_t u16;

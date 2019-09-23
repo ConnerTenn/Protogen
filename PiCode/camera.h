@@ -6,7 +6,8 @@
 
 
 void InitCamera(int *camfd, u_int8_t **buffer);
-void DestroyCamera(int camfd, u_int8_t **buffer);
+void CloseCamera(int camfd, u_int8_t **buffer);
 void QueueBuffer(int camfd);
 void DeQueueBuffer(int camfd);
+void WaitForFrame(int camfd);
 
