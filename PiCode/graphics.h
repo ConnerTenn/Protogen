@@ -11,3 +11,10 @@
 
 void InitDisplay(u8 **fb0);
 void CloseDisplay(u8 *fb0);
+
+void DrawLine();
+void DrawRect();
+void FillRect();
+void DrawCircle();
+void FillCircle();
+void BitBlit();
