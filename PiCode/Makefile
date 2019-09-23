@@ -9,10 +9,13 @@ LIBV4L2=libv4l2/libv4l2.so libv4l2/libv4lconvert.so libv4l2/libjpeg.so.62 #~/Dev
 all: main
 
 
-main: main.o camera.o graphics.o clean
+main: main.o globals.o camera.o graphics.o clean
 	$(GCC) $(CFLAGS) *.o $(LIBV4L2) -o $@
 
 main.o: main.c clean
+	$(GCC) $(CFLAGS) $< -c -o $@
+
+globals.o: globals.c clean
 	$(GCC) $(CFLAGS) $< -c -o $@
 
 camera.o: camera.c clean

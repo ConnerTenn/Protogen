@@ -1,28 +1,10 @@
 
-// #include <sys/mman.h>
-// #include <asm-generic/mman.h>
 
-//#include <sys/types.h>
-//#include <sys/stat.h>
-#include <sys/select.h>
-
-//#include <fcntl.h>
-
-#include <string.h>
-//#include <sys/ioctl.h>
-#include <termios.h>
 #include <signal.h>
-
-#include <sys/kd.h>
 
 #include "globals.h"
 #include "camera.h"
 #include "graphics.h"
-
-
-#define ARRACC(b,x,y,w,s,t) *(t)((b)+(y)*(w)*(s)+(x)*(s))
-#define FBACC(b,x,y) (ARRACC((b), (x), (y), FBWIDTH, 4, u_int32_t *))
-#define CAMACC(b,x,y) (ARRACC((b), (x), (y), CAMWIDTH, 3, u_int32_t *)&0xFFFFFF)
 
 
 union Ksequ
@@ -30,49 +12,6 @@ union Ksequ
 	u8 seq[8];
 	u32 val;
 };
-
-struct termios orig_termios;
-
-void reset_terminal_mode()
-{
-	tcsetattr(0, TCSANOW, &orig_termios);
-}
-
-void set_conio_terminal_mode()
-{
-	struct termios new_termios;
-
-	// take two copies - one for now, one for later
-	tcgetattr(0, &orig_termios);
-	memcpy(&new_termios, &orig_termios, sizeof(new_termios));
-
-	// register cleanup handler, and set the new terminal mode
-	atexit(reset_terminal_mode);
-	//cfmakeraw(&new_termios);
-	new_termios.c_lflag &= ~(ECHO | ECHONL| ICANON | IEXTEN);
-	
-	//new_termios.c_oflag |= ONLCR;
-	//new_termios.c_lflag |= ISIG;
-	tcsetattr(0, TCSANOW, &new_termios);
-}
-
-int kbhit()
-{
-	struct timeval tv = { 0L, 0L };
-	fd_set fds;
-	FD_ZERO(&fds);
-	FD_SET(0, &fds);
-	return select(1, &fds, NULL, NULL, &tv);
-}
-
-u8 getch()
-{
-	int r;
-	u8 c;
-	if ((r = read(0, &c, sizeof(c))) < 0) { return (u8)r; }
-	else { return c; }
-}
-
 
 
 struct FloodFillLine
@@ -107,7 +46,7 @@ int main()
 			u8 ch;// = getch();
 			union Ksequ sequ = {.val=0};
 			u8 seqc=0;
-			while(kbhit()) { sequ.seq[seqc++]=getch();}sequ.seq[seqc]=0;
+			while(kbhit()) { sequ.seq[seqc++]=getch();} sequ.seq[seqc]=0;
 			ch=sequ.seq[0];
 			
 			printf("PRESS: %d(%X)\n%u(%08X)\n", ch, ch, sequ.val, sequ.val);
@@ -125,7 +64,7 @@ int main()
 
 		DeQueueBuffer(camfd);
 
-		u_int32_t camFrame[CAMHEIGHT][CAMWIDTH];
+		u32 camFrame[CAMHEIGHT][CAMWIDTH];
 		for (unsigned int y=0; y<CAMHEIGHT; y++)
 		{
 			for (unsigned int x=0; x<CAMWIDTH; x++)
@@ -142,31 +81,32 @@ int main()
 			}
 		}
 
-		u_int32_t regionmap[CAMHEIGHT][CAMWIDTH];
-		memset(regionmap, 0, CAMWIDTH*CAMHEIGHT*sizeof(u_int32_t));
+		u32 regionmap[CAMHEIGHT][CAMWIDTH];
+		memset(regionmap, 0, CAMWIDTH*CAMHEIGHT*sizeof(u32));
 
-		u_int32_t maxregion;
-		u_int32_t avgX=0, avgY=0, avgC=0;
+		u32 maxregion;
+		u32 avgX=0, avgY=0, avgC=0;
 
 		{		
-			u_int32_t region=0;
+			u32 region=0;
 			
 			maxregion=0;
-			u_int32_t maxregionarea = 0;
+			u32 maxregionarea = 0;
 			
-			struct FloodFillLine lineStack[CAMHEIGHT]; u_int32_t lineStackP=-1;
+			struct FloodFillLine lineStack[CAMHEIGHT]; u32 lineStackP=-1;
 
 			const unsigned int crop=40;
 			for (unsigned int y=crop; y<CAMHEIGHT-crop; y++)
 			{
 				for (unsigned int x=crop; x<CAMWIDTH-crop; x++)
 				{
+					//if black and not part of region
 					if (camFrame[y][x]==0 && regionmap[y][x]==0)
 					{ 
 						
 						//Flood Fill
 						region++;
-						u_int32_t regionarea = 0;
+						u32 regionarea = 0;
 						
 						lineStack[++lineStackP] = (struct FloodFillLine){x,y};
 						
@@ -193,7 +133,7 @@ int main()
 								while(xf<CAMWIDTH-crop && camFrame[yf][xf]==0)
 								{
 									regionmap[yf][xf] = region;
-									//*(u_int32_t *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
+									//*(u32 *)(fb0+yf*width*4+xf*4) = 0xFF00FFFF;
 									regionarea++;
 									
 									//Check if line above or below is unaccounted for. If so, add it to the stack.

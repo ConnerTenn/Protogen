@@ -1,10 +1,10 @@
 
 #include <fcntl.h>
-
 #include <sys/mman.h>
 #include <asm-generic/mman.h>
 
 #include "graphics.h"
+
 
 void InitDisplay(u8 **fb0)
 {
@@ -20,3 +20,5 @@ void CloseDisplay(u8 *fb0)
 {
 	munmap(fb0, FB_SIZE);
 }
+
+

@@ -1,16 +1,10 @@
 
-
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-
-#include <sys/mman.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
+#include <sys/mman.h>
+//#include <sys/ioctl.h>
 
 #include <linux/videodev2.h>
 #include <libv4l2.h>
-#include <errno.h>
 
 #include "camera.h"
 
@@ -24,7 +18,7 @@ static int xioctl(int fd, int request, void *arg)
 	return r;
 }
 
-void InitCamera(int *camfd, u_int8_t **buffer)
+void InitCamera(int *camfd, u8 **buffer)
 {
 	*camfd = v4l2_open("/dev/video0", O_RDWR | O_NONBLOCK, 0);
 	if (*camfd < 0) { perror("Cannot open device"); exit(EXIT_FAILURE); }
@@ -68,7 +62,7 @@ void InitCamera(int *camfd, u_int8_t **buffer)
 	if (xioctl(*camfd, VIDIOC_STREAMON, &type)==-1) { perror("Start Capture"); exit(-1); }
 }
 
-void CloseCamera(int camfd, u_int8_t **buffer)
+void CloseCamera(int camfd, u8 **buffer)
 {
 	struct v4l2_buffer buf = {0};
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
