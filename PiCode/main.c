@@ -198,6 +198,8 @@ int main()
 
 	//ioctl(0, KDSETMODE, KD_TEXT);
 
+	reset_terminal_mode();
+
 	printf("\n Done\n");
 	return 0;
 }

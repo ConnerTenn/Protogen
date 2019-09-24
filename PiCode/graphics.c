@@ -21,4 +21,161 @@ void CloseDisplay(u8 *fb0)
 	munmap(fb0, FB_SIZE);
 }
 
+Pixel WordToPixel(u32 pix)
+{
+	return (Pixel){ pix&0x00FF0000>>(8*2), pix&0x0000FF00>>(8*1), pix&0x000000FF, pix&0xFF000000>>(8*3) };
+}
+u32 PixelToWord(Pixel pix)
+{
+	return (pix.R << (8*2)) | (pix.G << (8*1)) | (pix.B) | (pix.A << (8*3));
+}
+
+void SetPixel(u32 *buffer, int w, int x, int y, Pixel colour)
+{
+	Pixel background = WordToPixel(buffer[y*w + x]);
+	colour.R = (colour.R * colour.A + background.R * (0xFF-colour.A) ) / 0xFF;
+	colour.G = (colour.G * colour.A + background.G * (0xFF-colour.A) ) / 0xFF;
+	colour.B = (colour.B * colour.A + background.B * (0xFF-colour.A) ) / 0xFF;
+	buffer[y*w + x] = PixelToWord(colour);
+}
+
+
+/*
+plotLineLow(x0,y0, x1,y1)
+  dx = x1 - x0
+  dy = y1 - y0
+  yi = 1
+  if dy < 0
+    yi = -1
+    dy = -dy
+  end if
+  D = 2*dy - dx
+  y = y0
+
+  for x from x0 to x1
+    plot(x,y)
+    if D > 0
+       y = y + yi
+       D = D - 2*dx
+    end if
+    D = D + 2*dy
+
+plotLineHigh(x0,y0, x1,y1)
+  dx = x1 - x0
+  dy = y1 - y0
+  xi = 1
+  if dx < 0
+    xi = -1
+    dx = -dx
+  end if
+  D = 2*dx - dy
+  x = x0
+
+  for y from y0 to y1
+    plot(x,y)
+    if D > 0
+       x = x + xi
+       D = D - 2*dy
+    end if
+    D = D + 2*dx
+
+plotLine(x0,y0, x1,y1)
+  if abs(y1 - y0) < abs(x1 - x0)
+    if x0 > x1
+      plotLineLow(x1, y1, x0, y0)
+    else
+      plotLineLow(x0, y0, x1, y1)
+    end if
+  else
+    if y0 > y1
+      plotLineHigh(x1, y1, x0, y0)
+    else
+      plotLineHigh(x0, y0, x1, y1)
+    end if
+  end if
+*/
+void DrawLineLow(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+{
+	int dx = x2 - x1, dy = y2 - y1, yi = 1;
+	if (dy < 0) { yi = -1; dy = -dy; }
+	int D = 2*dy - dx, y = y1;
+
+	for (int x=x1; x<x2; x++)
+	{
+		SetPixel(buffer, w, x, y, colour);
+		if (D > 0) { y = y + yi; D = D - 2*dx; }
+		D = D + 2*dy;
+	}
+}
+void DrawLineHigh(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+{
+	int dx = x2 - x1, dy = y2 - y1, xi = 1;
+	if (dx < 0) { xi = -1; dx = -dx; }
+	int D = 2*dx - dy, x = x1;
+
+	for (int y=y1; y<y2; y++)
+	{
+		SetPixel(buffer, w, x, y, colour);
+		if (D > 0) { x = x + xi; D = D - 2*dy; }
+		D = D + 2*dx;
+	}
+}
+
+void DrawLine(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+{
+	if (abs(y2 - y1) < abs(x2 - x1))
+    {
+		if (x1 > x2) { DrawLineLow(buffer, w, x2, y2, x1, y1, colour); }
+		else { DrawLineLow(buffer, w, x1, y1, x2, y2, colour); }
+	}
+	else
+	{
+		if (y1 > y2) { DrawLineHigh(buffer, w, x2, y2, x1, y1, colour); }
+		else { DrawLineHigh(buffer, w, x1, y1, x2, y2, colour); }
+	}
+}
+
+void DrawRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+{
+	
+}
+
+void DrawRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour)
+{
+	DrawRect(buffer, w, x, y, x+width, y+height, colour);
+}
+
+void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+{
+	int t, w;
+	if (x1>x2) { t=x1; x1=x2; x2=t; }
+	if (y1>y2) { t=y1; y1=y2; y2=t; }
+
+	for (int y=y1; y<y2; y++)
+	{
+		for (int x=x1; x<x2; x++)
+		{
+			SetPixel(buffer, w, x, y, colour);
+		}
+	}
+}
+
+void FillRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour)
+{
+	FillRect(buffer, w, x, y, x+width, y+height, colour);
+}
+
+void DrawCircle(u32 *buffer, int w, int x, int y, int diameter)
+{
+}
+
+void FillCircle(u32 *buffer, int w, int x, int y, int diameter)
+{
+
+}
+
+void BitBlit(u32 *src, u32 *dest, int sx, int sy, int dx, int dy, int width, int height)
+{
+
+}
 
