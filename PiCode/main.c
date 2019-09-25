@@ -68,9 +68,9 @@ int main()
 
 		FillRect(fb1, FBWIDTH, 50, 50, 400, 400, (Pixel){.R=0xFF, .G=0x00, .B=0xFF, .A=0x7F});
 
-		for (u16 y=0; y<FBHEIGHT; y++)
+		for (u32 y=0; y<FBHEIGHT; y++)
 		{
-			for (u16 x=0; x<FBWIDTH; x++)
+			for (u32 x=0; x<FBWIDTH; x++)
 			{
 				FBACC(fb0, x, y) = FBACC(fb1, x, y);
 			}

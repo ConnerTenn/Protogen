@@ -122,16 +122,17 @@ void WaitForFrame(int camfd)
 
 struct FloodFillLine
 {
-	unsigned int X, Y;
+	u32 X, Y;
 };
 
 void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 {
-
 	u32 camFrame[CAMHEIGHT][CAMWIDTH];
-	for (unsigned int y=0; y<CAMHEIGHT; y++)
+
+	//Preform initial treshold gating
+	for (u32 y=0; y<CAMHEIGHT; y++)
 	{
-		for (unsigned int x=0; x<CAMWIDTH; x++)
+		for (u32 x=0; x<CAMWIDTH; x++)
 		{
 			//struct PixelData col={0,0,0,0};//0x00000000;//[4]="\xff\x00\x00\x00";
 			
@@ -151,6 +152,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 	u32 maxregion;
 	u32 avgX=0, avgY=0, avgC=0;
 
+	//Main algorithm
 	{		
 		u32 region=0;
 		
@@ -159,10 +161,11 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 		
 		struct FloodFillLine lineStack[CAMHEIGHT]; u32 lineStackP=-1;
 
-		const unsigned int crop=40;
-		for (unsigned int y=crop; y<CAMHEIGHT-crop; y++)
+		const u32 crop=40;
+		//For every Pixel in the Frame (except crop region)
+		for (u32 y=crop; y<CAMHEIGHT-crop; y++)
 		{
-			for (unsigned int x=crop; x<CAMWIDTH-crop; x++)
+			for (u32 x=crop; x<CAMWIDTH-crop; x++)
 			{
 				//if black and not part of region
 				if (camFrame[y][x]==0 && regionmap[y][x]==0)
@@ -174,7 +177,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 					
 					lineStack[++lineStackP] = (struct FloodFillLine){x,y};
 					
-					unsigned int yf=0, xf=0;
+					u32 yf=0, xf=0;
 					
 					//Handle every line that is part of the region
 					while(lineStackP<-1)
@@ -219,9 +222,10 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 			}
 		}
 
-		for (int y=0; y<CAMHEIGHT; y++)
+		//Calculate Centerpoint of maxregion
+		for (u32 y=0; y<CAMHEIGHT; y++)
 		{
-			for (int x=0; x<CAMWIDTH; x++)
+			for (u32 x=0; x<CAMWIDTH; x++)
 			{
 				if (regionmap[y][x] == maxregion) { avgX+=x; avgY+=y; avgC++; }
 			}
@@ -230,11 +234,12 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 		avgY=avgY/avgC;
 	}
 
+	//Display to Frame Buffer
 	if (fb)
 	{
-		for (unsigned int y=0; y<CAMHEIGHT; y++)
+		for (u32 y=0; y<CAMHEIGHT; y++)
 		{
-			for (unsigned int x=0; x<CAMWIDTH; x++)
+			for (u32 x=0; x<CAMWIDTH; x++)
 			{
 
 				u32 col = 0;
@@ -243,7 +248,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 				else { col = camFrame[y][x]; }
 
 
-				if (abs((int)(x-160)-(int)avgX) <= 5 && abs((int)y-(int)avgY) <= 5)
+				if (abs((int)(x)-(int)avgX) <= 5 && abs((int)y-(int)avgY) <= 5)
 				{
 					col = 0x00FF0000;
 				}
