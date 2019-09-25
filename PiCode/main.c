@@ -31,8 +31,9 @@ int main()
 	set_conio_terminal_mode();
 
 
-	u8 *fb0 = 0;
+	u32 *fb0 = 0, *fb1 = 0;
 	InitDisplay(&fb0);
+	CreateFrameBuffer(&fb1, FBWIDTH, FBHEIGHT);
 
 	int camfd; u8 *cambuff;
 	InitCamera(&camfd, &cambuff);
@@ -186,14 +187,27 @@ int main()
 					col = 0x00FF0000;
 				}
 
-				FBACC(fb0, x, y) = col;
+				FBACC(fb1, x, y) = col;
 			}
 		}
+
+		FillRect(fb1, FBWIDTH, 50, 50, 400, 400, (Pixel){.R=0xFF, .G=0x00, .B=0xFF, .A=0x7F});
+
+		for (u16 y=0; y<FBHEIGHT; y++)
+		{
+			for (u16 x=0; x<FBWIDTH; x++)
+			{
+				FBACC(fb0, x, y) = FBACC(fb1, x, y);
+			}
+		}
+
+		usleep(1000);
 	}
 
 	CloseCamera(camfd, &cambuff);
 
 	
+	DesctroyFrameBuffer(fb1);
 	CloseDisplay(fb0);
 
 	//ioctl(0, KDSETMODE, KD_TEXT);

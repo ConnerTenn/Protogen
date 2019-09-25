@@ -7,7 +7,7 @@
 
 #define FB_SIZE (FBHEIGHT*FBWIDTH*4)
 
-#define FBACC(buff,x,y) (ARRACC((buff), (x), (y), FBWIDTH, 4, u32 *))
+#define FBACC(buff,x,y) (ARRACC((buff), (x), (y), FBWIDTH, 1, u32 *))
 
 typedef struct Pixel_t
 {
@@ -17,8 +17,11 @@ typedef struct Pixel_t
 	u8 A;
 } Pixel; 
 
-void InitDisplay(u8 **fb0);
-void CloseDisplay(u8 *fb0);
+void InitDisplay(u32 **fb0);
+void CloseDisplay(u32 *fb0);
+
+void CreateFrameBuffer(u32 **fb, u16 width, u16 height);
+void DesctroyFrameBuffer(u32 *fb);
 
 Pixel WordToPixel(u32 pix);
 u32 PixelToWord(Pixel pix);

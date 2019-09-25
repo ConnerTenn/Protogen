@@ -6,7 +6,7 @@
 #include "graphics.h"
 
 
-void InitDisplay(u8 **fb0)
+void InitDisplay(u32 **fb0)
 {
 	int dispfd = open("/dev/fb0", O_RDWR);
 	printf("Display File Descriptor: %d\n", dispfd);
@@ -16,10 +16,20 @@ void InitDisplay(u8 **fb0)
 	close(dispfd);
 }
 
-void CloseDisplay(u8 *fb0)
+void CloseDisplay(u32 *fb0)
 {
 	munmap(fb0, FB_SIZE);
 }
+
+void CreateFrameBuffer(u32 **fb, u16 width, u16 height)
+{
+	*fb = malloc(width * height * 4);
+}
+void DesctroyFrameBuffer(u32 *fb)
+{
+	free(fb);
+}
+
 
 Pixel WordToPixel(u32 pix)
 {
@@ -147,7 +157,7 @@ void DrawRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel
 
 void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
 {
-	int t, w;
+	int t;
 	if (x1>x2) { t=x1; x1=x2; x2=t; }
 	if (y1>y2) { t=y1; y1=y2; y2=t; }
 
