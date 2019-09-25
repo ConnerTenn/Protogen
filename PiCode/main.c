@@ -26,14 +26,14 @@ int main()
 	set_conio_terminal_mode();
 
 
-	u32 *fb0 = 0, *fb1 = 0;
+	u32 *fb0 = 0;
 	InitDisplay(&fb0);
-	CreateFrameBuffer(&fb1, FBWIDTH, FBHEIGHT);
+	FrameBuffer fb1 = CreateFrameBuffer(FBWIDTH, FBHEIGHT);
 
 	int camfd; u8 *cambuff;
 	InitCamera(&camfd, &cambuff);
 	
-	int threshold = 127;
+	int threshold = 25;//127;
 
 	while(Run)
 	{
@@ -47,8 +47,8 @@ int main()
 			
 			printf("PRESS: %d(%X)\n%u(%08X)\n", ch, ch, sequ.val, sequ.val);
 
-			if (sequ.val==0x415B1B) { threshold-=5; }
-			if (sequ.val==0x425B1B) { threshold+=5; }
+			if (sequ.val==0x415B1B) { threshold-=2; }
+			if (sequ.val==0x425B1B) { threshold+=2; }
 			if (threshold<0) { threshold=0; }
 			if (threshold>255) { threshold=255; }
 		}
@@ -62,17 +62,17 @@ int main()
 
 		u32 eyeTrackBuff[CAMHEIGHT*CAMWIDTH];
 		int eyeX=0, eyeY=0;
-		EyeTracking(cambuff, &eyeX, &eyeY, threshold, eyeTrackBuff); 
+		EyeTracking(cambuff, &eyeX, &eyeY, threshold, eyeTrackBuff);	
 
-		BitBlit(eyeTrackBuff, fb1, 0, 0, 0, 0, CAMWIDTH, FBWIDTH, CAMWIDTH, CAMHEIGHT);
+		BitBlit((FrameBuffer){.Buff=eyeTrackBuff,.Width=CAMWIDTH}, fb1, 0, 0, 0, 0, CAMWIDTH, CAMHEIGHT);
 
-		FillRect(fb1, FBWIDTH, 50, 50, 400, 400, (Pixel){.R=0xFF, .G=0x00, .B=0xFF, .A=0x7F});
+		FillRect(fb1, 50, 50, 400, 400, (Pixel){.R=0xFF, .G=0x00, .B=0xFF, .A=0x7F});
 
 		for (u32 y=0; y<FBHEIGHT; y++)
 		{
 			for (u32 x=0; x<FBWIDTH; x++)
 			{
-				FBACC(fb0, x, y) = FBACC(fb1, x, y);
+				FBACC(fb0, x, y) = fb1.Buff[y*fb1.Width+x];
 			}
 		}
 	}
@@ -80,7 +80,7 @@ int main()
 	CloseCamera(camfd, &cambuff);
 
 	
-	DesctroyFrameBuffer(fb1);
+	DestroyFrameBuffer(fb1);
 	CloseDisplay(fb0);
 
 	//ioctl(0, KDSETMODE, KD_TEXT);

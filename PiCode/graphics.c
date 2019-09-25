@@ -21,32 +21,36 @@ void CloseDisplay(u32 *fb0)
 	munmap(fb0, FB_SIZE);
 }
 
-void CreateFrameBuffer(u32 **fb, u16 width, u16 height)
+FrameBuffer CreateFrameBuffer(u16 width, u16 height)
 {
-	*fb = malloc(width * height * 4);
+	FrameBuffer fb;
+	fb.Buff = malloc(width * height * 4);
+	fb.Width=width;
+	fb.Height=height;
+	return fb;
 }
-void DesctroyFrameBuffer(u32 *fb)
+void DestroyFrameBuffer(FrameBuffer fb)
 {
-	free(fb);
+	free(fb.Buff);
 }
 
 
 Pixel WordToPixel(u32 pix)
 {
-	return (Pixel){ pix&0x00FF0000>>(8*2), pix&0x0000FF00>>(8*1), pix&0x000000FF, pix&0xFF000000>>(8*3) };
+	return (Pixel){ .R=(pix&0x00FF0000)>>(8*2), .G=(pix&0x0000FF00)>>(8*1), .B=pix&0x000000FF, .A=(pix&0xFF000000)>>(8*3) };
 }
 u32 PixelToWord(Pixel pix)
 {
 	return (pix.R << (8*2)) | (pix.G << (8*1)) | (pix.B) | (pix.A << (8*3));
 }
 
-void SetPixel(u32 *buffer, int w, int x, int y, Pixel colour)
+void SetPixel(u32 *buff, int w, int x, int y, Pixel colour)
 {
-	Pixel background = WordToPixel(buffer[y*w + x]);
+	Pixel background = WordToPixel(buff[y*w + x]);
 	colour.R = (colour.R * colour.A + background.R * (0xFF-colour.A) ) / 0xFF;
 	colour.G = (colour.G * colour.A + background.G * (0xFF-colour.A) ) / 0xFF;
 	colour.B = (colour.B * colour.A + background.B * (0xFF-colour.A) ) / 0xFF;
-	buffer[y*w + x] = PixelToWord(colour);
+	buff[y*w + x] = PixelToWord(colour);
 }
 
 
@@ -104,7 +108,7 @@ plotLine(x0,y0, x1,y1)
     end if
   end if
 */
-void DrawLineLow(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+void DrawLineLow(u32 *buff, int w, int x1, int y1, int x2, int y2, Pixel colour)
 {
 	int dx = x2 - x1, dy = y2 - y1, yi = 1;
 	if (dy < 0) { yi = -1; dy = -dy; }
@@ -112,12 +116,12 @@ void DrawLineLow(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colou
 
 	for (int x=x1; x<x2; x++)
 	{
-		SetPixel(buffer, w, x, y, colour);
+		SetPixel(buff, w, x, y, colour);
 		if (D > 0) { y = y + yi; D = D - 2*dx; }
 		D = D + 2*dy;
 	}
 }
-void DrawLineHigh(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+void DrawLineHigh(u32 *buff, int w, int x1, int y1, int x2, int y2, Pixel colour)
 {
 	int dx = x2 - x1, dy = y2 - y1, xi = 1;
 	if (dx < 0) { xi = -1; dx = -dx; }
@@ -125,27 +129,27 @@ void DrawLineHigh(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colo
 
 	for (int y=y1; y<y2; y++)
 	{
-		SetPixel(buffer, w, x, y, colour);
+		SetPixel(buff, w, x, y, colour);
 		if (D > 0) { x = x + xi; D = D - 2*dy; }
 		D = D + 2*dx;
 	}
 }
 
-void DrawLine(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+void DrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour)
 {
 	if (abs(y2 - y1) < abs(x2 - x1))
     {
-		if (x1 > x2) { DrawLineLow(buffer, w, x2, y2, x1, y1, colour); }
-		else { DrawLineLow(buffer, w, x1, y1, x2, y2, colour); }
+		if (x1 > x2) { DrawLineLow(fb.Buff, fb.Width, x2, y2, x1, y1, colour); }
+		else { DrawLineLow(fb.Buff, fb.Width, x1, y1, x2, y2, colour); }
 	}
 	else
 	{
-		if (y1 > y2) { DrawLineHigh(buffer, w, x2, y2, x1, y1, colour); }
-		else { DrawLineHigh(buffer, w, x1, y1, x2, y2, colour); }
+		if (y1 > y2) { DrawLineHigh(fb.Buff, fb.Width, x2, y2, x1, y1, colour); }
+		else { DrawLineHigh(fb.Buff, fb.Width, x1, y1, x2, y2, colour); }
 	}
 }
 
-void DrawRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+void DrawRect(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour)
 {
 	int t;
 	if (x1>x2) { t=x1; x1=x2; x2=t; }
@@ -153,22 +157,22 @@ void DrawRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
 	
 	for (int i=x1; i<=x2; i++)
 	{
-		SetPixel(buffer, w, x1+i, y1, colour);
-		SetPixel(buffer, w, x1+i, y2, colour);
+		SetPixel(fb.Buff, fb.Width, x1+i, y1, colour);
+		SetPixel(fb.Buff, fb.Width, x1+i, y2, colour);
 	}
 	for (int i=y1; i<=y2; i++)
 	{
-		SetPixel(buffer, w, x1, y1+i, colour);
-		SetPixel(buffer, w, x2, y1+i, colour);
+		SetPixel(fb.Buff, fb.Width, x1, y1+i, colour);
+		SetPixel(fb.Buff, fb.Width, x2, y1+i, colour);
 	}
 }
 
-void DrawRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour)
+void DrawRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel colour)
 {
-	DrawRect(buffer, w, x, y, x+width, y+height, colour);
+	DrawRect(fb, x, y, x+width, y+height, colour);
 }
 
-void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
+void FillRect(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour)
 {
 	int t;
 	if (x1>x2) { t=x1; x1=x2; x2=t; }
@@ -178,36 +182,35 @@ void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
 	{
 		for (int x=x1; x<=x2; x++)
 		{
-			SetPixel(buffer, w, x, y, colour);
+			SetPixel(fb.Buff, fb.Width, x, y, colour);
 		}
 	}
 }
 
-void FillRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour)
+void FillRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel colour)
 {
-	FillRect(buffer, w, x, y, x+width, y+height, colour);
+	FillRect(fb, x, y, x+width, y+height, colour);
 }
 
-void DrawCircle(u32 *buffer, int w, int x, int y, int diameter)
+void DrawCircle(FrameBuffer fb, int x, int y, int diameter)
 {
 }
 
-void FillCircle(u32 *buffer, int w, int x, int y, int diameter)
+void FillCircle(FrameBuffer fb, int x, int y, int diameter)
 {
 
 }
 
 void BitBlit(
-	u32 *src, u32 *dest, 
-	int sx, int sy, int dx, int dy, 
-	int srcwidth, int dstwidth,
+	FrameBuffer src, FrameBuffer dest, 
+	int sx, int sy, int dx, int dy,
 	int width, int height)
 {
 	for (u32 y=0; y<height; y++)
 	{
 		for (u32 x=0; x<width; x++)
 		{
-			dest[(dy+y)*dstwidth+(x+dx)] = src[(sy+y)*srcwidth+(x+sx)];
+			dest.Buff[(dy+y)*dest.Width+(x+dx)] = src.Buff[(sy+y)*src.Width+(x+sx)];
 		}
 	}
 }

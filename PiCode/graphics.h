@@ -1,4 +1,7 @@
 
+#ifndef _GRAPHICS_H_
+#define _GRAPHICS_H_
+
 #include "globals.h"
 
 
@@ -9,7 +12,7 @@
 
 #define FBACC(buff,x,y) (ARRACC((buff), (x), (y), FBWIDTH, 1, u32 *))
 
-typedef struct Pixel_t
+typedef struct
 {
 	u8 R;
 	u8 G;
@@ -17,29 +20,35 @@ typedef struct Pixel_t
 	u8 A;
 } Pixel; 
 
+typedef struct
+{
+	u32 *Buff;
+	u32 Width;
+	u32 Height;
+} FrameBuffer;
+
 void InitDisplay(u32 **fb0);
 void CloseDisplay(u32 *fb0);
 
-void CreateFrameBuffer(u32 **fb, u16 width, u16 height);
-void DesctroyFrameBuffer(u32 *fb);
+FrameBuffer CreateFrameBuffer(u16 width, u16 height);
+void DestroyFrameBuffer(FrameBuffer fb);
 
 Pixel WordToPixel(u32 pix);
 u32 PixelToWord(Pixel pix);
 
-void SetPixel(u32 *buffer, int w, int x, int y, Pixel colour);
+void SetPixel(u32 *buff, int w, int x, int y, Pixel colour);
 
 
-void DrawLine(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour);
-void DrawRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour);
-void DrawRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour);
-void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour);
-void FillRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour);
-void DrawCircle(u32 *buffer, int w, int x, int y, int diameter);
-void FillCircle(u32 *buffer, int w, int x, int y, int diameter);
+void DrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour);
+void DrawRect(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour);
+void DrawRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel colour);
+void FillRect(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour);
+void FillRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel colour);
+void DrawCircle(FrameBuffer fb, int x, int y, int diameter);
+void FillCircle(FrameBuffer fb, int x, int y, int diameter);
 void BitBlit(
-	u32 *src, u32 *dest, 
-	int sx, int sy, int dx, int dy, 
-	int srcwidth, int dstwidth,
+	FrameBuffer src, FrameBuffer dest, 
+	int sx, int sy, int dx, int dy,
 	int width, int height);
 
-
+#endif

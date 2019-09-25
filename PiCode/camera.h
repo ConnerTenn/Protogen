@@ -1,5 +1,6 @@
 
 #include "globals.h"
+#include "graphics.h"
 
 #define CAMWIDTH 800
 #define CAMHEIGHT 480
