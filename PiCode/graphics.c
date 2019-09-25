@@ -216,18 +216,23 @@ void BitBlit(
 }
 
 u8 CharacterMap[];
-u8 *FontData;
+u8 FontData[];
 
 void DrawText(FrameBuffer fb, char *str, int x, int y, Pixel foreground, Pixel background, u8 scale)
 {
+	u16 nl=0;
 	for (u32 i=0;str[i];i++)
 	{
-		u16 c = CharacterMap[str[i]]*5*9;
-		for (u16 ci=0; ci<5*9; ci++)
+		if (str[i]=='\n') { nl+=1; }
+		else
 		{
-			u16 cx = ci%5;
-			u16 cy = ci/5;
-			SetPixel(fb.Buff, fb.Width, x+i*6+cx, y+cy, FontData[c + ci]);
+			u16 c = CharacterMap[(u8)str[i]]*5*9;
+			for (u16 ci=0; ci<5*9*scale*scale; ci++)
+			{
+				u16 cx = ci%(5*scale);
+				u16 cy = ci/(5*scale);
+				SetPixel(fb.Buff, fb.Width, x+i*6+cx, y+cy+10*nl*scale, FontData[c + ci/(scale*scale)] ? foreground : background);
+			}
 		}
 	}
 }
@@ -253,7 +258,7 @@ u8 CharacterMap[] =
 	1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
 
 //  91  92  93  94  95  96
-	85, 86, 87, 88, 89, 90
+	85, 86, 87, 88, 89, 90,
 
 //  97  98  99  100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122
 	27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52,
@@ -262,7 +267,7 @@ u8 CharacterMap[] =
 	91, 92, 93, 94, 95
 };
 
-u8 *FontData=
+u8 FontData[] =
 {
 	//Space 0
 	0, 0, 0, 0, 0,
