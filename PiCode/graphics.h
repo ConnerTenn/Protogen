@@ -52,6 +52,6 @@ void BitBlit(
 	int width, int height);
 
 
-void DrawText(u32 *buffer, char *str, int x, int y, u8 scale);
+void DrawText(FrameBuffer fb, char *str, int x, int y, Pixel foreground, Pixel background, u8 scale);
 
 #endif
