@@ -184,8 +184,18 @@ void FillCircle(u32 *buffer, int w, int x, int y, int diameter)
 
 }
 
-void BitBlit(u32 *src, u32 *dest, int sx, int sy, int dx, int dy, int width, int height)
+void BitBlit(
+	u32 *src, u32 *dest, 
+	int sx, int sy, int dx, int dy, 
+	int srcwidth, int dstwidth,
+	int width, int height)
 {
-
+	for (u32 y=0; y<height; y++)
+	{
+		for (u32 x=0; x<width; x++)
+		{
+			dest[(dy+y)*dstwidth+(x+dx)] = src[(sy+y)*srcwidth+(x+sx)];
+		}
+	}
 }
 

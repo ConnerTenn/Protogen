@@ -36,4 +36,8 @@ void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour);
 void FillRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour);
 void DrawCircle(u32 *buffer, int w, int x, int y, int diameter);
 void FillCircle(u32 *buffer, int w, int x, int y, int diameter);
-void BitBlit(u32 *src, u32 *dest, int sx, int sy, int dx, int dy, int width, int height);
+void BitBlit(
+	u32 *src, u32 *dest, 
+	int sx, int sy, int dx, int dy, 
+	int srcwidth, int dstwidth,
+	int width, int height);
