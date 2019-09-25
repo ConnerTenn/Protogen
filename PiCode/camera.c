@@ -161,7 +161,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 		
 		struct FloodFillLine lineStack[CAMHEIGHT]; u32 lineStackP=-1;
 
-		const u32 crop=40;
+		const u32 crop=0;
 		//For every Pixel in the Frame (except crop region)
 		for (u32 y=crop; y<CAMHEIGHT-crop; y++)
 		{
@@ -245,7 +245,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 				u32 col = 0;
 				if (maxregion && regionmap[y][x]==maxregion) { col = 0x0000FF00; }
 				else if (regionmap[y][x]) { col = 0x0000FFFF; }
-				else { col = camFrame[y][x]; }
+				else { col = CAMACC(cambuff, x, y); }
 
 
 				if (abs((int)(x)-(int)avgX) <= 5 && abs((int)y-(int)avgY) <= 5)

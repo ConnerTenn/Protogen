@@ -147,7 +147,20 @@ void DrawLine(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
 
 void DrawRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
 {
+	int t;
+	if (x1>x2) { t=x1; x1=x2; x2=t; }
+	if (y1>y2) { t=y1; y1=y2; y2=t; }
 	
+	for (int i=x1; i<=x2; i++)
+	{
+		SetPixel(buffer, w, x1+i, y1, colour);
+		SetPixel(buffer, w, x1+i, y2, colour);
+	}
+	for (int i=y1; i<=y2; i++)
+	{
+		SetPixel(buffer, w, x1, y1+i, colour);
+		SetPixel(buffer, w, x2, y1+i, colour);
+	}
 }
 
 void DrawRectSize(u32 *buffer, int w, int x, int y, int width, int height, Pixel colour)
@@ -161,9 +174,9 @@ void FillRect(u32 *buffer, int w, int x1, int y1, int x2, int y2, Pixel colour)
 	if (x1>x2) { t=x1; x1=x2; x2=t; }
 	if (y1>y2) { t=y1; y1=y2; y2=t; }
 
-	for (int y=y1; y<y2; y++)
+	for (int y=y1; y<=y2; y++)
 	{
-		for (int x=x1; x<x2; x++)
+		for (int x=x1; x<=x2; x++)
 		{
 			SetPixel(buffer, w, x, y, colour);
 		}

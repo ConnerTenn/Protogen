@@ -64,7 +64,7 @@ int main()
 		int eyeX=0, eyeY=0;
 		EyeTracking(cambuff, &eyeX, &eyeY, threshold, eyeTrackBuff); 
 
-		BitBlit(eyeTrackBuff, fb1, 0, 0, 160, 0, CAMWIDTH, FBWIDTH, CAMWIDTH, CAMHEIGHT);
+		BitBlit(eyeTrackBuff, fb1, 0, 0, 0, 0, CAMWIDTH, FBWIDTH, CAMWIDTH, CAMHEIGHT);
 
 		FillRect(fb1, FBWIDTH, 50, 50, 400, 400, (Pixel){.R=0xFF, .G=0x00, .B=0xFF, .A=0x7F});
 

@@ -1,7 +1,7 @@
 
 #include "globals.h"
 
-#define CAMWIDTH 640
+#define CAMWIDTH 800
 #define CAMHEIGHT 480
 
 #define CAMACC(buff,x,y) (ARRACC((buff), (x), (y), CAMWIDTH, 3, u32 *)&0xFFFFFF)
