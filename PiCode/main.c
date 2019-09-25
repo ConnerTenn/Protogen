@@ -60,9 +60,11 @@ int main()
 
 		DeQueueBuffer(camfd);
 
+		memset(fb1.Buff, 0, fb1.Width*fb1.Height*4);
+
 		u32 eyeTrackBuff[CAMHEIGHT*CAMWIDTH];
 		int eyeX=0, eyeY=0;
-		EyeTracking(cambuff, &eyeX, &eyeY, threshold, eyeTrackBuff);	
+		EyeTracking(cambuff, &eyeX, &eyeY, threshold, eyeTrackBuff);
 
 		BitBlit((FrameBuffer){.Buff=eyeTrackBuff,.Width=CAMWIDTH}, fb1, 0, 0, 0, 0, CAMWIDTH, CAMHEIGHT);
 
