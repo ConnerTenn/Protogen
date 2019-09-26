@@ -70,6 +70,11 @@ int main()
 
 		FillRect(fb1, 50, 50, 400, 400, (Pixel){.R=0xFF, .G=0x00, .B=0xFF, .A=0x7F});
 
+		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 20, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 1);
+		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 60, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 2);
+		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 100, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 3);
+		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 140, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 4);
+
 		for (u32 y=0; y<FBHEIGHT; y++)
 		{
 			for (u32 x=0; x<FBWIDTH; x++)

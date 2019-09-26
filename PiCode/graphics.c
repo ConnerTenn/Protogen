@@ -231,7 +231,7 @@ void DrawText(FrameBuffer fb, char *str, int x, int y, Pixel foreground, Pixel b
 			{
 				u16 cx = ci%(5*scale);
 				u16 cy = ci/(5*scale);
-				SetPixel(fb.Buff, fb.Width, x+i*6+cx, y+cy+10*nl*scale, FontData[c + ci/(scale*scale)] ? foreground : background);
+				SetPixel(fb.Buff, fb.Width, x+i*6*scale+cx, y+cy+10*nl*scale, FontData[c + ((ci)%(5*scale))/scale + (5*(ci/(5*scale*scale)))] ? foreground : background);
 			}
 		}
 	}
