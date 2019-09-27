@@ -12,6 +12,8 @@
 
 #define FBACC(buff,x,y) (ARRACC((buff), (x), (y), FBWIDTH, 1, u32 *))
 
+#define PIXEL(r,g,b,a) ((Pixel){.R=a,.B=b,.G=g,.A=a})
+
 typedef struct
 {
 	u8 R;
@@ -44,8 +46,8 @@ void DrawRect(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour);
 void DrawRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel colour);
 void FillRect(FrameBuffer fb, int x1, int y1, int x2, int y2, Pixel colour);
 void FillRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel colour);
-void DrawCircle(FrameBuffer fb, int x, int y, int diameter);
-void FillCircle(FrameBuffer fb, int x, int y, int diameter);
+void DrawCircle(FrameBuffer fb, int x, int y, int r, Pixel colour);
+void FillCircle(FrameBuffer fb, int x, int y, int r, Pixel colour);
 void BitBlit(
 	FrameBuffer src, FrameBuffer dest, 
 	int sx, int sy, int dx, int dy,

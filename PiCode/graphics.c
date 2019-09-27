@@ -192,13 +192,28 @@ void FillRectSize(FrameBuffer fb, int x, int y, int width, int height, Pixel col
 	FillRect(fb, x, y, x+width, y+height, colour);
 }
 
-void DrawCircle(FrameBuffer fb, int x, int y, int diameter)
+void DrawCircle(FrameBuffer fb, int x, int y, int r, Pixel colour)
 {
+	for (int yi=y-r, yi<y+r; yi++)
+	{
+		int xl = r - sqrt(r*r - (y-yi)*(y-yi));
+
+		SetPixel(fb.Buff, fb.Width, x+xl, yi, colour);
+		SetPixel(fb.Buff, fb.Width, x-x1, yi, colour);
+	}
 }
 
-void FillCircle(FrameBuffer fb, int x, int y, int diameter)
+void FillCircle(FrameBuffer fb, int x, int y, int r, Pixel colour)
 {
+	for (int yi=y-r, yi<y+r; yi++)
+	{
+		int xl = r - sqrt(r*r - (y-yi)*(y-yi));
 
+		for (int xi=x+x1, xi<x+2*xl+1; xi++)
+		{
+			SetPixel(fb.Buff, fb.Width, xi, yi, colour);
+		}
+	}
 }
 
 void BitBlit(
@@ -244,6 +259,7 @@ u8 CharacterMap[] =
 {
 //  0
 	0,
+	
 //  1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  26  28  29  30  31
 	95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 
 
