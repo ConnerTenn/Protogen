@@ -244,16 +244,16 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 				fb[y*CAMWIDTH+x]=CAMACC(cambuff, x, y);
 
 				//u32 col = 0;
-				Pixel col = (Pixel){.R=0x00,.G=0x00,.B=0x00,.A=0x00};
-				if (maxregion && regionmap[y][x]==maxregion) { col = (Pixel){.R=0x00,.G=0xFF,.B=0x00,.A=0x8F}; }
-				else if (regionmap[y][x]) { col = (Pixel){.R=0x00,.G=0xFF,.B=0xFF,.A=0x3F}; }
+				Pixel col = PIXEL(0x00,0x00,0x00,0x00);
+				if (maxregion && regionmap[y][x]==maxregion) { col = PIXEL(0x00,0xFF,0x00,0x8F); }
+				else if (regionmap[y][x]) { col = PIXEL(0x00,0xFF,0xFF,0x3F); }
 				//else { col = WordToPixel(CAMACC(cambuff, x, y)); col.A=0xFF; }
 
 
-				if (abs((int)(x)-(int)avgX) <= 5 && abs((int)y-(int)avgY) <= 5)
-				{
-					col = (Pixel){.R=0xFF,.G=0x00,.B=0x00,.A=0xFF};
-				}
+				// if (abs((int)(x)-(int)avgX) <= 5 && abs((int)y-(int)avgY) <= 5)
+				// {
+				// 	col = (Pixel){.R=0xFF,.G=0x00,.B=0x00,.A=0xFF};
+				// }
 
 				SetPixel(fb, CAMWIDTH, x, y, col);
 			}
