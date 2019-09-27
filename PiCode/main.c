@@ -37,6 +37,12 @@ int main()
 
 	while(Run)
 	{
+		QueueBuffer(camfd);
+
+		WaitForFrame(camfd);
+
+		DeQueueBuffer(camfd);
+
 		while(kbhit())
 		{
 			u8 ch;// = getch();
@@ -52,13 +58,6 @@ int main()
 			if (threshold<0) { threshold=0; }
 			if (threshold>255) { threshold=255; }
 		}
-
-
-		QueueBuffer(camfd);
-
-		WaitForFrame(camfd);
-
-		DeQueueBuffer(camfd);
 
 		memset(fb1.Buff, 0, fb1.Width*fb1.Height*4);
 
@@ -84,6 +83,15 @@ int main()
 				if (i%26==0) { printbuff[j++] = '\n'; }
 			}
 			DrawText(fb1, printbuff, 10, 220, PIXEL(0xFF,0x00,0xFF,0xFF), PIXEL(0x00,0x00,0x00,0x00), 4);
+		}
+
+		//Draw Cursor
+		for (int y=MAX(eyeY-5,0); y<=MIN(eyeY+5,FBHEIGHT-1); y++)
+		{
+			for (int x=MAX(eyeX-5,0); x<=MIN(eyeX+5,FBWIDTH-1); x++)
+			{
+				SetPixel(fb1.Buff, fb1.Width, x, y, PIXEL(0xFF,0x00,0x00,0xFF));
+			}
 		}
 
 		for (u32 y=0; y<FBHEIGHT; y++)
