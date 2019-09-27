@@ -73,7 +73,18 @@ int main()
 		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 20, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 1);
 		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 60, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 2);
 		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 100, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 3);
-		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 140, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 4);
+		DrawText(fb1, "ABCDEFGHIJLMN\nOPQRSTUVWXYZ", 10, 140, (Pixel){.R=0xFF,.B=0x00,.G=0x00,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 4);
+
+		{
+			char printbuff[255];
+			u8 j=0;
+			for (u8 i=1; i<128; i++)
+			{
+				printbuff[j++]=(char)i;
+				if (i%26==0) { printbuff[j++] = '\n'; }
+			}
+			DrawText(fb1, printbuff, 10, 220, (Pixel){.R=0xFF,.B=0x00,.G=0xFF,.A=0xFF}, (Pixel){.R=0x00,.B=0x00,.G=0x00,.A=0x00}, 4);
+		}
 
 		for (u32 y=0; y<FBHEIGHT; y++)
 		{

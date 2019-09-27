@@ -221,9 +221,10 @@ u8 FontData[];
 void DrawText(FrameBuffer fb, char *str, int x, int y, Pixel foreground, Pixel background, u8 scale)
 {
 	u16 nl=0;
+	u16 px=0;
 	for (u32 i=0;str[i];i++)
 	{
-		if (str[i]=='\n') { nl+=1; }
+		if (str[i]=='\n') { nl+=1; px=0; }
 		else
 		{
 			u16 c = CharacterMap[(u8)str[i]]*5*9;
@@ -231,8 +232,9 @@ void DrawText(FrameBuffer fb, char *str, int x, int y, Pixel foreground, Pixel b
 			{
 				u16 cx = ci%(5*scale);
 				u16 cy = ci/(5*scale);
-				SetPixel(fb.Buff, fb.Width, x+i*6*scale+cx, y+cy+10*nl*scale, FontData[c + ((ci)%(5*scale))/scale + (5*(ci/(5*scale*scale)))] ? foreground : background);
+				SetPixel(fb.Buff, fb.Width, x+px+cx, y+cy+10*nl*scale, FontData[c + ((ci)%(5*scale))/scale + (5*(ci/(5*scale*scale)))] ? foreground : background);
 			}
+			px+=6*scale;
 		}
 	}
 }
@@ -531,7 +533,7 @@ u8 FontData[] =
 	1, 0, 0, 0, 1,
 	1, 0, 1, 0, 1,
 	1, 1, 0, 1, 1,
-	1, 0, 0, 0, 0,
+	1, 0, 0, 0, 1,
 	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0,
 	
@@ -772,7 +774,7 @@ u8 FontData[] =
 	0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0,
 	0, 1, 1, 1, 1,
-	1, 0, 0, 0, 1,
+	1, 0, 0, 0, 0,
 	0, 1, 1, 1, 0,
 	0, 0, 0, 0, 1,
 	1, 1, 1, 1, 0,
@@ -862,7 +864,7 @@ u8 FontData[] =
 	0, 1, 1, 1, 0,
 	1, 0, 0, 0, 1,
 	1, 0, 0, 1, 1,
-	1, 0, 1, 0, 0,
+	1, 0, 1, 0, 1,
 	1, 1, 0, 0, 1,
 	1, 0, 0, 0, 1,
 	0, 1, 1, 1, 0,
@@ -903,7 +905,7 @@ u8 FontData[] =
 	0, 0, 0, 0, 0,
 	
 	//4 57
-	0, 1, 0, 0, 0,
+	0, 1, 0, 0, 1,
 	0, 1, 0, 0, 1,
 	1, 0, 0, 0, 1,
 	1, 1, 1, 1, 1,
@@ -914,7 +916,7 @@ u8 FontData[] =
 	0, 0, 0, 0, 0,
 	
 	//5 58
-	0, 1, 1, 1, 1,
+	1, 1, 1, 1, 1,
 	1, 0, 0, 0, 0,
 	1, 0, 0, 0, 0,
 	1, 1, 1, 1, 0,
@@ -961,7 +963,7 @@ u8 FontData[] =
 	0, 1, 1, 1, 0,
 	1, 0, 0, 0, 1,
 	1, 0, 0, 0, 1,
-	0, 1, 1, 1, 0,
+	0, 1, 1, 1, 1,
 	0, 0, 0, 0, 1,
 	1, 0, 0, 0, 1,
 	0, 1, 1, 1, 0,
@@ -1183,7 +1185,7 @@ u8 FontData[] =
 	0, 0, 0, 0, 0,
 	1, 1, 0, 0, 0,
 	0, 0, 1, 1, 0,
-	1, 0, 0, 0, 1,
+	0, 0, 0, 0, 1,
 	0, 0, 1, 1, 0,
 	1, 1, 0, 0, 0,
 	0, 0, 0, 0, 0,
@@ -1304,8 +1306,8 @@ u8 FontData[] =
 	0, 1, 0, 0, 0,
 	0, 0, 1, 0, 0,
 	0, 0, 1, 0, 0,
-	0, 0, 1, 0, 0,
 	0, 0, 0, 1, 0,
+	0, 0, 1, 0, 0,
 	0, 0, 1, 0, 0,
 	0, 1, 0, 0, 0,
 	0, 0, 0, 0, 0,
