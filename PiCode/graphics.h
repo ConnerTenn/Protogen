@@ -12,7 +12,7 @@
 
 #define FBACC(buff,x,y) (ARRACC((buff), (x), (y), FBWIDTH, 1, u32 *))
 
-#define PIXEL(r,g,b,a) ((Pixel){.R=a,.B=b,.G=g,.A=a})
+#define PIXEL(r,g,b,a) ((Pixel){.R=r,.B=b,.G=g,.A=a})
 
 typedef struct
 {

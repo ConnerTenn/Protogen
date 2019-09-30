@@ -5,14 +5,7 @@
 #include "globals.h"
 #include "camera.h"
 #include "graphics.h"
-
-
-union Ksequ
-{
-	u8 seq[8];
-	u32 val;
-};
-
+#include "controller.h"
 
 u8 Run = 1;
 
@@ -33,7 +26,7 @@ int main()
 	int camfd; u8 *cambuff;
 	InitCamera(&camfd, &cambuff);
 	
-	int threshold = 25;//127;
+	//127;
 
 	while(Run)
 	{
@@ -45,45 +38,27 @@ int main()
 
 		while(kbhit())
 		{
-			u8 ch;// = getch();
+			//u8 ch;// = getch();
 			union Ksequ sequ = {.val=0};
 			u8 seqc=0;
 			while(kbhit()) { sequ.seq[seqc++]=getch();} sequ.seq[seqc]=0;
-			ch=sequ.seq[0];
+			//ch=sequ.seq[0];
 			
-			printf("PRESS: %d(%X)\n%u(%08X)\n", ch, ch, sequ.val, sequ.val);
+			//printf("PRESS: %d(%X)\n%u(%08X)\n", ch, ch, sequ.val, sequ.val);
 
-			if (sequ.val==0x415B1B) { threshold-=2; }
-			if (sequ.val==0x425B1B) { threshold+=2; }
-			if (threshold<0) { threshold=0; }
-			if (threshold>255) { threshold=255; }
+			HandleKeyEvent(sequ);
 		}
 
 		memset(fb1.Buff, 0, fb1.Width*fb1.Height*4);
 
 		u32 eyeTrackBuff[CAMHEIGHT*CAMWIDTH];
 		int eyeX=0, eyeY=0;
-		EyeTracking(cambuff, &eyeX, &eyeY, threshold, eyeTrackBuff);
+		EyeTracking(cambuff, &eyeX, &eyeY, eyeTrackBuff);
 
 		BitBlit((FrameBuffer){.Buff=eyeTrackBuff,.Width=CAMWIDTH}, fb1, 0, 0, 0, 0, CAMWIDTH, CAMHEIGHT);
 
-		FillRect(fb1, 50, 50, 400, 400, PIXEL(0xFF,0x00,0xFF,0x7F));
 
-		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 20, PIXEL(0xFF,0x00,0x00,0xFF), PIXEL(0x00,0x00,0x00,0x00), 1);
-		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 60, PIXEL(0xFF,0x00,0x00,0xFF), PIXEL(0x00,0x00,0x00,0x00), 2);
-		DrawText(fb1, "ABCDEFGHIJLMNOPQRSTUVWXYZ", 10, 100, PIXEL(0xFF,0x00,0x00,0xFF), PIXEL(0x00,0x00,0x00,0x00), 3);
-		DrawText(fb1, "ABCDEFGHIJLMN\nOPQRSTUVWXYZ", 10, 140, PIXEL(0xFF,0x00,0x00,0xFF), PIXEL(0x00,0x00,0x00,0x00), 4);
-
-		{
-			char printbuff[255];
-			u8 j=0;
-			for (u8 i=1; i<128; i++)
-			{
-				printbuff[j++]=(char)i;
-				if (i%26==0) { printbuff[j++] = '\n'; }
-			}
-			DrawText(fb1, printbuff, 10, 220, PIXEL(0xFF,0x00,0xFF,0xFF), PIXEL(0x00,0x00,0x00,0x00), 4);
-		}
+		RenderPanels(fb1);
 
 		//Draw Cursor
 		for (int y=MAX(eyeY-5,0); y<=MIN(eyeY+5,FBHEIGHT-1); y++)

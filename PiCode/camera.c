@@ -8,6 +8,8 @@
 
 #include "camera.h"
 
+int Threshold = 25;
+
 static int xioctl(int fd, int request, void *arg)
 {
 	int r;
@@ -125,7 +127,7 @@ struct FloodFillLine
 	u32 X, Y;
 };
 
-void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
+void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, u32 *fb)
 {
 	u32 camFrame[CAMHEIGHT][CAMWIDTH];
 
@@ -140,7 +142,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 
 			u8 val = (((col>>24)&0xFF) + ((col>>16)&0xFF) + (col&0xFF))/3;
 
-			if (val<(u8)threshold) { col = 0x00000000; }
+			if (val<(u8)Threshold) { col = 0x00000000; }
 			
 			camFrame[y][x] = col;
 		}
@@ -261,7 +263,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb)
 	}
 
 	*eyeX=avgX;
-	*eyeY=avgX;
+	*eyeY=avgY;
 
 }
 

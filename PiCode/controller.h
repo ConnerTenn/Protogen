@@ -1,6 +1,10 @@
 
+#ifndef _CONTROLLER_H_
+#define _CONTROLLER_H_
+
 #include "globals.h"
 #include "graphics.h"
+#include "camera.h"
 
 /*
 Panels:
@@ -16,13 +20,20 @@ Chest Display Controller
 
 */
 
-enum Panels
+extern enum Panels
 {
 	Overview,
 	DoubleEmotion,
 	ChestConfig,
 	AudioPipe,
+	Terminal,
 } PanelState;
+
+void HandleEyeEvent(int eyeX, int eyeY);
+void HandleKeyEvent(union Ksequ sequ);
 
 void RenderPanels(FrameBuffer fb);
 
+void Log(const char *format, ...);
+
+#endif

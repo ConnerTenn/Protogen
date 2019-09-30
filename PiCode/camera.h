@@ -13,4 +13,5 @@ void QueueBuffer(int camfd);
 void DeQueueBuffer(int camfd);
 void WaitForFrame(int camfd);
 
-void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, int threshold, u32 *fb);
+extern int Threshold;
+void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, u32 *fb);
