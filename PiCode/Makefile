@@ -9,7 +9,7 @@ LIBV4L2=libv4l2/libv4l2.so libv4l2/libv4lconvert.so libv4l2/libjpeg.so.62 #~/Dev
 all: main
 
 
-main: main.o globals.o camera.o graphics.o controller.o clean
+main: main.o globals.o camera.o graphics.o controller.o matrix.o clean
 	$(GCC) $(CFLAGS) *.o $(LIBV4L2) -o $@
 
 main.o: main.c clean
@@ -27,6 +27,9 @@ graphics.o: graphics.c clean
 controller.o: controller.c clean
 	$(GCC) $(CFLAGS) $< -c -o $@
 
+matrix.o: matrix.c clean
+	$(GCC) $(CFLAGS) $< -c -o $@
+
 clean:
 	rm -f main *.o
 
@@ -34,5 +37,5 @@ update:
 	git fetch --all; git reset --hard origin/PiCode;
 
 upload:
-	sshpass -p "pipass" scp main root@192.168.0.129:/root/Dev/Protogen/PiCode
+	sshpass -p "pipass" scp main root@192.168.0.133:/root/Dev/Protogen/PiCode
 
