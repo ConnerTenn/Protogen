@@ -23,7 +23,7 @@ static int xioctl(int fd, int request, void *arg)
 void InitCamera(int *camfd, u8 **buffer)
 {
 	*camfd = v4l2_open("/dev/video0", O_RDWR | O_NONBLOCK, 0);
-	if (*camfd < 0) { perror("Cannot open device"); exit(EXIT_FAILURE); }
+	if (*camfd < 0) { perror("Cannot open video device"); exit(EXIT_FAILURE); }
 
 	struct v4l2_format fmt = {0};
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -163,7 +163,7 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, u32 *fb)
 		
 		struct FloodFillLine lineStack[CAMHEIGHT]; u32 lineStackP=-1;
 
-		const u32 crop=0;
+		const u32 crop=100;
 		//For every Pixel in the Frame (except crop region)
 		for (u32 y=crop; y<CAMHEIGHT-crop; y++)
 		{
@@ -236,6 +236,10 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, u32 *fb)
 		avgY=avgY/avgC;
 	}
 
+
+#define INVX 1
+#define INVY 0
+
 	//Display to Frame Buffer
 	if (fb)
 	{
@@ -243,7 +247,15 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, u32 *fb)
 		{
 			for (u32 x=0; x<CAMWIDTH; x++)
 			{
-				fb[y*CAMWIDTH+x]=CAMACC(cambuff, x, y);
+				u32 xa=x, ya=y;
+#if INVX==1
+				xa = CAMWIDTH-xa-1;
+#endif
+#if INVY==1
+				ya = CAMHEIGHT-ya-1;
+#endif
+
+				fb[ya*CAMWIDTH+xa]=CAMACC(cambuff, x, y);
 
 				//u32 col = 0;
 				Pixel col = PIXEL(0x00,0x00,0x00,0x00);
@@ -257,13 +269,24 @@ void EyeTracking(u8 *cambuff, int *eyeX, int *eyeY, u32 *fb)
 				// 	col = (Pixel){.R=0xFF,.G=0x00,.B=0x00,.A=0xFF};
 				// }
 
-				SetPixel(fb, CAMWIDTH, x, y, col);
+				SetPixel(fb, CAMWIDTH, xa, ya, col);
 			}
 		}
 	}
 
+#if INVX==1
+	*eyeX=CAMWIDTH-avgX-1;
+#else
 	*eyeX=avgX;
+#endif
+	
+#if INVY==1
+	*eyeY=CAMHEIGHT-avgY-1;
+#else
 	*eyeY=avgY;
+#endif
 
 }
+
+
 

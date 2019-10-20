@@ -37,5 +37,8 @@ update:
 	git fetch --all; git reset --hard origin/PiCode;
 
 upload:
-	sshpass -p "pipass" scp main root@192.168.0.133:/root/Dev/Protogen/PiCode
+	sshpass -p "pipass" scp main root@192.168.0.133:/root/Dev/Protogen/PiCode/main
+
+ssh:
+	sshpass -p "pipass" ssh root@192.168.0.133
 

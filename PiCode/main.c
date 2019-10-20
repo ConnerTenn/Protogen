@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "graphics.h"
 #include "controller.h"
+#include "matrix.h"
 
 u8 Run = 1;
 
@@ -68,6 +69,26 @@ int main()
 				SetPixel(fb1.Buff, fb1.Width, x, y, PIXEL(0xFF,0x00,0x00,0xFF));
 			}
 		}
+
+		double sx1=300, sy1=250, sx2=500, sy2=250, sx3=500, sy3=400, sx4=300, sy4=400;
+		double dx1=0, dy1=0, dx2=FBWIDTH, dy2=0, dx3=FBWIDTH, dy3=FBHEIGHT, dx4=0, dy4=FBHEIGHT;
+		double sx=eyeX,sy=eyeY,dx,dy;
+
+		ProjectiveTransformation(sx1,sy1,sx2,sy2,sx3,sy3,sx4,sy4,dx1,dy1,dx2,dy2,dx3,dy3,dx4,dy4,sx,sy,&dx,&dy);
+
+		FillRectSize(fb1, sx1-5, sy1-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+		FillRectSize(fb1, sx2-5, sy2-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+		FillRectSize(fb1, sx3-5, sy3-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+		FillRectSize(fb1, sx4-5, sy4-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+
+		FillRectSize(fb1, dx1-5, dy1-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+		FillRectSize(fb1, dx2-5, dy2-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+		FillRectSize(fb1, dx3-5, dy3-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+		FillRectSize(fb1, dx4-5, dy4-5, 10, 10, PIXEL(0xFF, 0xFF, 0x00, 0xFF));
+
+		FillRectSize(fb1, sx-5, sy-5, 10, 10, PIXEL(0xFF, 0x00, 0x00, 0xFF));
+		FillRectSize(fb1, dx-5, dy-5, 10, 10, PIXEL(0x00, 0x00, 0xFF, 0xFF));
+
 
 		for (u32 y=0; y<FBHEIGHT; y++)
 		{

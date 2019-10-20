@@ -61,7 +61,7 @@ Matrix Matrix3x3Inv(Matrix mat)
 	//MM
 	MATACC(out,1,1)=((b*i-c*h)*(d*i-f*g)) / ((a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g))*(e*i-f*h)) + i/(e*i-f*h);
 	//MR
-	MATACC(out,2,1)=(-(b*i-c*e)*(d*i-f*g)) / ((a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g))*(e*i-f*h)) - f/(e*i-f*h);
+	MATACC(out,2,1)=(-(b*f-c*e)*(d*i-f*g)) / ((a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g))*(e*i-f*h)) - f/(e*i-f*h);
 
 	//BL
 	MATACC(out,0,2)=(d*h-e*g) / (a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g));
@@ -81,14 +81,20 @@ void ProjectiveTransformation(
 	Matrix sls = (Matrix){.Width=3,.Height=3,.Mat=(double[]){sx1,sx2,sx3,sy1,sy2,sy3,1,1,1}};
 	Matrix dls = (Matrix){.Width=3,.Height=3,.Mat=(double[]){dx1,dx2,dx3,dy1,dy2,dy3,1,1,1}};
 
+	//printf("Src mat\n");
+	//PrintMatrix(sls);
 
 	Matrix slsi = Matrix3x3Inv(sls);
+	//printf("Src mat inv\n");
+	//PrintMatrix(slsi);
 	Matrix shomog = MatrixMul(slsi,(Matrix){.Width=1,.Height=3,.Mat=(double[]){sx4,sy4,1}});
 	DestroyMatrix(slsi);
 	Matrix dlsi = Matrix3x3Inv(dls);
 	Matrix dhomog = MatrixMul(Matrix3x3Inv(dls),(Matrix){.Width=1,.Height=3,.Mat=(double[]){dx4,dy4,1}});
 	DestroyMatrix(dlsi);
 	
+	//printf("Src Homog mat\n");
+	//PrintMatrix(shomog);
 
 	Matrix A = (Matrix){.Width=3,.Height=3,.Mat=(double[])
 		{
@@ -115,4 +121,18 @@ void ProjectiveTransformation(
 
 	DestroyMatrix(P);
 	DestroyMatrix(C);
+	//printf("\n");
 }
+
+void PrintMatrix(Matrix mat)
+{
+	for (int y=0; y<mat.Height; y++)
+	{
+		for (int x=0; x<mat.Width; x++)
+		{	
+			printf("%6.2f ", MATACC(mat,x,y));
+		}
+		printf("\n");
+	}
+}
+
