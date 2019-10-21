@@ -2,6 +2,8 @@
 Modeling/
 log
 *.bin
+*.elf
+*.hex
 
 *.o
 program
