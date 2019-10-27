@@ -35,11 +35,11 @@ def Hx(val, length):
 # 		length-=1
 # 	return out
 
-def HxtoStr(hx):
-	out=""
-	for val in hx:
-		out+="\\x{0:02X}".format(val & 0xFF)
-	return out
+# def HxtoStr(hx):
+# 	out=""
+# 	for val in hx:
+# 		out+="\\x{0:02X}".format(val & 0xFF)
+# 	return out
 
 def StrtoHx(string):
 	return bytes(string, "utf8")
@@ -55,9 +55,9 @@ def ParseImageData(line):
 		c = (1 if ch=='#' else 0)
 		byte|=c<<bit
 		bit-=1
-		if bit==-1: 
+		if bit==-1: #Reached end of bit
+			ImgDataTmp+=Hx(byte,1) #Convert byte to byte string and append #"\\x{0:02X}".format(byte)
 			bit=7
-			ImgDataTmp+=Hx(byte,1) #"\\x{0:02X}".format(byte)
 			byte=0
 
 def EndImageData():
@@ -76,34 +76,34 @@ def Parse(f, fields):
 		line=f.readline()
 
 		if len(line):
-			line=line.split("\\")[0].rstrip()
+			line=line.split("\\")[0].rstrip() #Remove Comments and whitespace
 			
-			keyval=line.split("=")
+			keyval=line.split("=") #Split keys and values
 			
-			for field in fields:
+			for field in fields: #Assign values to field if it exists
 				if keyval[0]==field: fields[field] = (keyval[1] if len(keyval)==2 else "")
 			
 			if line=="":
-				EndImageData()
+				EndImageData() #end image parsing
 			elif line[0]=="." or line[0]=="#":
 				ParseImageData(line)
 
 			if line==";":
-				EndImageData()
+				EndImageData() #end image parsing
 				dat={}
-				for field in fields:
+				for field in fields: 
 					#print("{0}={1}".format(field,fields[field]))
 					dat[field]=fields[field]
-					fields[field]=""
+					fields[field]="" #reset fields back to default
 				#if len(ImgData): print("ImgData:")
-				dat["ImgData"]=[]
-				for img in ImgData:
+				dat["ImgData"]=[] #image data array
+				for img in ImgData: #append each image into the array
 					dat["ImgData"]+=[img]
 				dat["Index"]=index
 				#	print(img)
-				outData[dat["Name"]]=dat
+				outData[dat["Name"]]=dat #Label this data with the name value
 
-				ImgData=[]
+				ImgData=[] #reset image data
 				index+=1
 				#print(dat)
 				#print()
@@ -127,7 +127,7 @@ for name in FrameData:
 	frameDelay = int(frame["Delay"]) if len(frame["Delay"]) else frame["Index"]
 	HeaderStr+=Hx(frameNext, 2)
 	HeaderStr+=Hx(frameDelay, 1)
-	HeaderStr+=Hx(0, 5)
+	HeaderStr+=Hx(0, 5) #padding  =8-(2+1)
 	HeaderStr+=Hx(FrameOffset, 8)
 	for imgDat in frame["ImgData"]:
 		FrameStr+=imgDat
