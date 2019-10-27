@@ -1,13 +1,19 @@
 
 GCC=avr-gcc
-CFLAGS= -Os -g -mmcu=atmega328p
+CFLAGS= -Os -mmcu=atmega328p
 
 .PHONY: prog.hex
 
 all: prog.hex
 
-prog.elf:
-	$(GCC) $(CFLAGS) main.c -o prog.elf
+prog.elf: main.o interfaces.o
+	$(GCC) $(CFLAGS) *.o -o prog.elf
+
+main.o:
+	$(GCC) $(CFLAGS) main.c -c -o main.o
+
+interfaces.o:
+	$(GCC) $(CFLAGS) interfaces.c -c -o interfaces.o
 
 prog.hex: prog.elf
 	avr-objcopy -j .text -j .data -O ihex prog.elf prog.hex
