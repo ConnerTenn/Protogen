@@ -2,15 +2,24 @@
 #include "globals.h"
 #include <avr/interrupt.h>
 
+//http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
+
 #define SETBITS(r,m,v) ((r)=((r) & ~(m)) | ((m) & (v)))
 #define ENBITS(r,m) ((r)=((r) | (m)))
 #define DABITS(r,m) ((r)=((r) & ~(m)))
 
+//Page 135
 void IntiSPI();
 void SPITransmit(u8 data);
 void SPITransmit16(u16 data);
 
-#define DDR_MOSI 3
-#define DDR_SCK 5
-#define DRB_CS 2
+#define DDRB_MOSI 3
+#define DDRB_SCK 5
+#define DDRB_CS 2
+
+
+void Max7219Init(u8 numDisplays);
+void Max7219SendCmd(u16 cmd, u8 numDisplays);
+
+
 
