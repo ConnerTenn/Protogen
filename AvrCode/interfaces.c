@@ -143,7 +143,7 @@ void Max7219Init(u8 numDisplays)
 	Max7219SendCmd(0x0900, numDisplays); //Decode off
 	Max7219SendCmd(0x0B07, numDisplays); //Scan 7
 
-	for (int l=1; l<=8; l++)
+	for (u16 l=1; l<=8; l++)
 	{
 		Max7219SendCmd(l<<8, numDisplays); 
 	}
@@ -156,8 +156,22 @@ void Max7219SendCmd(u16 cmd, u8 numDisplays)
 	CSDA; 
 	for (u8 d=0; d<numDisplays; d++) 
 	{ 
-		SPITransmit16(cmd); 
-	} 
+		SPITransmit16(cmd);
+	}
 	CSEN;
 }
+
+void Max7219SendFrame(u8 *data, u8 numDisplays)
+{
+	for (u16 y=0; y<8; y++)
+	{
+		CSDA;
+		for (u16 i=0; i<numDisplays; i++)
+		{
+			SPITransmit16(((y+1)<<8) | data[y*numDisplays + i]);
+		}
+		CSEN;
+	}
+}
+
 

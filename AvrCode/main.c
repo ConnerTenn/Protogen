@@ -6,7 +6,6 @@
 #include "frames.h"
 
 
-
 int main()
 {
 	PRR = 0;//PRR & ~(1<<PRSPI); //Power Reduction Register
@@ -20,6 +19,32 @@ int main()
 	IntiUART();
 
 	SerialTransmit("Setup Complete\n", 16);
+
+	u32 FrameIndex = 0;
+
+	while (1)
+	{
+		// {
+		// 	static u8 i=0;
+		// 	char buff[] = "Tick  \n"; 
+		// 	buff[5] = i+'0'; 
+		// 	SerialTransmit(buff, 8);
+		// 	i=(i>=9?0:i+1);
+		// }
+
+		{
+			if (SerialAvail())
+			{
+				u8 in;
+				SerialRead(&in, 1);
+				FrameIndex=in-'0';
+			}
+		}
+		
+		Max7219SendFrame(FrameDataAcc(FrameIndex), 4);
+		
+		//_delay_ms(1000);
+	}
 
 	u8 arr[8] = {0,0,0,0, 0,0,0,0};
 	while (1)

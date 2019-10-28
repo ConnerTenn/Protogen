@@ -15,12 +15,13 @@ all: prog.hex
 	$(LD) -r -b binary $< -o $@
 
 FrameData.bin: bin
+
 bin:
 	python GenFrames.py
 
 
 
-prog.elf: main.o interfaces.o FrameData.o
+prog.elf: main.o interfaces.o frames.o FrameData.o
 	$(GCC) $(CFLAGS) $? -o $@
 
 prog.hex: prog.elf

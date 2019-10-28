@@ -32,6 +32,6 @@ u8 SerialAvail();
 
 void Max7219Init(u8 numDisplays);
 void Max7219SendCmd(u16 cmd, u8 numDisplays);
-
+void Max7219SendFrame(u8 *data, u8 numDisplays);
 
 
