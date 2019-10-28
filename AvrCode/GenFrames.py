@@ -92,6 +92,8 @@ def Parse(f, fields):
 
 FrameData=Parse(FFrames, { "Name":"", "Type":"", "Delay":"", "Next":"" })
 
+print("Number of frames: " +str(len(FrameData)) + "\n")
+
 HeaderStr=b""
 FrameStr=b""
 FrameOffset=len(FrameData)*(4+2+2) #Size of header * bytes in each header

@@ -7,7 +7,8 @@ ISR(SPI_STC_vect)
 	//PORTC = !PORTC;
 }
 
-//Page 166
+//Page 135
+//Page 140
 void IntiSPI()
 {
 	//Setup GPIO Pins
@@ -15,7 +16,7 @@ void IntiSPI()
 	ENBITS(DDRB,(1<<DDRB_MOSI) | (1<<DDRB_SCK) | (1<<DDRB_CS));
 
 	//Setup SPI
-	SPCR = (1<<SPE) | (1<<MSTR);//|(1<<SPR0);//|(1<<SPIE); 
+	SPCR = (1<<MSTR) | (1<<SPE);//Master & SPI enable
 	SPSR = (1<<SPI2X);
 
 	//sei();
@@ -25,10 +26,9 @@ void SPITransmit16(u16 data)
 {
 	SPDR = (data & 0xFF00) >> 8;
 	while(!(SPSR & (1<<SPIF) )) {}
-	//_delay_us(100);
+
 	SPDR = data & 0xFF;
 	while(!(SPSR & (1<<SPIF) )) {}
-	//_delay_us(100);
 }
 
 
@@ -39,19 +39,6 @@ u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0;
 
 u8 RX_Ring[256];
 u8 RX_Head=0, RX_Tail=0;
-
-void TXNextByte()
-{
-	if (TX_Tail != TX_Head)
-	{
-		UDR0 = TX_Ring[TX_Tail++];
-	}
-	else
-	{
-		DABITS(UCSR0B,(1<<UDRIE0));
-	}
-	
-}
 
 ISR(USART_RX_vect)
 {
@@ -68,7 +55,8 @@ ISR(USART_TX_vect)
 }
 ISR(USART_UDRE_vect)
 {
-	TXNextByte();
+	if (TX_Tail != TX_Head) { UDR0 = TX_Ring[TX_Tail++]; }
+	else { DABITS(UCSR0B,(1<<UDRIE0)); }
 }
 
 #define BAUD 9600
@@ -106,7 +94,6 @@ void SerialTransmit(u8 *data, u8 len)
 		if (TX_Head+(u8)1 == TX_Tail) { return; }
 		TX_Head++;
 	}
-	if (!TX_Ongoing) { TXNextByte(); }
 	ENBITS(UCSR0B,(1<<UDRIE0));
 }
 void SerialFlush()
@@ -164,10 +151,11 @@ void Max7219SendCmd(u16 cmd, u8 numDisplays)
 
 void Max7219SendFrame(u8 *data, u8 numDisplays)
 {
-	for (u16 y=0; y<8; y++)
+	u16 y, i;
+	for (y=0; y<8; y++)
 	{
 		CSDA;
-		for (u16 i=0; i<numDisplays; i++)
+		for (i=0; i<numDisplays; i++)
 		{
 			SPITransmit16(((y+1)<<8) | data[y*numDisplays + i]);
 		}
