@@ -94,16 +94,16 @@ FrameData=Parse(FFrames, { "Name":"", "Type":"", "Delay":"", "Next":"" })
 
 HeaderStr=b""
 FrameStr=b""
-FrameOffset=len(FrameData)*(4+2+1+1) #Size of header * bytes in each header
+FrameOffset=len(FrameData)*(4+2+2) #Size of header * bytes in each header
 for name in FrameData:
 	frame=FrameData[name]
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
 	frameNext = int(FrameData[frame["Next"]]["Index"]) if len(frame["Next"]) else frame["Index"]
-	frameDelay = int(frame["Delay"]) if len(frame["Delay"]) else frame["Index"]
+	frameDelay = int(frame["Delay"]) if len(frame["Delay"]) else 0xFF #frame["Index"]
 	HeaderStr+=Hx(FrameOffset, 4) #4 bytes  32 bits
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
-	HeaderStr+=Hx(frameDelay, 1) #1 byte  16 bits
-	HeaderStr+=Hx(0, 1) #padding to 4-byte boundary  =4-(2+1) =1
+	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
+	#HeaderStr+=Hx(0, 1) #padding to 4-byte boundary  =4-(2+1) =1
 	for imgDat in frame["ImgData"]:
 		FrameStr+=imgDat
 		FrameOffset+=len(imgDat)

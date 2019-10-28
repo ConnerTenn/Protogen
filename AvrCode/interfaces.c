@@ -7,6 +7,7 @@ ISR(SPI_STC_vect)
 	//PORTC = !PORTC;
 }
 
+//Page 166
 void IntiSPI()
 {
 	//Setup GPIO Pins
