@@ -35,6 +35,10 @@ void SPITransmit16(u16 data)
 u8 TX_Ring[256];
 u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
 
+
+u8 RX_Ring[256];
+u8 RX_Head=0, RX_Tail=0;
+
 void TXNextByte()
 {
 	if (TX_Tail != TX_Head)
@@ -50,6 +54,9 @@ void TXNextByte()
 
 ISR(USART_RX_vect)
 {
+	RX_Ring[RX_Head] = UDR0;
+	if (RX_Head+(u8)1 == RX_Tail) { RX_Tail++; }
+	RX_Head++;
 }
 ISR(USART_TX_vect)
 {
@@ -106,27 +113,20 @@ void SerialFlush()
 	while (TX_Ongoing==1) {}
 }
 
-/*void SerialTransmit(u8 *data, u8 len)
-{
-	for (u8 i=0; i<len; i++)
-	{
-		//Wait for empty transmit buffer
-		while ( !( UCSR0A & (1<<UDRE0)) );
-		//Put data into buffer, sends the data
-		UDR0 = data[i];
-	}
-}*/
 
-void SerialTransmitStr(char *data)
+u8 SerialRead(u8 *data, u8 len)
 {
-	u16 i=0;
-	while (data[i])
+	u8 i=0;
+	while (i<len && RX_Tail != RX_Head)
 	{
-		//Wait for empty transmit buffer
-		while ( !( UCSR0A & (1<<UDRE0)) );
-		//Put data into buffer, sends the data
-		UDR0 = data[i++];
+		data[i++] = RX_Ring[RX_Tail++];
 	}
+	return i;
+}
+
+u8 SerialAvail()
+{
+	return RX_Tail != RX_Head;
 }
 
 
@@ -160,3 +160,4 @@ void Max7219SendCmd(u16 cmd, u8 numDisplays)
 	} 
 	CSEN;
 }
+

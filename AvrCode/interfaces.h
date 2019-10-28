@@ -26,6 +26,10 @@ void SerialFlush();
 void SerialTransmit(u8 *data, u8 len);
 void SerialTransmitStr(char *data);
 
+u8 SerialRead(u8 *data, u8 len);
+u8 SerialAvail();
+
+
 void Max7219Init(u8 numDisplays);
 void Max7219SendCmd(u16 cmd, u8 numDisplays);
 

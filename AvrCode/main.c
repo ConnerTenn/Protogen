@@ -20,8 +20,6 @@ int main()
 	IntiUART();
 
 	SerialTransmit("Setup Complete\n", 16);
-	
-	SerialFlush();
 
 	u8 arr[8] = {0,0,0,0, 0,0,0,0};
 	while (1)
@@ -31,10 +29,19 @@ int main()
 			PORTC = !PORTC;
 
 			static u8 i=0;
-			char buff[]= "Tick  \n"; 
+			char buff[] = "Tick  \n"; 
 			buff[5] = i+'0'; 
 			SerialTransmit(buff, 8);
 			i=(i>=9?0:i+1);
+
+			if (SerialAvail())
+			{
+				u8 in=0; 
+				char buff2[] = "Recv  \n"; 
+				SerialRead(&in, 1);
+				buff2[5] = in; 
+				SerialTransmit(buff2, 8);
+			}
 		}
 		
 		for (int i=0; i<8; i++)
