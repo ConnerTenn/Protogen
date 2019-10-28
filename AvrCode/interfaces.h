@@ -18,6 +18,14 @@ void SPITransmit16(u16 data);
 #define DDRB_CS 2
 
 
+//Page 143
+void IntiUART();
+void SerialTransmitByte(u8 data);
+//void SerialTransmit(u8 *data, u8 len);
+void SerialFlush();
+void SerialTransmit(u8 *data, u8 len);
+void SerialTransmitStr(char *data);
+
 void Max7219Init(u8 numDisplays);
 void Max7219SendCmd(u16 cmd, u8 numDisplays);
 

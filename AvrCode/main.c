@@ -1,9 +1,7 @@
 
-#define F_CPU 16000000UL
-
+#include "globals.h"
 #include <avr/io.h>
 #include <util/delay.h>
-#include "globals.h"
 #include "interfaces.h"
 #include "frames.h"
 
@@ -19,8 +17,11 @@ int main()
 
 	Max7219Init(4);
 	
+	IntiUART();
 
+	SerialTransmit("Setup Complete\n", 16);
 	
+	SerialFlush();
 
 	u8 arr[8] = {0,0,0,0, 0,0,0,0};
 	while (1)
@@ -28,6 +29,12 @@ int main()
 		if ((arr[0]&0x3F)==0x20)
 		{
 			PORTC = !PORTC;
+
+			static u8 i=0;
+			char buff[]= "Tick  \n"; 
+			buff[5] = i+'0'; 
+			SerialTransmit(buff, 8);
+			i=(i>=9?0:i+1);
 		}
 		
 		for (int i=0; i<8; i++)

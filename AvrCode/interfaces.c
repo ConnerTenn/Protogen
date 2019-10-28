@@ -32,6 +32,104 @@ void SPITransmit16(u16 data)
 
 
 
+u8 TX_Ring[256];
+u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
+
+void TXNextByte()
+{
+	if (TX_Tail != TX_Head)
+	{
+		UDR0 = TX_Ring[TX_Tail++];
+	}
+	else
+	{
+		DABITS(UCSR0B,(1<<UDRIE0));
+	}
+	
+}
+
+ISR(USART_RX_vect)
+{
+}
+ISR(USART_TX_vect)
+{
+	cli();
+	TX_Ongoing=0;
+	DABITS(UCSR0B,(1<<UDRIE0));
+	sei();
+}
+ISR(USART_UDRE_vect)
+{
+	TXNextByte();
+}
+
+#define BAUD 9600
+#define UBRR (F_CPU/16/BAUD-1)
+
+void IntiUART()
+{
+	cli();
+	UBRR0H = (u8)(UBRR>>8);
+	UBRR0L = (u8)(UBRR);
+
+
+	//Enable Transmit and Recieve
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0) | (1<<RXCIE0);//|(1<<TXCIE0);//|(1<<UDRIE0);
+	//Set frame format: 8data, 2stop bit
+	UCSR0C = (1<<USBS0)|(3<<UCSZ00); 
+
+	sei();
+}
+
+void SerialTransmitByte(u8 data)
+{
+	//Wait for empty transmit buffer
+	while ( !( UCSR0A & (1<<UDRE0)) );
+	//Put data into buffer, sends the data
+	UDR0 = data;
+}
+
+
+void SerialTransmit(u8 *data, u8 len)
+{
+	for (u8 i=0; i<len; i++)
+	{
+		TX_Ring[TX_Head] = data[i];
+		if (TX_Head+(u8)1 == TX_Tail) { return; }
+		TX_Head++;
+	}
+	if (!TX_Ongoing) { TXNextByte(); }
+	ENBITS(UCSR0B,(1<<UDRIE0));
+}
+void SerialFlush()
+{
+	while (TX_Ongoing==1) {}
+}
+
+/*void SerialTransmit(u8 *data, u8 len)
+{
+	for (u8 i=0; i<len; i++)
+	{
+		//Wait for empty transmit buffer
+		while ( !( UCSR0A & (1<<UDRE0)) );
+		//Put data into buffer, sends the data
+		UDR0 = data[i];
+	}
+}*/
+
+void SerialTransmitStr(char *data)
+{
+	u16 i=0;
+	while (data[i])
+	{
+		//Wait for empty transmit buffer
+		while ( !( UCSR0A & (1<<UDRE0)) );
+		//Put data into buffer, sends the data
+		UDR0 = data[i++];
+	}
+}
+
+
 #define CSEN ENBITS(PORTB, 1<<DDRB_CS) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))
 #define CSDA DABITS(PORTB, 1<<DDRB_CS) //(PORTB=(PORTB&(~(1<<2))) | (0<<2))
 
