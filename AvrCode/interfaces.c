@@ -114,7 +114,7 @@ u8 SerialRead(u8 *data, u8 len)
 
 u8 SerialAvail()
 {
-	return RX_Tail != RX_Head;
+	return RX_Head-RX_Tail+(RX_Tail>RX_Head?1:0);
 }
 
 

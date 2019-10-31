@@ -36,6 +36,8 @@ upload:
 	avrdude -v -p atmega328p -c arduino -P $(shell ls /dev/ttyUSB* | head -n 1) -b 57600 -D  -U flash:w:prog.hex:i
 
 com:
-	#stty -F $(shell ls /dev/ttyUSB* | head -n 1) 9600
+	stty -F $(shell ls /dev/ttyUSB* | head -n 1) 9600 -crtscts
 	#cat $(shell ls /dev/ttyUSB* | head -n 1) 
-	picocom -b 9600 -p 2 --imap lfcrlf $(shell ls /dev/ttyUSB* | head -n 1)
+	picocom -b 9600 -p 2 --imap lfcrlf --noreset $(shell ls /dev/ttyUSB* | head -n 1)
+
+

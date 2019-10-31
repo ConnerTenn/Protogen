@@ -8,13 +8,13 @@ extern const u8 *FrameDataEnd;
 
 typedef struct 
 {
-	u32 FrameOffset;
+	u16 FrameOffset;
 	u16 FrameNext;
 	u16 FrameDelay;
 } Frame;
 
-#define FrameHeaderAcc(i) ((Frame *)(FrameData+i*8))
-#define FrameDataAcc(i) ((u8 *)(FrameData + *(u32 *)(FrameData+i*8)))
+#define FrameHeaderAcc(i) ((Frame *)(FrameData+i*sizeof(Frame)))
+#define FrameDataAcc(i) ((u8 *)(FrameData + FrameHeaderAcc(i)->FrameOffset))
 
 void FrameTransUp(u8 *data, u8 numDisplays, u8 num);
 void FrameTransDown(u8 *data, u8 numDisplays, u8 num);

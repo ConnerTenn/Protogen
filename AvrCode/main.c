@@ -3,32 +3,46 @@
 //#include <avr/io.h>
 //#include <util/delay.h>
 
+#include <stdio.h>
+
 #include "interfaces.h"
 #include "frames.h"
 
-u32 FrameIndex = 1;
+u16 FrameIndex = 1;
 u16 FrameDelay = -1;
 
-u8 FrameBuff1[8*4];
+//u8 FrameBuff1[8*4];
 
 ISR(TIMER1_COMPA_vect)
 {
 	PORTC = !PORTC;
 
-	if (SerialAvail())
+	if (SerialAvail()>=2)
 	{
-		u8 in;
-		SerialRead(&in, 1);
-		FrameIndex=in-'0';
+		/*
+		New serial format:
+		u8 DeviceAddr
+		u8 DestDisplay (implies Display type)
+		u16 FrameNumber
+		u16 MaskNumber
+		u16 BorderNumber
+		*/
+		u16 in;
+		SerialRead((u8 *)&in, 2);
+		
+		FrameIndex=in;//(in-'0';
 		FrameDelay=FrameHeaderAcc(FrameIndex)->FrameDelay;
+		
 	}
 
 	//memcpy_P(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
-	memcpy(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
-	FrameTransDown(FrameBuff1, 4, 2);
-	FrameTransRight(FrameBuff1, 4, 2);
+	//memcpy(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
+	//FrameTransDown(FrameBuff1, 4, 2);
+	//FrameTransRight(FrameBuff1, 4, 2);
 
-	Max7219SendFrame(FrameBuff1, 4);
+	//Max7219SendFrame(FrameBuff1, 4);
+	Max7219SendFrame(FrameDataAcc(FrameIndex), 4);
+	//Max7219SendFrame((u8 *)FrameData + ((Frame *)(FrameData+(u32)0x77790))->FrameOffset, 4);
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -81,6 +95,11 @@ int main()
 
 	SerialTransmit("\nSetup Complete\n", 17);
 
+	char dat[40];
+	//u32 a = FrameHeaderAcc(0x5)->FrameOffset;
+	//u32 b = FrameHeaderAcc(0x4)->FrameOffset;
+	//sprintf(dat, "%d %d\n", , FrameHeaderAcc(0x04)->FrameOffset);
+	SerialTransmit(dat, strlen(dat));
 
 	while (1)
 	{
