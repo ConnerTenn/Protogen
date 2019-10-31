@@ -21,7 +21,7 @@ bin:
 
 
 
-prog.elf: main.o interfaces.o frames.o FrameData.o
+prog.elf: main.o globals.o interfaces.o frames.o FrameData.o
 	$(GCC) $(CFLAGS) $? -o $@
 
 prog.hex: prog.elf

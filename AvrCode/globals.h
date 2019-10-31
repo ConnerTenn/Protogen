@@ -2,6 +2,9 @@
 #define F_CPU 16000000UL
 
 #include <avr/io.h>
+#include <string.h>
+
+#define CEILDIV(n,d) ( ((int)(n)) / ((int)(d)) + ( ((int)(n))%((int)(d)) ? 1 : 0 ) )
 
 typedef uint8_t u8;
 typedef uint16_t u16;

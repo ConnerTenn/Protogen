@@ -16,3 +16,7 @@ typedef struct
 #define FrameHeaderAcc(i) ((Frame *)(FrameData+i*8))
 #define FrameDataAcc(i) ((u8 *)(FrameData + *(u32 *)(FrameData+i*8)))
 
+void FrameTransUp(u8 *data, u8 numDisplays, u8 num);
+void FrameTransDown(u8 *data, u8 numDisplays, u8 num);
+void FrameTransLeft(u8 *data, u8 numDisplays, u8 num);
+void FrameTransRight(u8 *data, u8 numDisplays, u8 num);

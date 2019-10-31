@@ -2,11 +2,14 @@
 #include "globals.h"
 //#include <avr/io.h>
 //#include <util/delay.h>
+
 #include "interfaces.h"
 #include "frames.h"
 
 u32 FrameIndex = 1;
 u16 FrameDelay = -1;
+
+u8 FrameBuff1[8*4];
 
 ISR(TIMER1_COMPA_vect)
 {
@@ -20,7 +23,12 @@ ISR(TIMER1_COMPA_vect)
 		FrameDelay=FrameHeaderAcc(FrameIndex)->FrameDelay;
 	}
 
-	Max7219SendFrame(FrameDataAcc(FrameIndex), 4);
+	//memcpy_P(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
+	memcpy(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
+	FrameTransDown(FrameBuff1, 4, 2);
+	FrameTransRight(FrameBuff1, 4, 2);
+
+	Max7219SendFrame(FrameBuff1, 4);
 }
 
 ISR(TIMER0_COMPA_vect)
