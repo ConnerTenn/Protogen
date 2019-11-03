@@ -15,6 +15,7 @@ u16 FrameDelay = -1;
 
 ISR(TIMER1_COMPA_vect)
 {
+	sei(); //Enable Nested Interrupts
 	PORTC = !PORTC;
 
 	if (SerialAvail()>=2)
@@ -41,13 +42,13 @@ ISR(TIMER1_COMPA_vect)
 	//FrameTransRight(FrameBuff1, 4, 2);
 
 	//Max7219SendFrame(FrameBuff1, 4);
-	Max7219SendFrame(FrameDataAcc(FrameIndex), 4);
+	Max7219Send4Frame(FrameDataAcc(FrameIndex));
 	//Max7219SendFrame((u8 *)FrameData + ((Frame *)(FrameData+(u32)0x77790))->FrameOffset, 4);
 }
 
 ISR(TIMER0_COMPA_vect)
 {
-
+	sei(); //Enable Nested Interrupts
 	if (FrameDelay!=-1)
 	{
 		FrameDelay--;

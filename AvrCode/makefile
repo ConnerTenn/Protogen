@@ -1,7 +1,7 @@
 
 GCC=avr-gcc
 LD=avr-ld
-CFLAGS= -Os -mmcu=atmega328p
+CFLAGS= -O3 -mmcu=atmega328p
 
 .PHONY: all prog.hex
 

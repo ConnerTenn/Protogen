@@ -22,13 +22,20 @@ void IntiSPI()
 	//sei();
 }
 
-void SPITransmit16(u16 data)
+#include <avr/delay.h>
+void SPITransmit(const u8 data)
 {
-	SPDR = (data & 0xFF00) >> 8;
-	while(!(SPSR & (1<<SPIF) )) {}
+	SPDR = data;
+	while(!(SPSR & (1<<SPIF))) {}
+}
 
-	SPDR = data & 0xFF;
-	while(!(SPSR & (1<<SPIF) )) {}
+void SPITransmit16(const u16 data)
+{
+	SPDR = data >> 8;
+	while(!(SPSR & (1<<SPIF))) {}
+
+	SPDR = data;
+	while(!(SPSR & (1<<SPIF))) {}
 }
 
 
@@ -149,18 +156,42 @@ void Max7219SendCmd(u16 cmd, u8 numDisplays)
 	CSEN;
 }
 
-void Max7219SendFrame(u8 *data, u8 numDisplays)
+void Max7219Send4Frame(u8 *data)
 {
-	u16 y, i;
+	u16 y, n, i=0, l;
 	for (y=0; y<8; y++)
 	{
+		l=(y+1)<<8;
 		CSDA;
-		for (i=0; i<numDisplays; i++)
-		{
-			SPITransmit16(((y+1)<<8) | data[y*numDisplays + i]);
-		}
+		SPITransmit16(l | data[i++]);
+		SPITransmit16(l | data[i++]);
+		SPITransmit16(l | data[i++]);
+		SPITransmit16(l | data[i++]);
 		CSEN;
 	}
 }
+void Max7219Send2Frame(u8 *data)
+{
+	u16 y, n, i=0, l;
+	for (y=0; y<8; y++)
+	{
+		l=(y+1)<<8;
+		CSDA;
+		SPITransmit16(l | data[i++]);
+		SPITransmit16(l | data[i++]);
+		CSEN;
+	}
+}
+void Max7219Send1Frame(u8 *data)
+{
+	u16 y, n, i=0;
+	for (y=0; y<8; y++)
+	{
+		CSDA;
+		SPITransmit16(((y+1)<<8) | data[i++]);
+		CSEN;
+	}
+}
+
 
 

@@ -10,8 +10,8 @@
 
 //Page 135
 void IntiSPI();
-void SPITransmit(u8 data);
-void SPITransmit16(u16 data);
+void SPITransmit(const u8 data);
+void SPITransmit16(const u16 data);
 
 #define DDRB_MOSI 3
 #define DDRB_SCK 5
@@ -32,6 +32,8 @@ u8 SerialAvail();
 
 void Max7219Init(u8 numDisplays);
 void Max7219SendCmd(u16 cmd, u8 numDisplays);
-void Max7219SendFrame(u8 *data, u8 numDisplays);
+void Max7219Send4Frame(u8 *data);
+void Max7219Send2Frame(u8 *data);
+void Max7219Send1Frame(u8 *data);
 
 
