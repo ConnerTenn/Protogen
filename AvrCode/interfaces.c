@@ -22,7 +22,6 @@ void IntiSPI()
 	//sei();
 }
 
-#include <avr/delay.h>
 void SPITransmit(const u8 data)
 {
 	SPDR = data;
@@ -128,28 +127,28 @@ u8 SerialAvail()
 #define CSEN ENBITS(PORTB, 1<<DDRB_CS) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))
 #define CSDA DABITS(PORTB, 1<<DDRB_CS) //(PORTB=(PORTB&(~(1<<2))) | (0<<2))
 
-void Max7219Init(u8 numDisplays)
+void Max7219Init(u8 numSegments)
 {
 	CSEN;
 
-	Max7219SendCmd(0x0C00, numDisplays); //Disable
-	Max7219SendCmd(0x0F00, numDisplays); //Test off
-	Max7219SendCmd(0x0A00, numDisplays); //Intensity 0
-	Max7219SendCmd(0x0900, numDisplays); //Decode off
-	Max7219SendCmd(0x0B07, numDisplays); //Scan 7
+	Max7219SendCmd(0x0C00, numSegments); //Disable
+	Max7219SendCmd(0x0F00, numSegments); //Test off
+	Max7219SendCmd(0x0A00, numSegments); //Intensity 0
+	Max7219SendCmd(0x0900, numSegments); //Decode off
+	Max7219SendCmd(0x0B07, numSegments); //Scan 7
 
 	for (u16 l=1; l<=8; l++)
 	{
-		Max7219SendCmd(l<<8, numDisplays); 
+		Max7219SendCmd(l<<8, numSegments); 
 	}
 
-	Max7219SendCmd(0x0C01, numDisplays);  //Enable
+	Max7219SendCmd(0x0C01, numSegments);  //Enable
 }
 
-void Max7219SendCmd(u16 cmd, u8 numDisplays)
+void Max7219SendCmd(u16 cmd, u8 numSegments)
 {
 	CSDA; 
-	for (u8 d=0; d<numDisplays; d++) 
+	for (u8 d=0; d<numSegments; d++) 
 	{ 
 		SPITransmit16(cmd);
 	}

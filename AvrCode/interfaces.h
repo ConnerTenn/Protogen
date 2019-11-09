@@ -30,8 +30,8 @@ u8 SerialRead(u8 *data, u8 len);
 u8 SerialAvail();
 
 
-void Max7219Init(u8 numDisplays);
-void Max7219SendCmd(u16 cmd, u8 numDisplays);
+void Max7219Init(u8 numSegments);
+void Max7219SendCmd(u16 cmd, u8 numSegments);
 void Max7219Send4Frame(u8 *data);
 void Max7219Send2Frame(u8 *data);
 void Max7219Send1Frame(u8 *data);
