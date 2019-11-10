@@ -124,71 +124,71 @@ u8 SerialAvail()
 }
 
 
-#define CSEN ENBITS(PORTB, 1<<DDRB_CS) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))
-#define CSDA DABITS(PORTB, 1<<DDRB_CS) //(PORTB=(PORTB&(~(1<<2))) | (0<<2))
+#define DISPSEL(cs) ENBITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))
+#define DISPDESEL(cs) DABITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (0<<2))
 
-void Max7219Init(u8 numSegments)
+void Max7219Init(u8 numSegments, u8 cs)
 {
-	CSEN;
+	DISPSEL(cs);
 
-	Max7219SendCmd(0x0C00, numSegments); //Disable
-	Max7219SendCmd(0x0F00, numSegments); //Test off
-	Max7219SendCmd(0x0A00, numSegments); //Intensity 0
-	Max7219SendCmd(0x0900, numSegments); //Decode off
-	Max7219SendCmd(0x0B07, numSegments); //Scan 7
+	Max7219SendCmd(0x0C00, numSegments, cs); //Disable
+	Max7219SendCmd(0x0F00, numSegments, cs); //Test off
+	Max7219SendCmd(0x0A00, numSegments, cs); //Intensity 0
+	Max7219SendCmd(0x0900, numSegments, cs); //Decode off
+	Max7219SendCmd(0x0B07, numSegments, cs); //Scan 7
 
 	for (u16 l=1; l<=8; l++)
 	{
-		Max7219SendCmd(l<<8, numSegments); 
+		Max7219SendCmd(l<<8, numSegments, cs); 
 	}
 
-	Max7219SendCmd(0x0C01, numSegments);  //Enable
+	Max7219SendCmd(0x0C01, numSegments, cs);  //Enable
 }
 
-void Max7219SendCmd(u16 cmd, u8 numSegments)
+void Max7219SendCmd(u16 cmd, u8 numSegments, u8 cs)
 {
-	CSDA; 
+	DISPDESEL(cs); 
 	for (u8 d=0; d<numSegments; d++) 
 	{ 
 		SPITransmit16(cmd);
 	}
-	CSEN;
+	DISPSEL(cs);
 }
 
-void Max7219Send4Frame(u8 *data)
+void Max7219Send4Frame(u8 *data, u8 cs)
 {
 	u16 y, n, i=0, l;
 	for (y=0; y<8; y++)
 	{
 		l=(y+1)<<8;
-		CSDA;
+		DISPDESEL(cs);
 		SPITransmit16(l | data[i++]);
 		SPITransmit16(l | data[i++]);
 		SPITransmit16(l | data[i++]);
 		SPITransmit16(l | data[i++]);
-		CSEN;
+		DISPSEL(cs);
 	}
 }
-void Max7219Send2Frame(u8 *data)
+void Max7219Send2Frame(u8 *data, u8 cs)
 {
 	u16 y, n, i=0, l;
 	for (y=0; y<8; y++)
 	{
 		l=(y+1)<<8;
-		CSDA;
+		DISPDESEL(cs);
 		SPITransmit16(l | data[i++]);
 		SPITransmit16(l | data[i++]);
-		CSEN;
+		DISPSEL(cs);
 	}
 }
-void Max7219Send1Frame(u8 *data)
+void Max7219Send1Frame(u8 *data, u8 cs)
 {
 	u16 y, n, i=0;
 	for (y=0; y<8; y++)
 	{
-		CSDA;
+		DISPDESEL(cs);
 		SPITransmit16(((y+1)<<8) | data[i++]);
-		CSEN;
+		DISPSEL(cs);
 	}
 }
 

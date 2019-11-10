@@ -8,17 +8,29 @@
 #include "interfaces.h"
 #include "frames.h"
 
-u16 FrameIndex = 1;
-u16 FrameDelay = -1;
+// u16 FrameIndex = 1;
+// u16 FrameDelay = -1;
 
-//u8 FrameBuff1[8*4];
+typedef struct
+{
+	u8 CSPin;
+	u8 NumSegments;
+	u16 FrameIndex;
+	u16 FrameDelay;
+} Max7219;
+
+Max7219 DisplayList[] = 
+	{
+		{0, 4, 1, -1},
+		{1, 4, 1, -1},
+		{2, 2, 1, -1},
+	};
 
 ISR(TIMER1_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
-	PORTC = !PORTC;
 
-	if (SerialAvail()>=2)
+	while (SerialAvail()>=4)
 	{
 		/*
 		New serial format:
@@ -28,11 +40,18 @@ ISR(TIMER1_COMPA_vect)
 		u16 MaskNumber
 		u16 BorderNumber
 		*/
-		u16 in;
-		SerialRead((u8 *)&in, 2);
-		
-		FrameIndex=in;//(in-'0';
-		FrameDelay=FrameHeaderAcc(FrameIndex)->FrameDelay;
+		u8 in[4];
+		SerialRead(in, 4);
+
+		if (in[0] == 0x56)
+		{
+			u8 display = in[1];
+			u16 frame = *(u16 *)(in+2);
+			// FrameIndex=in;//(in-'0';
+			// FrameDelay=FrameHeaderAcc(FrameIndex)->FrameDelay;
+			DisplayList[display].FrameIndex=frame;
+			DisplayList[display].FrameDelay=FrameHeaderAcc(frame)->FrameDelay;
+		}
 		
 	}
 
@@ -42,21 +61,41 @@ ISR(TIMER1_COMPA_vect)
 	//FrameTransRight(FrameBuff1, 4, 2);
 
 	//Max7219SendFrame(FrameBuff1, 4);
-	Max7219Send4Frame(FrameDataAcc(FrameIndex));
 	//Max7219SendFrame((u8 *)FrameData + ((Frame *)(FrameData+(u32)0x77790))->FrameOffset, 4);
+	//Max7219Send4Frame(FrameDataAcc(FrameIndex), 0);
+
+	for (u8 i=0; i<sizeof(DisplayList)/sizeof(DisplayList[0]); i++)
+	{
+		switch (DisplayList[i].NumSegments)
+		{
+		case 1:
+			Max7219Send1Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
+			break;
+		case 2:
+			Max7219Send2Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
+			break;
+		case 4:
+			Max7219Send4Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
+			break;
+		}
+	}
 }
 
 ISR(TIMER0_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
-	if (FrameDelay!=-1)
+
+	for (u8 i=0; i<sizeof(DisplayList)/sizeof(DisplayList[0]); i++)
 	{
-		FrameDelay--;
-	}
-	if (FrameDelay==0)
-	{
-		FrameDelay=FrameHeaderAcc(FrameIndex)->FrameDelay;
-		FrameIndex=FrameHeaderAcc(FrameIndex)->FrameNext;
+		if (DisplayList[i].FrameDelay!=-1)
+		{
+			DisplayList[i].FrameDelay--;
+		}
+		if (DisplayList[i].FrameDelay==0)
+		{
+			DisplayList[i].FrameDelay=FrameHeaderAcc(DisplayList[i].FrameIndex)->FrameDelay;
+			DisplayList[i].FrameIndex=FrameHeaderAcc(DisplayList[i].FrameIndex)->FrameNext;
+		}
 	}
 	
 }
@@ -86,10 +125,13 @@ int main()
 {
 	PRR = 0;//PRR & ~(1<<PRSPI); //Power Reduction Register
 
-	DDRC = 1;
+	DDRC = 0xF;
 
 	IntiSPI();
-	Max7219Init(4);
+	for (u8 i=0; i<sizeof(DisplayList)/sizeof(DisplayList[0]); i++)
+	{
+		Max7219Init(DisplayList[i].NumSegments, DisplayList[i].CSPin);
+	}
 	IntiUART();
 
 	InitTimers();
