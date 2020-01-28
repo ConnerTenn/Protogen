@@ -31,16 +31,18 @@ void FrameTransDown(u8 *data, u8 numSegments, u8 num)
 	
 void FrameTransLeft(u8 *data, u8 numSegments, u8 num)
 {
-	int segover = CEILDIV(num,8);
-	int segov = (int)(((int)num)/((int)8)+1);
+	int segover = CEILDIV(num,8); //Number segments to right to grab
+	int segov = (int)(((int)num)/((int)8)); //Number of full segments to shift by
 	int bitover = num%8;
 	for (int y=0; y<8; y++)
 	{
+		//Start from left segment, then move right
 		for (int x=0; x<numSegments; x++)
 		{
-			if (x+segov-1<numSegments)
+			//If there is a segment to the right
+			if (x+segov<numSegments)
 			{
-				data[y*numSegments+x] = ( (data[y*numSegments+x+segov-1]<<bitover) & (0xFF<<bitover) );
+				data[y*numSegments+x] = ( (data[y*numSegments+x+segov]<<bitover) & (0xFF<<bitover) );
 			}
 			else
 			{

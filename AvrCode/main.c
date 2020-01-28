@@ -1,15 +1,10 @@
 
 #include "globals.h"
-//#include <avr/io.h>
-//#include <util/delay.h>
 
 #include <stdio.h>
 
 #include "interfaces.h"
 #include "frames.h"
-
-// u16 FrameIndex = 1;
-// u16 FrameDelay = -1;
 
 typedef struct
 {
@@ -21,7 +16,7 @@ typedef struct
 
 Max7219 DisplayList[] = 
 	{
-		{0, 4, 1, -1},
+		{0, 7, 1, -1},
 		{1, 4, 1, -1},
 		{2, 2, 1, -1},
 	};
@@ -54,15 +49,6 @@ ISR(TIMER1_COMPA_vect)
 		}
 		
 	}
-
-	//memcpy_P(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
-	//memcpy(FrameBuff1, FrameDataAcc(FrameIndex), 8*4);
-	//FrameTransDown(FrameBuff1, 4, 2);
-	//FrameTransRight(FrameBuff1, 4, 2);
-
-	//Max7219SendFrame(FrameBuff1, 4);
-	//Max7219SendFrame((u8 *)FrameData + ((Frame *)(FrameData+(u32)0x77790))->FrameOffset, 4);
-	//Max7219Send4Frame(FrameDataAcc(FrameIndex), 0);
 
 	for (u8 i=0; i<sizeof(DisplayList)/sizeof(DisplayList[0]); i++)
 	{
@@ -137,12 +123,6 @@ int main()
 	InitTimers();
 
 	SerialTransmit("\nSetup Complete\n", 17);
-
-	char dat[40];
-	//u32 a = FrameHeaderAcc(0x5)->FrameOffset;
-	//u32 b = FrameHeaderAcc(0x4)->FrameOffset;
-	//sprintf(dat, "%d %d\n", , FrameHeaderAcc(0x04)->FrameOffset);
-	SerialTransmit(dat, strlen(dat));
 
 	while (1)
 	{
