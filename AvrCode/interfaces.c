@@ -155,42 +155,64 @@ void Max7219SendCmd(u16 cmd, u8 numSegments, u8 cs)
 	DISPSEL(cs);
 }
 
-void Max7219Send4Frame(u8 *data, u8 cs)
+// void Max7219Send4Frame(u8 *data, u8 cs)
+// {
+// 	u16 y, n, i=0, l;
+// 	for (y=0; y<8; y++)
+// 	{
+// 		l=(y+1)<<8;
+// 		DISPDESEL(cs);
+// 		SPITransmit16(l | data[i++]);
+// 		SPITransmit16(l | data[i++]);
+// 		SPITransmit16(l | data[i++]);
+// 		SPITransmit16(l | data[i++]);
+// 		DISPSEL(cs);
+// 	}
+// }
+// void Max7219Send2Frame(u8 *data, u8 cs)
+// {
+// 	u16 y, n, i=0, l;
+// 	for (y=0; y<8; y++)
+// 	{
+// 		l=(y+1)<<8;
+// 		DISPDESEL(cs);
+// 		SPITransmit16(l | data[i++]);
+// 		SPITransmit16(l | data[i++]);
+// 		DISPSEL(cs);
+// 	}
+// }
+// void Max7219Send1Frame(u8 *data, u8 cs)
+// {
+// 	u16 y, n, i=0;
+// 	for (y=0; y<8; y++)
+// 	{
+// 		DISPDESEL(cs);
+// 		SPITransmit16(((y+1)<<8) | data[i++]);
+// 		DISPSEL(cs);
+// 	}
+// }
+
+void Max7219SendData(u8 **data, u8 *numSegments, u8 numDisplays, u8 cs)
 {
-	u16 y, n, i=0, l;
-	for (y=0; y<8; y++)
+	u16 i[numDisplays];
+
+	for (u16 y=0; y<8; y++)
 	{
-		l=(y+1)<<8;
 		DISPDESEL(cs);
-		SPITransmit16(l | data[i++]);
-		SPITransmit16(l | data[i++]);
-		SPITransmit16(l | data[i++]);
-		SPITransmit16(l | data[i++]);
+		for (u8 d=numDisplays-1; d<numDisplays; d--)
+		{
+			if (y==0) { i[d] = 0; }
+
+			for (u8 s=0; s<numSegments[d]; s++)
+			{
+				SPITransmit16(((y+1)<<8) | data[d][i[d]++]);
+			}
+		}
 		DISPSEL(cs);
 	}
 }
-void Max7219Send2Frame(u8 *data, u8 cs)
-{
-	u16 y, n, i=0, l;
-	for (y=0; y<8; y++)
-	{
-		l=(y+1)<<8;
-		DISPDESEL(cs);
-		SPITransmit16(l | data[i++]);
-		SPITransmit16(l | data[i++]);
-		DISPSEL(cs);
-	}
-}
-void Max7219Send1Frame(u8 *data, u8 cs)
-{
-	u16 y, n, i=0;
-	for (y=0; y<8; y++)
-	{
-		DISPDESEL(cs);
-		SPITransmit16(((y+1)<<8) | data[i++]);
-		DISPSEL(cs);
-	}
-}
+
+
 
 
 

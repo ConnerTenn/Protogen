@@ -8,7 +8,7 @@
 
 typedef struct
 {
-	u8 CSPin;
+	//u8 SegmentOffset;
 	u8 NumSegments;
 	u16 FrameIndex;
 	u16 FrameDelay;
@@ -16,11 +16,14 @@ typedef struct
 
 Max7219 DisplayList[] = 
 	{
-		{0, 7, 1, -1},
-		{1, 4, 1, -1},
-		{2, 2, 1, -1},
+		{2, 2, -1},
+		{1, 1, -1},
+		{4, 3, -1},
 	};
+u8 NumDisplays = 3;
+#define CSPIN 0
 
+//mail callback
 ISR(TIMER1_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
@@ -50,23 +53,29 @@ ISR(TIMER1_COMPA_vect)
 		
 	}
 
-	for (u8 i=0; i<sizeof(DisplayList)/sizeof(DisplayList[0]); i++)
+	u8 *data[NumDisplays];
+	u8 numSegments[NumDisplays];
+	for (u8 d=0; d<NumDisplays; d++)
 	{
-		switch (DisplayList[i].NumSegments)
-		{
-		case 1:
-			Max7219Send1Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
-			break;
-		case 2:
-			Max7219Send2Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
-			break;
-		case 4:
-			Max7219Send4Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
-			break;
-		}
+		// switch (DisplayList[i].NumSegments)
+		// {
+		// case 1:
+		// 	Max7219Send1Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
+		// 	break;
+		// case 2:
+		// 	Max7219Send2Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
+		// 	break;
+		// case 4:
+		// 	Max7219Send4Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
+		// 	break;
+		// }
+		data[d] = FrameDataAcc(DisplayList[d].FrameIndex);
+		numSegments[d] = DisplayList[d].NumSegments;
 	}
+	Max7219SendData(data, numSegments, NumDisplays, CSPIN);
 }
 
+//Frame periodic update
 ISR(TIMER0_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
@@ -114,10 +123,12 @@ int main()
 	DDRC = 0xF;
 
 	IntiSPI();
-	for (u8 i=0; i<sizeof(DisplayList)/sizeof(DisplayList[0]); i++)
+	u8 numSegments = 0;
+	for (u8 i=0; i<NumDisplays; i++)
 	{
-		Max7219Init(DisplayList[i].NumSegments, DisplayList[i].CSPin);
+		numSegments += DisplayList[i].NumSegments;
 	}
+	Max7219Init(numSegments, CSPIN);
 	IntiUART();
 
 	InitTimers();
