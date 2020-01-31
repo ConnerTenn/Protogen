@@ -21,6 +21,7 @@ Max7219 DisplayList[] =
 		{4, 3, -1},
 	};
 u8 NumDisplays = 3;
+u8 TotalSegments;
 #define CSPIN 0
 
 
@@ -56,7 +57,7 @@ ISR(TIMER1_COMPA_vect)
 
 	if (RefreshTimer == 0)
 	{
-		Max7219Init(NumDisplays, CSPIN);
+		Max7219Init(TotalSegments, CSPIN);
 		RefreshTimer = REFRESH_INTERVAL;
 	}
 	else { RefreshTimer--; }
@@ -131,14 +132,15 @@ int main()
 	DDRC = 0xF;
 
 	IntiSPI();
-	u8 numSegments = 0;
+
+	TotalSegments=0;
 	for (u8 i=0; i<NumDisplays; i++)
 	{
-		numSegments += DisplayList[i].NumSegments;
+		TotalSegments += DisplayList[i].NumSegments;
 	}
 
 	RefreshTimer = 0;
-	//Max7219Init(numSegments, CSPIN);
+	//Max7219Init(TotalSegments, CSPIN);
 	IntiUART();
 
 	InitTimers();
