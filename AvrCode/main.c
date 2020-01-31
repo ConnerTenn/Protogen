@@ -57,7 +57,7 @@ ISR(TIMER1_COMPA_vect)
 
 	if (RefreshTimer == 0)
 	{
-		Max7219Init(TotalSegments, CSPIN);
+		Max7219Refresh(TotalSegments, CSPIN);
 		RefreshTimer = REFRESH_INTERVAL;
 	}
 	else { RefreshTimer--; }

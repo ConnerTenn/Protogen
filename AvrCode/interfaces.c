@@ -133,14 +133,27 @@ void Max7219Init(u8 numSegments, u8 cs)
 
 	Max7219SendCmd(0x0C00, numSegments, cs); //Disable
 	Max7219SendCmd(0x0F00, numSegments, cs); //Test off
-	Max7219SendCmd(0x0A00, numSegments, cs); //Intensity 0
+	Max7219SendCmd(0x0A00, numSegments, cs); //Intensity 0 (minimum)
 	Max7219SendCmd(0x0900, numSegments, cs); //Decode off
 	Max7219SendCmd(0x0B07, numSegments, cs); //Scan 7
 
+	//Blank Display
 	for (u16 l=1; l<=8; l++)
 	{
 		Max7219SendCmd(l<<8, numSegments, cs); 
 	}
+
+	Max7219SendCmd(0x0C01, numSegments, cs);  //Enable
+}
+
+void Max7219Refresh(u8 numSegments, u8 cs)
+{
+	DISPSEL(cs);
+
+	Max7219SendCmd(0x0F00, numSegments, cs); //Test off
+	Max7219SendCmd(0x0A00, numSegments, cs); //Intensity 0 (minimum)
+	Max7219SendCmd(0x0900, numSegments, cs); //Decode off
+	Max7219SendCmd(0x0B07, numSegments, cs); //Scan 7
 
 	Max7219SendCmd(0x0C01, numSegments, cs);  //Enable
 }
