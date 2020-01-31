@@ -17,6 +17,8 @@ void SPITransmit16(const u16 data);
 #define DDRB_SCK 5
 #define DDRB_CS 2
 
+#define REFRESH_INTERVAL 100
+u16 RefreshTimer;
 
 //Page 143
 void IntiUART();

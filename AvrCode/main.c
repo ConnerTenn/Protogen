@@ -54,7 +54,14 @@ ISR(TIMER1_COMPA_vect)
 		
 	}
 
-	u8 *data[NumDisplays];
+	if (RefreshTimer == 0)
+	{
+		Max7219Init(NumDisplays, CSPIN);
+		RefreshTimer = REFRESH_INTERVAL;
+	}
+	else { RefreshTimer--; }
+
+	u8 *data[NumDisplays]; //array of pointers
 	u8 numSegments[NumDisplays];
 	for (u8 d=0; d<NumDisplays; d++)
 	{
@@ -129,7 +136,9 @@ int main()
 	{
 		numSegments += DisplayList[i].NumSegments;
 	}
-	Max7219Init(numSegments, CSPIN);
+
+	RefreshTimer = 0;
+	//Max7219Init(numSegments, CSPIN);
 	IntiUART();
 
 	InitTimers();
