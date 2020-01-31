@@ -198,14 +198,17 @@ void Max7219SendData(u8 **data, u8 *numSegments, u8 numDisplays, u8 cs)
 
 	for (u16 y=0; y<8; y++)
 	{
+		u16 cmd = ((y+1)<<8); //select row
+
 		DISPDESEL(cs);
+		//From last display to the first; The data for the end must be sent first
 		for (u8 d=numDisplays-1; d<numDisplays; d--)
 		{
 			if (y==0) { i[d] = 0; }
 
 			for (u8 s=0; s<numSegments[d]; s++)
 			{
-				SPITransmit16(((y+1)<<8) | data[d][i[d]++]);
+				SPITransmit16(cmd | data[d][i[d]++]);
 			}
 		}
 		DISPSEL(cs);

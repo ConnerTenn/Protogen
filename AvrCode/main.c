@@ -23,7 +23,8 @@ Max7219 DisplayList[] =
 u8 NumDisplays = 3;
 #define CSPIN 0
 
-//mail callback
+
+//main callback
 ISR(TIMER1_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
@@ -75,7 +76,7 @@ ISR(TIMER1_COMPA_vect)
 	Max7219SendData(data, numSegments, NumDisplays, CSPIN);
 }
 
-//Frame periodic update
+//Frame delay update
 ISR(TIMER0_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
@@ -97,22 +98,22 @@ ISR(TIMER0_COMPA_vect)
 
 void InitTimers()
 {
-	//Counter 1
+	//Counter 1 (16 bit)
 	//Page 89
 	//Page 108
-	OCR1A = 2000; //(60MHz/8)/1000Hz
+	OCR1A = 2000; //(16MHz/8)/1000Hz  1KHz
 	TCNT1 = 0;
 	TIMSK1 = (1<<OCIE1A); //Enable Interrupt
-	//CTC mode & Prescale divide by 64 & start the timer
+	//CTC mode & Prescale divide by 8 & start the timer
 	TCCR1B = (1<<WGM12) | (0<<CS12)|(1<<CS11)|(0<<CS10); 
 	
-	//Counter 0
+	//Counter 0 (8 bit)
 	//Page 84
 	TCCR0A = (1<<WGM01);
-	OCR0A = 250; //(60MHz/64)/1000Hz
+	OCR0A = 250; //(16MHz/64)/1000Hz  1KHz
 	TCNT0 = 0;
 	TIMSK0 = (1<<OCIE0A); //Enable Interrupt
-	//CTC mode & Prescaler & start the timer
+	//CTC mode & Prescaler divide by 64 & start the timer
 	TCCR0B = (0<<CS02)|(1<<CS01)|(1<<CS00); 
 }
 
