@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "interfaces.h"
-
+#include "vfd.h"
 
 
 //main callback
@@ -89,7 +89,7 @@ int main()
 
 	while (1)
 	{
-
+		DISP_ON_OFF_CMD(1, 1, 1, 0, 0, 0);
 	}
 
 	return 0;

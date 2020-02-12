@@ -11,7 +11,7 @@ all: prog.hex
 %.o: %.c
 	$(GCC) $(CFLAGS) $< -c -o $@
 
-prog.elf: main.o globals.o interfaces.o
+prog.elf: main.o globals.o interfaces.o vfd.o
 	$(GCC) $(CFLAGS) $? -o $@
 
 prog.hex: prog.elf
