@@ -90,7 +90,7 @@ def Parse(f, fields):
 	return outData
 
 
-FrameData=Parse(FFrames, { "Name":"", "Type":"", "Delay":"", "Next":"" })
+FrameData=Parse(FFrames, { "Name":"", "Mask":"", "Pass":"", "Delay":"", "Next":"" })
 
 print("Number of frames: " +str(len(FrameData)) + "\n")
 
