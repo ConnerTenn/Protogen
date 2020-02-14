@@ -32,17 +32,17 @@ u8 DisplayBuffer[0xF][0x7F];
 
 void foo()
 {
-	DisplayBuffer[0];
+    DisplayBuffer[0];
 }
 
 #define CD 1
 
 #define DISP_ON_OFF_CMD(l0, l1, gs, grv, and, xor) (\
-	ENBITS(DDRC, CD), \
-	SPI_TRANSMIT((0b0010<<4) | (l1<<3) | (l0<<2)), \
-	SPI_TRANSMIT((gs<<6) | (grv<<4) | (and<<3) | (xor<<2)), \
-	DABITS(DDRC, CD) \
-	) 
+    ENBITS(DDRC, CD), \
+    SPI_TRANSMIT((0b0010<<4) | (l1<<3) | (l0<<2)), \
+    SPI_TRANSMIT((gs<<6) | (grv<<4) | (and<<3) | (xor<<2)), \
+    DABITS(DDRC, CD) \
+    ) 
 
 
 //#define CMD_DISP_ON_OFF(l0, l1
