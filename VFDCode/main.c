@@ -79,17 +79,21 @@ int main()
 
     IntiSPI();
 
-
-    //Max7219Init(TotalSegments, CSPIN);
     IntiUART();
+
+	InitDisplay();
 
     InitTimers();
 
     SerialTransmit("\nSetup Complete\n", 17);
 
+
+    DISP_ON_OFF_CMD(1, 0, 1, 0, 0, 0);
+
+	GRAM_WRITE(0xEA);
+
     while (1)
     {
-        DISP_ON_OFF_CMD(1, 1, 1, 0, 0, 0);
     }
 
     return 0;
