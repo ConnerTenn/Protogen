@@ -12,7 +12,12 @@
 void IntiSPI();
 void SPITransmit(const u8 data);
 void SPITransmit16(const u16 data);
-#define SPI_TRANSMIT(data) ( (SPDR = (data)), ({while(!(SPSR & (1<<SPIF))) {}}) )
+#define SPI_TRANSMIT(data) ( \
+    DABITS(PORTB, (1<<DDRB_CS)), \
+	(SPDR = (data)), \
+	({while(!(SPSR & (1<<SPIF))) {}}), \
+    ENBITS(PORTB, (1<<DDRB_CS)), \
+	(0))
 
 #define DDRB_MOSI 3
 #define DDRB_SCK 5
