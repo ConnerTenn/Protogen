@@ -77,20 +77,42 @@ int main()
 
     DDRC = 0xF;
 
+	PORTC = 0xFF;
+
     IntiSPI();
 
     IntiUART();
 
-	InitDisplay();
+	asm volatile (
+    "    ldi  r18, 42"	"\n"
+    "    ldi  r19, 142"	"\n"
+    "1:  dec  r19"	"\n"
+    "    brne 1b"	"\n"
+    "    dec  r18"	"\n"
+    "    brne 1b"	"\n"
+    "    nop"	"\n"
+	);
 
+	PORTC = 0x00;
+	InitDisplay();
+	
+	//GRAM_READ(0,0);
+
+	PORTC = 0xFF;
     InitTimers();
+	PORTC = 0x00;
 
     SerialTransmit("\nSetup Complete\n", 17);
 
-
-    DISP_ON_OFF_CMD(1, 0, 1, 0, 0, 0);
-
+    DISP_ON_OFF_CMD(1, 1, 1, 0, 0, 0);
+	//SET_WRITE_POS_X_ADDR_CMD(0);
+	//SET_WRITE_POS_Y_ADDR_CMD(0);
+	SET_ADDR_MODE_CMD(1, 1);
 	GRAM_WRITE(0xEA);
+	GRAM_WRITE(0x4C);
+	GRAM_WRITE(0x35);
+	GRAM_WRITE(0x93);
+
 
     while (1)
     {

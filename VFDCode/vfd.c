@@ -3,9 +3,11 @@
 
 void InitDisplay()
 {
-    ENBITS(DDRB,(1<<CD));
-
+    ENBITS(DDRB, (1<<CD) | (1<<DDRB_CS));
+	DABITS(PORTB, (1<<CD) | (1<<DDRB_CS)), \
+	//DELAY_1_US;
 	DISPLAY_CLEAR_CMD(1, 1, 1);
+	//DELAY_1_US;
 	DISPLAY_AREA_SET_ALL_GRAPHIC_CMD;
 }
 
