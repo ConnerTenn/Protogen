@@ -12,3 +12,6 @@ main
 camera
 camDisp
 circlefind
+
+*.bmp
+
