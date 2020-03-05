@@ -23,71 +23,6 @@ def StrtoHx(string):
 # ImgData=[]
 # ImgDataTmp=b""
 
-'''
-def ParseImageData(line):
-	global ImgDataTmp, ImgData
-	byte=0x00
-	bit=7
-	for ch in line:
-		c = (1 if ch=='#' else 0)
-		byte|=c<<bit
-		bit-=1
-		if bit==-1: #Reached end of bit
-			ImgDataTmp+=Hx(byte,1) #Convert byte to byte string and append #"\\x{0:02X}".format(byte)
-			bit=7
-			byte=0
-
-def EndImageData():
-	global ImgDataTmp, ImgData
-	if len(ImgDataTmp):
-		ImgData+=[ImgDataTmp]
-		ImgDataTmp=b""
-
-def Parse(f, fields):
-	global ImgData
-	cont=True
-	outData={}
-	index=0
-	while cont:
-		line=f.readline()
-
-		if len(line):
-			line=line.split("\\")[0].rstrip() #Remove Comments and whitespace
-			
-			keyval=line.split("=") #Split keys and values
-			
-			for field in fields: #Assign values to field if it exists
-				if keyval[0]==field: fields[field] = (keyval[1] if len(keyval)==2 else "")
-			
-			if line=="":
-				EndImageData() #end image parsing
-			elif line[0]=="." or line[0]=="#":
-				ParseImageData(line)
-
-			if line==";":
-				EndImageData() #end image parsing
-				dat={}
-				for field in fields: 
-					#print("{0}={1}".format(field,fields[field]))
-					dat[field]=fields[field]
-					fields[field]="" #reset fields back to default
-				#if len(ImgData): print("ImgData:")
-				dat["ImgData"]=[] #image data array
-				for img in ImgData: #append each image into the array
-					dat["ImgData"]+=[img]
-				dat["Index"]=index
-				#	print(img)
-				outData[dat["Name"]]=dat #Label this data with the name value
-
-				ImgData=[] #reset image data
-				index+=1
-				#print(dat)
-				#print()
-		else:
-			cont=False
-	#print(outData)
-	return outData
-'''
 
 def ParseImageData(img, y, xrange):
 	data = b""
@@ -118,7 +53,9 @@ FrameData = {
 		b'\x00\x00\x00\x00'],
 		"Delay":0, "Index":0, "Next":"Null"}
 	}
+	
 index = 1
+
 def ParseImage(path, expr, stage):
 	global index
 
@@ -135,37 +72,12 @@ def ParseImage(path, expr, stage):
 	name = expr + "_" + stage + "_" + str(framenum)
 	nxt = expr + "_" + stage + "_" + str(framenum+1)
 
-	frameData[name+"_EyeLeft"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_EyeLeft"}; index += 1
-	frameData[name+"_MouthLeft"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_MouthLeft"}; index += 1
-	frameData[name+"_NoseLeft"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_NoseLeft"}; index += 1
-	frameData[name+"_NoseRight"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_NoseRight"}; index += 1
-	frameData[name+"_MouthRight"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_MouthRight"}; index += 1
-	frameData[name+"_EyeRight"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_EyeRight"}; index += 1
+	frameData[name] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt}; index += 1
 
 	for y in range(0,8):
-		frameData[name+"_EyeLeft"]["ImgData"] += [ b"" ]
-		frameData[name+"_EyeLeft"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
-
-		frameData[name+"_MouthLeft"]["ImgData"] += [ b"" ]
-		frameData[name+"_MouthLeft"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
-
-		frameData[name+"_NoseLeft"]["ImgData"] += [ b"" ]
-		frameData[name+"_NoseLeft"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
-
-		frameData[name+"_NoseRight"]["ImgData"] += [ b"" ]
-		frameData[name+"_NoseRight"]["ImgData"][-1] += ParseImageData(img, y, (56,64))
-
-		frameData[name+"_MouthRight"]["ImgData"] += [ b"" ]
-		frameData[name+"_MouthRight"]["ImgData"][-1] += ParseImageData(img, y, (64,96))
-
-		frameData[name+"_EyeRight"]["ImgData"] += [ b"" ]
-		frameData[name+"_EyeRight"]["ImgData"][-1] += ParseImageData(img, y, (96,112))
+		frameData[name]["ImgData"] += [ b"" ]
+		frameData[name]["ImgData"][-1] += ParseImageData(img, y, (0,112))
 
 	return frameData
 
@@ -187,11 +99,24 @@ def Parse():
 		endFrameData = {}
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
-			startFrameData.update(ParseImage(path, expr, "start"))
+			data = ParseImage(path, expr, "start")
+			
+			startFrameData.update(data)
 
+		last = ""
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
-			loopFrameData.update(ParseImage(path, expr, "loop"))
+			data = ParseImage(path, expr, "loop")
+
+			if len(list(loopFrameData)) and data[list(data)[-1]]["ImgData"] == loopFrameData[list(loopFrameData)[-1]]["ImgData"]:
+				loopFrameData[list(loopFrameData)[-1]]["Delay"] += 40
+				print("Match")
+			else:
+				loopFrameData.update(data)
+				last = list(loopFrameData)[-1]
+			
+			if len(list(loopFrameData)) > 1:
+				loopFrameData[list(loopFrameData)[-2]]["Next"] = last
 
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
@@ -262,11 +187,10 @@ Datablock Format:
 Header
 	Frame
 	{
-		FrameOffset [4]
+		FrameOffset [2]
 		FrameNext [2]
-		FrameDelay [1]
-		Padding [1]
-	} [8]
+		FrameDelay [2]
+	} [6]
 	...
 
 ImageData
