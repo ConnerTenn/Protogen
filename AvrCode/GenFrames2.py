@@ -106,12 +106,26 @@ def ParseImageData(img, y, xrange):
 	#return the data for the entire display
 	return data
 
-FrameData = {}
-index = 0
+FrameData = {
+	"Null": {"ImgData":[
+		b'\x00\x00\x00\x00',
+		b'\x00\x80\x00\x00',
+		b'\x00\x00\x00\x00',
+		b'\x00\x00\x00\x00',
+		b'\x00\x00\x00\x00',
+		b'\x00\x00\x00\x00',
+		b'\x00\x00\x00\x00',
+		b'\x00\x00\x00\x00'],
+		"Delay":0, "Index":0, "Next":"Null"}
+	}
+index = 1
 def ParseImage(path, expr, stage):
+	global index
+
+	frameData = {}
 
 	try: img = Image.open(path)
-	except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
+	except: print("Error opening file \"{0}\"".format(frameData)); exit(-1)
 
 	if (img.size[1] != 8 or img.size[0] != (8*4 + 8*2 + 8)*2):
 		print("Error: Image improperly sized")
@@ -119,36 +133,41 @@ def ParseImage(path, expr, stage):
 	
 	framenum = int(path.split("frame")[1].split(".bmp")[0])
 	name = expr + "_" + stage + "_" + str(framenum)
-	print(name)
+	nxt = expr + "_" + stage + "_" + str(framenum+1)
 
-	FrameData[name+"_EyeLeft"] = {"ImgData":[]}
-	FrameData[name+"_MouthLeft"] = {"ImgData":[]}
-	FrameData[name+"_NoseLeft"] = {"ImgData":[]}
-	FrameData[name+"_NoseRight"] = {"ImgData":[]}
-	FrameData[name+"_MouthRight"] = {"ImgData":[]}
-	FrameData[name+"_EyeRight"] = {"ImgData":[]}
+	frameData[name+"_EyeLeft"] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_EyeLeft"}; index += 1
+	frameData[name+"_MouthLeft"] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_MouthLeft"}; index += 1
+	frameData[name+"_NoseLeft"] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_NoseLeft"}; index += 1
+	frameData[name+"_NoseRight"] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_NoseRight"}; index += 1
+	frameData[name+"_MouthRight"] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_MouthRight"}; index += 1
+	frameData[name+"_EyeRight"] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_EyeRight"}; index += 1
 
 	for y in range(0,8):
-		FrameData[name+"_EyeLeft"]["ImgData"] += [ b"" ]
-		FrameData[name+"_EyeLeft"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
+		frameData[name+"_EyeLeft"]["ImgData"] += [ b"" ]
+		frameData[name+"_EyeLeft"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
 
-		FrameData[name+"_MouthLeft"]["ImgData"] += [ b"" ]
-		FrameData[name+"_MouthLeft"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
+		frameData[name+"_MouthLeft"]["ImgData"] += [ b"" ]
+		frameData[name+"_MouthLeft"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
 
-		FrameData[name+"_NoseLeft"]["ImgData"] += [ b"" ]
-		FrameData[name+"_NoseLeft"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
+		frameData[name+"_NoseLeft"]["ImgData"] += [ b"" ]
+		frameData[name+"_NoseLeft"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
 
-		FrameData[name+"_NoseRight"]["ImgData"] += [ b"" ]
-		FrameData[name+"_NoseRight"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
+		frameData[name+"_NoseRight"]["ImgData"] += [ b"" ]
+		frameData[name+"_NoseRight"]["ImgData"][-1] += ParseImageData(img, y, (56,64))
 
-		FrameData[name+"_MouthRight"]["ImgData"] += [ b"" ]
-		FrameData[name+"_MouthRight"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
+		frameData[name+"_MouthRight"]["ImgData"] += [ b"" ]
+		frameData[name+"_MouthRight"]["ImgData"][-1] += ParseImageData(img, y, (64,96))
 
-		FrameData[name+"_EyeRight"]["ImgData"] += [ b"" ]
-		FrameData[name+"_EyeRight"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
+		frameData[name+"_EyeRight"]["ImgData"] += [ b"" ]
+		frameData[name+"_EyeRight"]["ImgData"][-1] += ParseImageData(img, y, (96,112))
 
-
-	print(FrameData[name+"_MouthLeft"]["ImgData"])
+	return frameData
 
 def Parse():
 	Expressions = os.listdir(FFrames)
@@ -162,17 +181,36 @@ def Parse():
 		start.sort()
 		loop.sort()
 		end.sort()
+		
+		startFrameData = {}
+		loopFrameData = {}
+		endFrameData = {}
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
-			ParseImage(path, expr, "start")
+			startFrameData.update(ParseImage(path, expr, "start"))
 
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
-			ParseImage(path, expr, "loop")
+			loopFrameData.update(ParseImage(path, expr, "loop"))
 
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
-			ParseImage(path, expr, "end")
+			endFrameData.update(ParseImage(path, expr, "end"))
+		
+		for i in range(0,6):
+			startFrameData[list(startFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
+			loopFrameData[list(loopFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
+			endFrameData[list(endFrameData)[i-6]]["Next"] = "Null"
+		FrameData.update(startFrameData)
+		FrameData.update(loopFrameData)
+		FrameData.update(endFrameData)
+
+		i=0
+		for f in FrameData:
+			print(str(i) + " " + f + " -> " + FrameData[f]["Next"])
+			i+=1
+			#FrameData[f]["Next"] = ""
+
 			
 		
 
@@ -189,7 +227,7 @@ for name in FrameData:
 	frame=FrameData[name]
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
 	frameNext = int(FrameData[frame["Next"]]["Index"]) if len(frame["Next"]) else frame["Index"]
-	frameDelay = int(frame["Delay"]) if len(frame["Delay"]) else 0xFF #frame["Index"]
+	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["Index"]
 	HeaderStr+=Hx(FrameOffset, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
@@ -198,8 +236,13 @@ for name in FrameData:
 		FrameStr+=imgDat
 		FrameOffset+=len(imgDat)
 
-FFrameData.write(HeaderStr+FrameStr)
+	
 
+print("Header: " + str(len(HeaderStr)) + "b")
+print("Frames: " + str(len(FrameStr)) + "b")
+
+print("Writing Data File")
+FFrameData.write(HeaderStr+FrameStr)
 
 FFrameData.close()
 

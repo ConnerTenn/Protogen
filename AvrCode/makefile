@@ -17,7 +17,7 @@ all: prog.hex
 FrameData.bin: bin
 
 bin:
-	python GenFrames.py
+	python GenFrames2.py
 
 
 

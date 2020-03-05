@@ -16,9 +16,9 @@ typedef struct
 
 Max7219 DisplayList[] = 
 	{
-		{2, 2, -1},
-		{1, 1, -1},
-		{4, 3, -1},
+		{2, 1, -1}, //Eye
+		{1, 3, -1}, //Nose
+		{4, 2, -1}, //Mouth
 	};
 u8 NumDisplays;
 u8 TotalSegments;
