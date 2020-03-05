@@ -13,29 +13,6 @@ try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
 FFrameData=f
 
-Expressions = os.listdir(FFrames)
-for expr in Expressions:
-    start = os.listdir(FFrames + "/" + expr + "/start")
-    loop = os.listdir(FFrames + "/" + expr + "/loop")
-    end = os.listdir(FFrames + "/" + expr + "/end")
-    start = list(map(lambda s: FFrames+"/"+expr+"/start/"+s, start))
-    loop = list(map(lambda s: FFrames+"/"+expr+"/loop/"+s, loop))
-    end = list(map(lambda s: FFrames+"/"+expr+"/end/"+s, end))
-    for f in start:
-        print(f)
-    for f in loop:
-        print(f)
-    for f in end:
-        print(f)
-    im = Image.open(loop[0])
-    print(im.format, im.size, im.mode)
-    for y in range(im.size[1]):
-        for x in range(im.size[0]):
-            print(1 if im.getpixel((x, y))[0]>127 else 0, end="")
-        print()
-
-exit(0)
-
 
 def Hx(val, length):
 	return val.to_bytes(length, byteorder="little")
@@ -43,9 +20,10 @@ def Hx(val, length):
 def StrtoHx(string):
 	return bytes(string, "utf8")
 
-ImgData=[]
-ImgDataTmp=b""
+# ImgData=[]
+# ImgDataTmp=b""
 
+'''
 def ParseImageData(line):
 	global ImgDataTmp, ImgData
 	byte=0x00
@@ -64,7 +42,6 @@ def EndImageData():
 	if len(ImgDataTmp):
 		ImgData+=[ImgDataTmp]
 		ImgDataTmp=b""
-
 
 def Parse(f, fields):
 	global ImgData
@@ -110,9 +87,96 @@ def Parse(f, fields):
 			cont=False
 	#print(outData)
 	return outData
+'''
+
+def ParseImageData(img, y, xrange):
+	data = b""
+	bit=0
+	byte=0x00
+	for x in range(xrange[0],xrange[1]):
+		if x % 8 == 0:
+			bit=7
+			byte = 0x00
+		c = 1 if img.getpixel((x,y))[0]>127 else 0
+		byte |= c<<bit
+		bit-=1
+		if bit==-1:
+			data += Hx(byte,1)
+	return data
+
+FrameData = {}
+index = 0
+def ParseImage(path, expr, stage):
+
+	try: img = Image.open(path)
+	except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
+
+	if (img.size[1] != 8 or img.size[0] != (8*4 + 8*2 + 8)*2):
+		print("Error: Image improperly sized")
+		exit(0)
+	
+	framenum = int(path.split("frame")[1].split(".bmp")[0])
+	name = expr + "_" + stage + "_" + str(framenum)
+	print(name)
+
+	FrameData[name+"_EyeLeft"] = {"ImgData":[]}
+	FrameData[name+"_MouthLeft"] = {"ImgData":[]}
+	FrameData[name+"_NoseLeft"] = {"ImgData":[]}
+	FrameData[name+"_NoseRight"] = {"ImgData":[]}
+	FrameData[name+"_MouthRight"] = {"ImgData":[]}
+	FrameData[name+"_EyeRight"] = {"ImgData":[]}
+
+	for y in range(0,8):
+		FrameData[name+"_EyeLeft"]["ImgData"] += [ b"" ]
+		FrameData[name+"_EyeLeft"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
+
+		FrameData[name+"_MouthLeft"]["ImgData"] += [ b"" ]
+		FrameData[name+"_MouthLeft"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
+
+		FrameData[name+"_NoseLeft"]["ImgData"] += [ b"" ]
+		FrameData[name+"_NoseLeft"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
+
+		FrameData[name+"_NoseRight"]["ImgData"] += [ b"" ]
+		FrameData[name+"_NoseRight"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
+
+		FrameData[name+"_MouthRight"]["ImgData"] += [ b"" ]
+		FrameData[name+"_MouthRight"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
+
+		FrameData[name+"_EyeRight"]["ImgData"] += [ b"" ]
+		FrameData[name+"_EyeRight"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
 
 
-FrameData=Parse(FFrames, { "Name":"", "Mask":"", "Pass":"", "Delay":"", "Next":"" })
+	print(FrameData[name+"_MouthLeft"]["ImgData"])
+
+def Parse():
+	Expressions = os.listdir(FFrames)
+	for expr in Expressions:
+		start = os.listdir(FFrames + "/" + expr + "/start")
+		loop = os.listdir(FFrames + "/" + expr + "/loop")
+		end = os.listdir(FFrames + "/" + expr + "/end")
+		# start = list(map(lambda s: FFrames+"/"+expr+"/start/"+s, start))
+		# loop = list(map(lambda s: FFrames+"/"+expr+"/loop/"+s, loop))
+		# end = list(map(lambda s: FFrames+"/"+expr+"/end/"+s, end))
+		start.sort()
+		loop.sort()
+		end.sort()
+		for f in start:
+			path = FFrames+"/"+expr+"/start/"+f
+			ParseImage(path, expr, "start")
+
+		for f in loop:
+			path = FFrames+"/"+expr+"/loop/"+f
+			ParseImage(path, expr, "loop")
+
+		for f in end:
+			path = FFrames+"/"+expr+"/end/"+f
+			ParseImage(path, expr, "end")
+			
+		
+
+# FrameData=Parse(FFrames, { "Name":"", "Mask":"", "Pass":"", "Delay":"", "Next":"" })
+
+Parse()
 
 print("Number of frames: " +str(len(FrameData)) + "\n")
 
@@ -135,7 +199,6 @@ for name in FrameData:
 FFrameData.write(HeaderStr+FrameStr)
 
 
-FFrames.close()
 FFrameData.close()
 
 
