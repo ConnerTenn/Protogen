@@ -118,7 +118,9 @@ FrameData = {
 		b'\x00\x00\x00\x00'],
 		"Delay":0, "Index":0, "Next":"Null"}
 	}
+	
 index = 1
+
 def ParseImage(path, expr, stage):
 	global index
 
@@ -135,37 +137,12 @@ def ParseImage(path, expr, stage):
 	name = expr + "_" + stage + "_" + str(framenum)
 	nxt = expr + "_" + stage + "_" + str(framenum+1)
 
-	frameData[name+"_EyeLeft"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_EyeLeft"}; index += 1
-	frameData[name+"_MouthLeft"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_MouthLeft"}; index += 1
-	frameData[name+"_NoseLeft"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_NoseLeft"}; index += 1
-	frameData[name+"_NoseRight"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_NoseRight"}; index += 1
-	frameData[name+"_MouthRight"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_MouthRight"}; index += 1
-	frameData[name+"_EyeRight"] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt+"_EyeRight"}; index += 1
+	frameData[name] = \
+		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt}; index += 1
 
 	for y in range(0,8):
-		frameData[name+"_EyeLeft"]["ImgData"] += [ b"" ]
-		frameData[name+"_EyeLeft"]["ImgData"][-1] += ParseImageData(img, y, (0,16))
-
-		frameData[name+"_MouthLeft"]["ImgData"] += [ b"" ]
-		frameData[name+"_MouthLeft"]["ImgData"][-1] += ParseImageData(img, y, (16,48))
-
-		frameData[name+"_NoseLeft"]["ImgData"] += [ b"" ]
-		frameData[name+"_NoseLeft"]["ImgData"][-1] += ParseImageData(img, y, (48,56))
-
-		frameData[name+"_NoseRight"]["ImgData"] += [ b"" ]
-		frameData[name+"_NoseRight"]["ImgData"][-1] += ParseImageData(img, y, (56,64))
-
-		frameData[name+"_MouthRight"]["ImgData"] += [ b"" ]
-		frameData[name+"_MouthRight"]["ImgData"][-1] += ParseImageData(img, y, (64,96))
-
-		frameData[name+"_EyeRight"]["ImgData"] += [ b"" ]
-		frameData[name+"_EyeRight"]["ImgData"][-1] += ParseImageData(img, y, (96,112))
+		frameData[name]["ImgData"] += [ b"" ]
+		frameData[name]["ImgData"][-1] += ParseImageData(img, y, (0,112))
 
 	return frameData
 
@@ -187,11 +164,24 @@ def Parse():
 		endFrameData = {}
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
-			startFrameData.update(ParseImage(path, expr, "start"))
+			data = ParseImage(path, expr, "start")
+			
+			startFrameData.update(data)
 
+		last = ""
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
-			loopFrameData.update(ParseImage(path, expr, "loop"))
+			data = ParseImage(path, expr, "loop")
+
+			if len(list(loopFrameData)) and data[list(data)[-1]]["ImgData"] == loopFrameData[list(loopFrameData)[-1]]["ImgData"]:
+				loopFrameData[list(loopFrameData)[-1]]["Delay"] += 40
+				print("Match")
+			else:
+				loopFrameData.update(data)
+				last = list(loopFrameData)[-1]
+			
+			if len(list(loopFrameData)) > 1:
+				loopFrameData[list(loopFrameData)[-2]]["Next"] = last
 
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
