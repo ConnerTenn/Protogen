@@ -91,17 +91,19 @@ def Parse(f, fields):
 
 def ParseImageData(img, y, xrange):
 	data = b""
-	bit=0
+	bit=7
 	byte=0x00
 	for x in range(xrange[0],xrange[1]):
-		if x % 8 == 0:
-			bit=7
-			byte = 0x00
+		#read the red channel at each pixel and set on/off
 		c = 1 if img.getpixel((x,y))[0]>127 else 0
 		byte |= c<<bit
 		bit-=1
+		#byte filled; save it and reset bits
 		if bit==-1:
 			data += Hx(byte,1)
+			bit=7
+			byte = 0x00
+	#return the data for the entire display
 	return data
 
 FrameData = {}
