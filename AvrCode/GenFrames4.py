@@ -53,7 +53,7 @@ Frames = [
 	]
 
 FrameData = [
-	{"Name":"Null", "Index":0, "Delay":0, "Next":0},
+	{"Name":"Null", "Frame":0, "Delay":0, "Next":0, "Index":0},
 	]
 
 def ExistsInFrames(frame):
@@ -65,8 +65,10 @@ def ExistsInFrames(frame):
 		i+=1
 	return -1
 
+Index=1
 def ParseImage(path, expr, stage):
 	global Frames
+	global Index
 
 	frameData = []
 
@@ -85,12 +87,13 @@ def ParseImage(path, expr, stage):
 		frame += [ b"" ]
 		frame[-1] += ParseImageData(img, y, (0,112))
 	
-	idx = ExistsInFrames(frame)
-	if idx == -1:
-		idx = len(Frames)
+	frameidx = ExistsInFrames(frame)
+	if frameidx == -1:
+		frameidx = len(Frames)
 		Frames += [ frame ]
 	
-	frameData = {"Name":name, "Index":idx, "Delay":40, "Next":0}
+	frameData = {"Name":name, "Frame":frameidx, "Delay":40, "Next":Index+1, "Index":Index}
+	Index+=1
 	return frameData
 
 def Parse():
@@ -127,9 +130,10 @@ def Parse():
 			path = FFrames+"/"+expr+"/end/"+f
 			endFrameData += [ ParseImage(path, expr, "end") ]
 		
-#		for f in end:
-#			path = FFrames+"/"+expr+"/end/"+f
-#			endFrameData.update(ParseImage(path, expr, "end"))
+		
+		
+		# for fi in range(0, len(start)):
+		# 	startFrameData[fi]["Next"] = fi+1
 #		
 #		for i in range(0,6):
 #			startFrameData[list(startFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
@@ -138,6 +142,10 @@ def Parse():
 #		FrameData.update(startFrameData)
 #		FrameData.update(loopFrameData)
 #		FrameData.update(endFrameData)
+		
+		startFrameData[-1]["Next"] = loopFrameData[0]["Index"]
+		loopFrameData[-1]["Next"] = loopFrameData[0]["Index"]
+		endFrameData[-1]["Next"] = 0 #Null
 
 		FrameData += startFrameData
 		FrameData += loopFrameData
@@ -145,17 +153,21 @@ def Parse():
 		
 		last = -1
 		tmpdata = []
+		backmod = 0
 		for f in FrameData:
-			if f["Index"] == last:
+			if f["Frame"] == last:
 				tmpdata[-1]["Delay"] += 40
+				#tmpdata[-1]["Next"] -= 1
+				backmod += 1
 			else:
+				f["Next"] =  f["Next"] - backmod if f["Next"] else 0
 				tmpdata += [ f ]
-				last = f["Index"]
+				last = f["Frame"]
 		FrameData = tmpdata
 
 		i=0
 		for f in FrameData:
-			print(str(i) + " " + f["Name"] + " [" + str(f["Index"]) + "]" )
+			print(str(i) + " " + f["Name"] + " [" + str(f["Frame"]) + "] " + str(f["Delay"]) + "ms -> " + FrameData[f["Next"]]["Name"] )
 			i+=1
 			#FrameData[f]["Next"] = ""
 
@@ -177,8 +189,8 @@ FrameStr=b""
 FrameOffset=len(FrameData)*(2+2+2) #Size of header * bytes in each header
 for frame in FrameData:
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
-	frameNext = int(frame["Index"])
-	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["Index"]
+	frameNext = int(frame["Frame"])
+	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["Frame"]
 	HeaderStr+=Hx(FrameOffset, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
