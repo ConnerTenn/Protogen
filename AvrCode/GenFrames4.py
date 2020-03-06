@@ -87,8 +87,8 @@ def ParseImage(path, expr, stage):
 	
 	idx = ExistsInFrames(frame)
 	if idx == -1:
-		Frames += [ frame ]
 		idx = len(Frames)
+		Frames += [ frame ]
 	
 	frameData = {"Name":name, "Index":idx, "Delay":40, "Next":0}
 	return frameData
@@ -190,8 +190,8 @@ for name in FrameData:
 
 	
 
-print("Header: " + str(len(HeaderStr)) + "b")
-print("Frames: " + str(len(FrameStr)) + "b")
+print("Header: " + str(len(HeaderStr)) + "B")
+print("Frames: " + str(len(FrameStr)) + "B")
 
 print("Writing Data File")
 FFrameData.write(HeaderStr+FrameStr)
