@@ -109,7 +109,7 @@ def ParseImageData(img, y, xrange):
 FrameData = {
 	"Null": {"ImgData":[
 		b'\x00\x00\x00\x00',
-		b'\x00\x80\x00\x00',
+		b'\x00\x00\x00\x00',
 		b'\x00\x00\x00\x00',
 		b'\x00\x00\x00\x00',
 		b'\x00\x00\x00\x00',
@@ -252,10 +252,9 @@ Datablock Format:
 Header
 	Frame
 	{
-		FrameOffset [4]
+		FrameOffset [2]
 		FrameNext [2]
-		FrameDelay [1]
-		Padding [1]
+		FrameDelay [2]
 	} [8]
 	...
 
