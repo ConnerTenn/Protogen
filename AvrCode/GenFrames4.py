@@ -41,28 +41,37 @@ def ParseImageData(img, y, xrange):
 	#return the data for the entire display
 	return data
 
-FrameData = {
-	"Null": {"ImgData":[
-		b'\x00\x00\x00\x00',
-		b'\x00\x80\x00\x00',
-		b'\x00\x00\x00\x00',
-		b'\x00\x00\x00\x00',
-		b'\x00\x00\x00\x00',
-		b'\x00\x00\x00\x00',
-		b'\x00\x00\x00\x00',
-		b'\x00\x00\x00\x00'],
-		"Delay":0, "Index":0, "Next":"Null"}
-	}
+Frames = [
+	[b'\x00\x00\x00\x00',
+	 b'\x00\x80\x00\x00',
+	 b'\x00\x00\x00\x00',
+	 b'\x00\x00\x00\x00',
+	 b'\x00\x00\x00\x00',
+	 b'\x00\x00\x00\x00',
+	 b'\x00\x00\x00\x00',
+	 b'\x00\x00\x00\x00'],
+
+]
+FrameData = [
+	{"Name":"Null", "Index":0, "Delay":0, "Next":0}
+	]
 	
-index = 1
+
+def ExitsInFrames(frame):
+	global Frames
+	i=0
+	for f in Frames:
+		if frame == f:
+			return i
+		i+=1
+	return -1
 
 def ParseImage(path, expr, stage):
-	global index
-
-	frameData = {}
+	global Frames
+	frame = []
 
 	try: img = Image.open(path)
-	except: print("Error opening file \"{0}\"".format(frameData)); exit(-1)
+	except: print("Error opening file \"{0}\"".format(path)); exit(-1)
 
 	if (img.size[1] != 8 or img.size[0] != (8*4 + 8*2 + 8)*2):
 		print("Error: Image improperly sized")
@@ -70,18 +79,23 @@ def ParseImage(path, expr, stage):
 	
 	framenum = int(path.split("frame")[1].split(".bmp")[0])
 	name = expr + "_" + stage + "_" + str(framenum)
-	nxt = expr + "_" + stage + "_" + str(framenum+1)
-
-	frameData[name] = \
-		{"ImgData":[], "Delay":40, "Index":index, "Next":nxt}; index += 1
 
 	for y in range(0,8):
-		frameData[name]["ImgData"] += [ b"" ]
-		frameData[name]["ImgData"][-1] += ParseImageData(img, y, (0,112))
+		frame += [ b"" ]
+		frame[-1] += ParseImageData(img, y, (0,112))
+
+	idx = ExitsInFrames(frame)
+	if idx == -1:
+		Frames += frame
+		idx = len(Frames)
+	
+	frameData = {"Name":name, "Index":idx, "Delay":40, "Next":0}
 
 	return frameData
 
 def Parse():
+	global FrameData
+
 	Expressions = os.listdir(FFrames)
 	for expr in Expressions:
 		start = os.listdir(FFrames + "/" + expr + "/start")
@@ -94,45 +108,36 @@ def Parse():
 		loop.sort()
 		end.sort()
 		
-		startFrameData = {}
-		loopFrameData = {}
-		endFrameData = {}
-		for f in start:
-			path = FFrames+"/"+expr+"/start/"+f
-			data = ParseImage(path, expr, "start")
+		# startFrameData = []
+		loopFrameData = []
+		# endFrameData = []
+		# for f in start:
+		# 	path = FFrames+"/"+expr+"/start/"+f
+		# 	data = ParseImage(path, expr, "start")
 			
-			startFrameData.update(data)
+		# 	startFrameData.update(data)
 
-		last = ""
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
-			data = ParseImage(path, expr, "loop")
+			loopFrameData += [ ParseImage(path, expr, "loop") ]
 
-			if len(list(loopFrameData)) and data[list(data)[-1]]["ImgData"] == loopFrameData[list(loopFrameData)[-1]]["ImgData"]:
-				loopFrameData[list(loopFrameData)[-1]]["Delay"] += 40
-				print("Match")
-			else:
-				loopFrameData.update(data)
-				last = list(loopFrameData)[-1]
-			
-			if len(list(loopFrameData)) > 1:
-				loopFrameData[list(loopFrameData)[-2]]["Next"] = last
-
-		for f in end:
-			path = FFrames+"/"+expr+"/end/"+f
-			endFrameData.update(ParseImage(path, expr, "end"))
+		# for f in end:
+		# 	path = FFrames+"/"+expr+"/end/"+f
+		# 	endFrameData.update(ParseImage(path, expr, "end"))
 		
-		for i in range(0,6):
-			startFrameData[list(startFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
-			loopFrameData[list(loopFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
-			endFrameData[list(endFrameData)[i-6]]["Next"] = "Null"
-		FrameData.update(startFrameData)
-		FrameData.update(loopFrameData)
-		FrameData.update(endFrameData)
+		# for i in range(0,6):
+		# 	startFrameData[list(startFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
+		# 	loopFrameData[list(loopFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
+		# 	endFrameData[list(endFrameData)[i-6]]["Next"] = "Null"
+		# FrameData.update(startFrameData)
+		# FrameData.update(loopFrameData)
+		# FrameData.update(endFrameData)
+
+		FrameData += loopFrameData
 
 		i=0
 		for f in FrameData:
-			print(str(i) + " " + f + " -> " + FrameData[f]["Next"])
+			print(str(i) + " " + f["Name"] + " [" + str(f["Index"]) + "]")
 			i+=1
 			#FrameData[f]["Next"] = ""
 
