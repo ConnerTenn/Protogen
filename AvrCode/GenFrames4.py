@@ -175,18 +175,18 @@ print()
 HeaderStr=b""
 FrameStr=b""
 FrameOffset=len(FrameData)*(2+2+2) #Size of header * bytes in each header
-for name in FrameData:
-	frame=FrameData[name]
+for frame in FrameData:
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
-	frameNext = int(FrameData[frame["Next"]]["Index"]) if len(frame["Next"]) else frame["Index"]
+	frameNext = int(frame["Index"])
 	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["Index"]
 	HeaderStr+=Hx(FrameOffset, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
 	#HeaderStr+=Hx(0, 1) #padding to 4-byte boundary  =4-(2+1) =1
-	for imgDat in frame["ImgData"]:
-		FrameStr+=imgDat
-		FrameOffset+=len(imgDat)
+for imgdat in Frames:
+    for imgline in imgdat:
+        FrameStr+=imgline
+        FrameOffset+=len(imgline)
 
 	
 
