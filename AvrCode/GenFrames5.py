@@ -8,9 +8,13 @@ FFrames="Frames"
 FFrameData="FrameData.bin"
 Displays=[
 	#Name, Src Rectangle (x1, y1, x2, y2)
-	{"Name":"LeftEye", "Rect":{"x1":0, "y1":0, "x2":16, "y2":8}} 
+	{"Name":"LeftEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}},
+	{"Name":"LeftMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}},
+	{"Name":"LeftNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}},
+	{"Name":"RightNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}},
+	{"Name":"RightMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}},
+	{"Name":"RightEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}},
 ]
-
 
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
@@ -49,26 +53,25 @@ for d in Displays:
 	if d["Name"].find(" ") != -1 or d["Name"].find("_") != -1:
 		print("Spaces and Underscores not allowed in name")
 		exit(-1)
-	if ((d["Rect"]["x2"] - d["Rect"]["x1"]) % 8 != 0) or ((d["Rect"]["y2"] - d["Rect"]["y1"]) % 8 != 0):
+	if ((d["Rect"]["x2"] - d["Rect"]["x1"] + 1) % 8 != 0) or ((d["Rect"]["y2"] - d["Rect"]["y1"] + 1) % 8 != 0):
 		print("Invalid Display Rect")
 		exit(-1)
+	d["w"] = d["Rect"]["x2"] - d["Rect"]["x1"] + 1
+	d["W"] = int(d["w"]/8)
+	d["h"] = d["Rect"]["y2"] - d["Rect"]["y1"] + 1
+	d["H"] = int(d["h"]/8)
 
+# for d in Displays:
+# 	print(d)
 
+Frames = []
+FrameData = []
+for d in Displays:
+	Frames += [ [ b'\x00' * d["W"] ] * d["h"] ]
 
-Frames = [
-	[b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
-	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00']
-	]
-
-FrameData = [
-	{"Name":"Null", "FrameIdx":0, "Delay":0, "NextIdx":0, "Index":0},
-	]
+# for f in Frames:
+# 	print(f)
+exit()
 
 def ExistsInFrames(frame):
 	global Frames
