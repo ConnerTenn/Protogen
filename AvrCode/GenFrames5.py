@@ -31,20 +31,22 @@ def StrtoHx(string):
 # ImgDataTmp=b""
 
 
-def ParseImageData(img, y, xrange):
-	data = b""
-	bit=7
-	byte=0x00
-	for x in range(xrange[0],xrange[1]):
-		#read the red channel at each pixel and set on/off
-		c = 1 if img.getpixel((x,y))[0]>127 else 0
-		byte |= c<<bit
-		bit-=1
-		#byte filled; save it and reset bits
-		if bit==-1:
-			data += Hx(byte,1)
-			bit=7
-			byte = 0x00
+def ParseImageData(img, imgrange):
+	data = [ ]
+	for y in range(imgrange["y1"],imgrange["y2"]+1):
+		bit=7
+		byte=0x00
+		data += [ b"" ]
+		for x in range(imgrange["x1"],imgrange["x2"]+1):
+			#read the red channel at each pixel and set on/off
+			c = 1 if img.getpixel((x,y))[0]>127 else 0
+			byte |= c<<bit
+			bit-=1
+			#byte filled; save it and reset bits
+			if bit==-1:
+				data[-1] += Hx(byte,1)
+				bit=7
+				byte = 0x00
 	#return the data for the entire display
 	return data
 
@@ -66,12 +68,15 @@ for d in Displays:
 
 Frames = []
 FrameData = []
+i = 0
 for d in Displays:
 	Frames += [ [ b'\x00' * d["W"] ] * d["h"] ]
+	FrameData += [{"Name":"Null_"+d["Name"], "FrameIdx":i, "Delay":0, "NextIdx":i, "Index":i}]
+	i+=1
+del i
 
 # for f in Frames:
 # 	print(f)
-exit()
 
 def ExistsInFrames(frame):
 	global Frames
@@ -82,39 +87,63 @@ def ExistsInFrames(frame):
 		i+=1
 	return -1
 
-Index=1
+Index=len(Displays)
+Last=[None]*len(Displays)
 def ParseImage(path, expr, stage):
 	global Frames
 	global Index
+	global FrameData
 
 	frameData = []
 
 	try: img = Image.open(path)
 	except: print("Error opening file \"{0}\"".format(path)); exit(-1)
 
-	if (img.size[1] != 8 or img.size[0] != (8*4 + 8*2 + 8)*2):
+	if (img.size[1] % 8 != 0 or img.size[0] % 8 != 0):
 		print("Error: Image improperly sized")
 		exit(0)
 
-	framenum = int(path.split("frame")[1].split(".bmp")[0])
-	name = expr + "_" + stage + "_" + str(framenum)
+	imgnum = int(path.split("frame")[1].split(".bmp")[0])
 
-	frame = []
-	for y in range(0,8):
-		frame += [ b"" ]
-		frame[-1] += ParseImageData(img, y, (0,112))
+	newframes = []
+	frameData = []
+	l=0
+	for d in Displays:
+		newframes += [ ParseImageData(img, d["Rect"]) ]
+		
+		name = expr + "_" + stage + "_" + str(imgnum) + "_" + d["Name"]
+		
+		frameidx = ExistsInFrames(newframes[-1])
+		if frameidx == -1:
+			frameidx = len(Frames)
+			Frames += [ newframes[-1] ]
+
+		if Last[l] == None or Last[l]["FrameIdx"] != frameidx:
+			if Last[l] != None:
+				Last[l]["NextIdx"] = Index
+			frameData += [{"Name":name, "FrameIdx":frameidx, "Delay":40, "NextIdx":-1, "Index":Index}]
+			Last[l] = frameData[-1] 
+			Index+=1
+		else:
+			Last[l]["Delay"] += 40
+		
+		l+=1
+
+	return frameData
+	# for f in newframes:
+	# 	print(f)
+	# for f in frameData:
+	# 	print(f)
+	# exit()
+
 	
-	frameidx = ExistsInFrames(frame)
-	if frameidx == -1:
-		frameidx = len(Frames)
-		Frames += [ frame ]
 	
-	frameData = {"Name":name, "FrameIdx":frameidx, "Delay":40, "NextIdx":Index+1, "Index":Index}
-	Index+=1
+	
 	return frameData
 
 def Parse():
 	global FrameData
+	global Last
 
 	Expressions = os.listdir(FFrames)
 	for expr in Expressions:
@@ -135,42 +164,51 @@ def Parse():
 
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
-			startFrameData += [ ParseImage(path, expr, "start") ]
+			startFrameData += ParseImage(path, expr, "start")
+		lastofstart = Last
+		
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
-			loopFrameData += [ ParseImage(path, expr, "loop") ]
+			loopFrameData += ParseImage(path, expr, "loop")
+		lastofloop = Last
+
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
-			endFrameData += [ ParseImage(path, expr, "end") ]
+			endFrameData += ParseImage(path, expr, "end")
+		lastofend = Last
+
+		for fi in range(0, len(Displays)):
+			lastofstart[fi]["NextIdx"] = loopFrameData[fi]["Index"]
+			lastofloop[fi]["NextIdx"] = loopFrameData[fi]["Index"]
+			lastofend[fi]["NextIdx"] = fi
 		
 		
-		
-		
-		startFrameData[-1]["NextIdx"] = loopFrameData[0]["Index"]
-		loopFrameData[-1]["NextIdx"] = loopFrameData[0]["Index"]
-		endFrameData[-1]["NextIdx"] = 0 #Null
+		# startFrameData[-1]["NextIdx"] = loopFrameData[0]["Index"]
+		# loopFrameData[-1]["NextIdx"] = loopFrameData[0]["Index"]
+		# endFrameData[-1]["NextIdx"] = 0 #Null
 
 		FrameData += startFrameData
 		FrameData += loopFrameData
 		FrameData += endFrameData
 		
-		last = -1
-		tmpdata = []
-		backmod = 0
-		for f in FrameData:
-			if f["FrameIdx"] == last:
-				tmpdata[-1]["Delay"] += 40
-				#tmpdata[-1]["NextIdx"] -= 1
-				backmod += 1
-			else:
-				f["NextIdx"] =  f["NextIdx"] - backmod if f["NextIdx"] else 0
-				tmpdata += [ f ]
-				last = f["FrameIdx"]
-		FrameData = tmpdata
+		# last = -1
+		# tmpdata = []
+		# backmod = 0
+		# for f in FrameData:
+		# 	if f["FrameIdx"] == last:
+		# 		tmpdata[-1]["Delay"] += 40
+		# 		#tmpdata[-1]["NextIdx"] -= 1
+		# 		backmod += 1
+		# 	else:
+		# 		f["NextIdx"] =  f["NextIdx"] - backmod if f["NextIdx"] else 0
+		# 		tmpdata += [ f ]
+		# 		last = f["FrameIdx"]
+		# FrameData = tmpdata
 
 		i=0
 		for f in FrameData:
-			print(str(i) + " " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> " + FrameData[f["NextIdx"]]["Name"] )
+			print(str(i) + " " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> [" + str(f["NextIdx"]) + "] ", end="")
+			print(FrameData[f["NextIdx"]]["Name"] )
 			i+=1
 			#FrameData[f]["NextIdx"] = ""
 
