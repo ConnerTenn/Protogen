@@ -15,10 +15,10 @@ typedef struct
 } Max7219;
 
 Max7219 DisplayList[] = 
-	{
-		{2, 1, -1}, //Eye
-		{1, 3, -1}, //Nose
-		{4, 2, -1}, //Mouth
+	{//Must be listed in the order of connection
+		{.NumSegments=2, .FrameIndex=1, .FrameDelay=-1}, //Eye
+		{.NumSegments=1, .FrameIndex=3, .FrameDelay=-1}, //Nose
+		{.NumSegments=4, .FrameIndex=2, .FrameDelay=-1}, //Mouth
 	};
 u8 NumDisplays;
 u8 TotalSegments;
