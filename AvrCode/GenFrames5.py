@@ -8,12 +8,12 @@ FFrames="Frames"
 FFrameData="FrameData.bin"
 Displays=[
 	#Name, Src Rectangle (x1, y1, x2, y2)
-	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}},
-	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}},
-	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}},
-	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}},
-	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}},
-	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}},
+	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":False},
+	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":False},
+	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":False},
+	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":False},
+	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":True},
+	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":False},
 ]
 
 try: f = open(FFrameData, 'wb')
@@ -31,7 +31,7 @@ def StrtoHx(string):
 # ImgDataTmp=b""
 
 
-def ParseImageData(img, imgrange):
+def ParseImageData(img, imgrange, mirror):
 	data = [ ]
 	for y in range(imgrange["y1"],imgrange["y2"]+1):
 		bit=7
@@ -40,11 +40,14 @@ def ParseImageData(img, imgrange):
 		for x in range(imgrange["x1"],imgrange["x2"]+1):
 			#read the red channel at each pixel and set on/off
 			c = 1 if img.getpixel((x,y))[0]>127 else 0
-			byte |= c<<bit
+			byte |= c<<bit if not mirror else c<<(7-bit)
 			bit-=1
 			#byte filled; save it and reset bits
 			if bit==-1:
-				data[-1] += Hx(byte,1)
+				if not mirror:
+					data[-1] += Hx(byte,1)
+				else:
+					data[-1] = Hx(byte,1) + data[-1]
 				bit=7
 				byte = 0x00
 	#return the data for the entire display
@@ -109,7 +112,7 @@ def ParseImage(path, expr, stage):
 	frameData = []
 	l=0
 	for d in Displays:
-		newframes += [ ParseImageData(img, d["Rect"]) ]
+		newframes += [ ParseImageData(img, d["Rect"], d["Mirror"]) ]
 		
 		name = expr + "_" + stage + "_" + str(imgnum) + "_" + d["Name"]
 		
