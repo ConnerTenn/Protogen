@@ -18,6 +18,7 @@ FrameData.bin: bin
 
 bin:
 	python GenFrames5.py
+	#rm FrameData.bin; fallocate -l 1400 FrameData.bin
 
 
 

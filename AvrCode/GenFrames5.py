@@ -8,12 +8,12 @@ FFrames="Frames"
 FFrameData="FrameData.bin"
 Displays=[
 	#Name, Src Rectangle (x1, y1, x2, y2)
-	{"Name":"LeftEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}},
-	{"Name":"LeftMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}},
-	{"Name":"LeftNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}},
-	{"Name":"RightNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}},
-	{"Name":"RightMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}},
-	{"Name":"RightEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}},
+	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}},
+	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}},
+	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}},
+	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}},
+	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}},
+	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}},
 ]
 
 try: f = open(FFrameData, 'wb')
@@ -172,6 +172,7 @@ def Parse():
 			loopFrameData += ParseImage(path, expr, "loop")
 		lastofloop = Last
 
+		Last=[None]*len(Displays)
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
 			endFrameData += ParseImage(path, expr, "end")
@@ -180,6 +181,7 @@ def Parse():
 		for fi in range(0, len(Displays)):
 			lastofstart[fi]["NextIdx"] = loopFrameData[fi]["Index"]
 			lastofloop[fi]["NextIdx"] = loopFrameData[fi]["Index"]
+			# print(loopFrameData[fi]["Index"])
 			lastofend[fi]["NextIdx"] = fi
 		
 		
@@ -207,7 +209,7 @@ def Parse():
 
 		i=0
 		for f in FrameData:
-			print(str(i) + " " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> [" + str(f["NextIdx"]) + "] ", end="")
+			print(str(i) + "(" + str(f["Index"]) + ") " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> [" + str(f["NextIdx"]) + "] ", end="")
 			print(FrameData[f["NextIdx"]]["Name"] )
 			i+=1
 			#FrameData[f]["NextIdx"] = ""
@@ -227,10 +229,14 @@ print()
 
 HeaderStr=b""
 FrameStr=b""
-FrameOffset=len(FrameData)*(2+2+2) #Size of header * bytes in each header
+
 for frame in FrameData:
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
-	frameNext = int(frame["FrameIdx"])
+	frameNext = frame["NextIdx"]
+	#= Size of header * bytes in each header + \
+	#   the size of frames before current one
+	FrameOffset=len(FrameData)*(2+2+2) + sum(list(map(lambda f: len(f)*len(f[0]), Frames[:frame["FrameIdx"]])))
+
 	frameDelay = frame["Delay"] if frame["Delay"] else 0xFFFF #frame["FrameIdx"]
 	if frameDelay > 0xFFFF:
 		print("Error: Delay time exceeds maximum allowed value")
@@ -240,10 +246,10 @@ for frame in FrameData:
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
 	#HeaderStr+=Hx(0, 1) #padding to 4-byte boundary  =4-(2+1) =1
+	
 for imgdat in Frames:
-    for imgline in imgdat:
-        FrameStr+=imgline
-        FrameOffset+=len(imgline)
+	for imgline in imgdat:
+		FrameStr+=imgline
 
 	
 

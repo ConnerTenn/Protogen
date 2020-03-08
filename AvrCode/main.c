@@ -16,9 +16,9 @@ typedef struct
 
 Max7219 DisplayList[] = 
 	{//Must be listed in the order of connection
-		{.NumSegments=2, .FrameIndex=1, .FrameDelay=-1}, //Eye
-		{.NumSegments=1, .FrameIndex=3, .FrameDelay=-1}, //Nose
-		{.NumSegments=4, .FrameIndex=2, .FrameDelay=-1}, //Mouth
+		{.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
+		{.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
+		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
 	};
 u8 NumDisplays;
 u8 TotalSegments;
@@ -61,6 +61,17 @@ ISR(TIMER1_COMPA_vect)
 	{
 		Max7219Refresh(TotalSegments, CSPIN);
 		RefreshTimer = REFRESH_INTERVAL;
+		for (u8 d=0; d<NumDisplays; d++)
+		{
+			u8 buff[100];
+			sprintf(buff,"Disp: %d\n\tDelay: %d/%d\n\tNext: %d\n\tOffset: %d\n", DisplayList[d].FrameIndex, 
+				DisplayList[d].FrameDelay, FrameHeaderAcc(DisplayList[d].FrameIndex)->FrameDelay,
+				FrameHeaderAcc(DisplayList[d].FrameIndex)->FrameNext,
+				FrameHeaderAcc(DisplayList[d].FrameIndex)->FrameOffset);
+			SerialTransmit(buff, strlen(buff));
+			// SerialTransmit("Hello", 6);
+		}
+		SerialTransmit("\n\n", 3);
 	}
 	else { RefreshTimer--; }
 
@@ -150,6 +161,7 @@ int main()
 	for (u8 i=0; i<NumDisplays; i++)
 	{
 		TotalSegments += DisplayList[i].NumSegments;
+		DisplayList[i].FrameDelay=FrameHeaderAcc(DisplayList[i].FrameIndex)->FrameDelay;
 	}
 
 	RefreshTimer = 0;
