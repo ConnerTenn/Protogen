@@ -231,7 +231,11 @@ FrameOffset=len(FrameData)*(2+2+2) #Size of header * bytes in each header
 for frame in FrameData:
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
 	frameNext = int(frame["FrameIdx"])
-	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["FrameIdx"]
+	frameDelay = frame["Delay"] if frame["Delay"] else 0xFFFF #frame["FrameIdx"]
+	if frameDelay > 0xFFFF:
+		print("Error: Delay time exceeds maximum allowed value")
+		print("Please Implement fix")
+		exit(-1)
 	HeaderStr+=Hx(FrameOffset, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
