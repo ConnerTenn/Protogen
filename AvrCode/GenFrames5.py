@@ -6,7 +6,10 @@ from PIL import Image
 F=None
 FFrames="Frames"
 FFrameData="FrameData.bin"
-
+Displays=[
+	#Name, Src Rectangle (x1, y1, x2, y2)
+	{"Name":"LeftEye", "Rect":{"x1":0, "y1":0, "x2":16, "y2":8}} 
+]
 
 
 try: f = open(FFrameData, 'wb')
@@ -41,6 +44,17 @@ def ParseImageData(img, y, xrange):
 	#return the data for the entire display
 	return data
 
+#verify displays
+for d in Displays:
+	if d["Name"].find(" ") != -1 or d["Name"].find("_") != -1:
+		print("Spaces and Underscores not allowed in name")
+		exit(-1)
+	if ((d["Rect"]["x2"] - d["Rect"]["x1"]) % 8 != 0) or ((d["Rect"]["y2"] - d["Rect"]["y1"]) % 8 != 0):
+		print("Invalid Display Rect")
+		exit(-1)
+
+
+
 Frames = [
 	[b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
 	 b'\x00\x00',b'\x00\x00\x00\x00',b'\x00',b'\x00',b'\x00\x00\x00\x00',b'\x00\x00',
@@ -53,7 +67,7 @@ Frames = [
 	]
 
 FrameData = [
-	{"Name":"Null", "Frame":0, "Delay":0, "Next":0, "Index":0},
+	{"Name":"Null", "FrameIdx":0, "Delay":0, "NextIdx":0, "Index":0},
 	]
 
 def ExistsInFrames(frame):
@@ -92,7 +106,7 @@ def ParseImage(path, expr, stage):
 		frameidx = len(Frames)
 		Frames += [ frame ]
 	
-	frameData = {"Name":name, "Frame":frameidx, "Delay":40, "Next":Index+1, "Index":Index}
+	frameData = {"Name":name, "FrameIdx":frameidx, "Delay":40, "NextIdx":Index+1, "Index":Index}
 	Index+=1
 	return frameData
 
@@ -114,11 +128,7 @@ def Parse():
 		startFrameData = []
 		loopFrameData = []
 		endFrameData = []
-#		for f in start:
-#			path = FFrames+"/"+expr+"/start/"+f
-#			data = ParseImage(path, expr, "start")
-#			
-#			startFrameData.update(data)
+
 
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
@@ -132,20 +142,10 @@ def Parse():
 		
 		
 		
-		# for fi in range(0, len(start)):
-		# 	startFrameData[fi]["Next"] = fi+1
-#		
-#		for i in range(0,6):
-#			startFrameData[list(startFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
-#			loopFrameData[list(loopFrameData)[i-6]]["Next"] = list(loopFrameData)[i]
-#			endFrameData[list(endFrameData)[i-6]]["Next"] = "Null"
-#		FrameData.update(startFrameData)
-#		FrameData.update(loopFrameData)
-#		FrameData.update(endFrameData)
 		
-		startFrameData[-1]["Next"] = loopFrameData[0]["Index"]
-		loopFrameData[-1]["Next"] = loopFrameData[0]["Index"]
-		endFrameData[-1]["Next"] = 0 #Null
+		startFrameData[-1]["NextIdx"] = loopFrameData[0]["Index"]
+		loopFrameData[-1]["NextIdx"] = loopFrameData[0]["Index"]
+		endFrameData[-1]["NextIdx"] = 0 #Null
 
 		FrameData += startFrameData
 		FrameData += loopFrameData
@@ -155,26 +155,26 @@ def Parse():
 		tmpdata = []
 		backmod = 0
 		for f in FrameData:
-			if f["Frame"] == last:
+			if f["FrameIdx"] == last:
 				tmpdata[-1]["Delay"] += 40
-				#tmpdata[-1]["Next"] -= 1
+				#tmpdata[-1]["NextIdx"] -= 1
 				backmod += 1
 			else:
-				f["Next"] =  f["Next"] - backmod if f["Next"] else 0
+				f["NextIdx"] =  f["NextIdx"] - backmod if f["NextIdx"] else 0
 				tmpdata += [ f ]
-				last = f["Frame"]
+				last = f["FrameIdx"]
 		FrameData = tmpdata
 
 		i=0
 		for f in FrameData:
-			print(str(i) + " " + f["Name"] + " [" + str(f["Frame"]) + "] " + str(f["Delay"]) + "ms -> " + FrameData[f["Next"]]["Name"] )
+			print(str(i) + " " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> " + FrameData[f["NextIdx"]]["Name"] )
 			i+=1
-			#FrameData[f]["Next"] = ""
+			#FrameData[f]["NextIdx"] = ""
 
 			
 		
 
-# FrameData=Parse(FFrames, { "Name":"", "Mask":"", "Pass":"", "Delay":"", "Next":"" })
+# FrameData=Parse(FFrames, { "Name":"", "Mask":"", "Pass":"", "Delay":"", "NextIdx":"" })
 
 Parse()
 
@@ -189,8 +189,8 @@ FrameStr=b""
 FrameOffset=len(FrameData)*(2+2+2) #Size of header * bytes in each header
 for frame in FrameData:
 	#Data+=hx(0,1) #TypeMap[frame["Type"]]
-	frameNext = int(frame["Frame"])
-	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["Frame"]
+	frameNext = int(frame["FrameIdx"])
+	frameDelay = frame["Delay"] if frame["Delay"] else 0xFF #frame["FrameIdx"]
 	HeaderStr+=Hx(FrameOffset, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
 	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
