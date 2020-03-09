@@ -1,9 +1,10 @@
 
 #include "frames.h"
 
-const u8 *FrameData = (const u8 *)(&_binary_FrameData_bin_start);
-const u8 *FrameDataEnd = (const u8 *)(&_binary_FrameData_bin_end);
+// PROGMEM const u8 *const FrameData = (const u8 *const)(&_binary_FrameData_bin_start);
+// PROGMEM const u8 *const FrameDataEnd = (const u8 *const)(&_binary_FrameData_bin_end);
 
+const char TSTTT[] = "ahiuwghduwd";
 
 #define FrameCPY(fd, fs, w) (memcpy(fd,fs,w*8)) //fd <- fs
 
