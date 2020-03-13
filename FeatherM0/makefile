@@ -1,6 +1,9 @@
 
-GCC=arm-none-eabi-gcc
-LD=arm-none-eabi-ld
+GCC=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-gcc
+LD=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-ld
+OBJDMP=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objdump
+OBJCPY=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objcopy
+
 INCLUDES= \
 	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/variants/feather_m0
 DEFINES= \
@@ -82,6 +85,16 @@ dump:
 	
 	/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objdump -D prog.elf > prog.list
 	/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objcopy prog.elf -O binary prog.bin
+
+dump2:
+	# arm-none-eabi-gcc -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -c start.c -o start.o
+	$(GCC) -O3 -mcpu=cortex-m0plus main.c -c -o main.o
+	# -Wl,-Map,/tmp/arduino_build_749933/Blink.ino.map -Wl,--cref
+	$(GCC) -L/tmp/arduino_build_749933 -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs -mcpu=cortex-m0plus -mthumb -o prog.elf main.o /tmp/arduino_build_749933/core/variant.cpp.o -Wl,--start-group -L/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Lib/GCC/ -larm_cortexM0l_math -lm /tmp/arduino_build_749933/core/core.a -Wl,--end-group
+	
+	$(OBJDMP) -D prog.elf > prog.list
+	$(OBJCPY) prog.elf -O binary prog.bin
+
 
 arduinodump:
 	/usr/share/arduino/arduino-builder -dump-prefs -logger=machine -hardware /usr/share/arduino/hardware -hardware /home/conner/.arduino15/packages -tools /usr/share/arduino/tools-builder -tools /home/conner/.arduino15/packages -libraries /home/conner/Arduino/libraries -fqbn=arduino:samd:arduino_zero_edbg -vid-pid=0X239A_0X000B -ide-version=10812 -build-path /tmp/arduino_build_749933 -warnings=none -build-cache /tmp/arduino_cache_226268 -prefs=build.warn_data_percentage=75 -prefs=runtime.tools.arm-none-eabi-gcc.path=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4 -prefs=runtime.tools.arm-none-eabi-gcc-7-2017q4.path=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4 -prefs=runtime.tools.bossac.path=/home/conner/.arduino15/packages/arduino/tools/bossac/1.7.0-arduino3 -prefs=runtime.tools.bossac-1.7.0-arduino3.path=/home/conner/.arduino15/packages/arduino/tools/bossac/1.7.0-arduino3 -prefs=runtime.tools.CMSIS-Atmel.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0 -prefs=runtime.tools.CMSIS-Atmel-1.2.0.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0 -prefs=runtime.tools.openocd.path=/home/conner/.arduino15/packages/arduino/tools/openocd/0.10.0-arduino7 -prefs=runtime.tools.openocd-0.10.0-arduino7.path=/home/conner/.arduino15/packages/arduino/tools/openocd/0.10.0-arduino7 -prefs=runtime.tools.arduinoOTA.path=/home/conner/.arduino15/packages/arduino/tools/arduinoOTA/1.2.1 -prefs=runtime.tools.arduinoOTA-1.2.1.path=/home/conner/.arduino15/packages/arduino/tools/arduinoOTA/1.2.1 -prefs=runtime.tools.CMSIS.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0 -prefs=runtime.tools.CMSIS-4.5.0.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0 -verbose /usr/share/arduino/examples/01.Basics/Blink/Blink.ino
