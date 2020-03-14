@@ -1,8 +1,20 @@
 
-GCC=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-gcc
-LD=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-ld
-OBJDMP=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objdump
-OBJCPY=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objcopy
+
+ARMBIN=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin
+GCC=$(ARMBIN)/arm-none-eabi-gcc -std=gnu11
+GPP=$(ARMBIN)/arm-none-eabi-g++ -std=gnu++11 -fno-threadsafe-statics -fno-rtti -fno-exceptions 
+LD=$(ARMBIN)/arm-none-eabi-ld
+AR=$(ARMBIN)/arm-none-eabi-ar
+OBJDMP=$(ARMBIN)/arm-none-eabi-objdump
+OBJCPY=$(ARMBIN)/arm-none-eabi-objcopy
+
+export ARMBIN
+export GCC
+export GPP
+export LD
+export AR
+export OBJDMP
+export OBJCPY
 
 INCLUDES= \
 	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/variants/feather_m0
@@ -22,11 +34,11 @@ DEFINES= \
 	-D USB_MANUFACTURER="Adafruit" \
 	-D USB_PRODUCT="Feather M0"
 
-CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror -nostdlib -nostartfiles -ffreestanding
+CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib -nostartfiles -ffreestanding
 
-.PHONY: all prog.hex
+.PHONY: all prog.bin clean core
 
-all: prog.hex
+all: prog.bin
 
 
 %.o: %.c
@@ -44,16 +56,16 @@ all: prog.hex
 
 
 
-prog.elf: main.o
-	$(GCC) $(CFLAGS) $? -o $@
-
-# prog.hex: prog.elf
-# 	avr-objcopy -j .text -j .data -O ihex prog.elf prog.hex
+prog.elf: core main.o
+	# $(GCC) $(CFLAGS) $? -o $@
+	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? /tmp/arduino_build_749933/core/variant.cpp.o core/core.a -o $@
 
 prog.bin: prog.elf
-	arm-none-eabi-objdump -D $? > prog.list
-	arm-none-eabi-objcopy $? -O binary $@
+	$(OBJDMP) -D $? > prog.list
+	$(OBJCPY) $? -O binary $@
 
+core:
+	$(MAKE) core -C core
 
 clean:
 	$(MAKE) clean -C core 
@@ -64,19 +76,33 @@ upload:
 	#avrdude -v -p atmega328p -c arduino -P $(shell ls /dev/ttyUSB* | head -n 1) -b 57600 -D  -U flash:w:prog.hex:i
 	/home/conner/.arduino15/packages/arduino/tools/bossac/1.7.0-arduino3/bossac -i -d --port=$(shell ls /dev/ttyACM* | head -n 1) -U true -i -e -w -v prog.bin -R
 
-# com:
-# 	stty -F $(shell ls /dev/ttyUSB* | head -n 1) 9600 -crtscts
-# 	#cat $(shell ls /dev/ttyUSB* | head -n 1) 
-# 	picocom -b 9600 -p 2 --imap lfcrlf --noreset $(shell ls /dev/ttyUSB* | head -n 1)
 
-# comconfig:
-# 	stty -F $(shell ls /dev/ttyUSB* | head -n 1) 9600 \
-# 	-parenb -parodd -cmspar cs8 -hupcl cstopb cread clocal -crtscts \
-# 	-ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr -icrnl -ixon -ixoff -iuclc -ixany \
-# 	-imaxbel -iutf8 \
-# 	-opost -olcuc -ocrnl -onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0 \
-# 	-isig -icanon -iexten -echo -echoe -echok -echonl -noflsh -xcase -tostop -echoprt -echoctl -echoke \
-# 	-flusho -extproc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dump2: core
+	# arm-none-eabi-gcc -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -c start.c -o start.o
+	$(GCC) $(CFLAGS) main.c -c -o main.o
+	
+	$(GCC) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs -mcpu=cortex-m0plus -mthumb main.o /tmp/arduino_build_749933/core/variant.cpp.o core/core.a -o prog.elf
+	
+	$(OBJDMP) -D prog.elf > prog.list
+	$(OBJCPY) prog.elf -O binary prog.bin
+	#-larm_cortexM0l_math -lm 
 
 dump:
 	# arm-none-eabi-gcc -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -c start.c -o start.o
@@ -86,21 +112,6 @@ dump:
 	
 	/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objdump -D prog.elf > prog.list
 	/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin/arm-none-eabi-objcopy prog.elf -O binary prog.bin
-
-dump2: core
-	# arm-none-eabi-gcc -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -c start.c -o start.o
-	$(GCC) -O3 -mcpu=cortex-m0plus main.c -c -o main.o
-	
-	$(GCC) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs -mcpu=cortex-m0plus -mthumb main.o /tmp/arduino_build_749933/core/variant.cpp.o core/core.a -o prog.elf
-	
-	$(OBJDMP) -D prog.elf > prog.list
-	$(OBJCPY) prog.elf -O binary prog.bin
-	#-larm_cortexM0l_math -lm 
-
-core:
-	$(MAKE) core -C core
-
-.PHONY: core
 
 arduinodump:
 	/usr/share/arduino/arduino-builder -dump-prefs -logger=machine -hardware /usr/share/arduino/hardware -hardware /home/conner/.arduino15/packages -tools /usr/share/arduino/tools-builder -tools /home/conner/.arduino15/packages -libraries /home/conner/Arduino/libraries -fqbn=arduino:samd:arduino_zero_edbg -vid-pid=0X239A_0X000B -ide-version=10812 -build-path /tmp/arduino_build_749933 -warnings=none -build-cache /tmp/arduino_cache_226268 -prefs=build.warn_data_percentage=75 -prefs=runtime.tools.arm-none-eabi-gcc.path=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4 -prefs=runtime.tools.arm-none-eabi-gcc-7-2017q4.path=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4 -prefs=runtime.tools.bossac.path=/home/conner/.arduino15/packages/arduino/tools/bossac/1.7.0-arduino3 -prefs=runtime.tools.bossac-1.7.0-arduino3.path=/home/conner/.arduino15/packages/arduino/tools/bossac/1.7.0-arduino3 -prefs=runtime.tools.CMSIS-Atmel.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0 -prefs=runtime.tools.CMSIS-Atmel-1.2.0.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0 -prefs=runtime.tools.openocd.path=/home/conner/.arduino15/packages/arduino/tools/openocd/0.10.0-arduino7 -prefs=runtime.tools.openocd-0.10.0-arduino7.path=/home/conner/.arduino15/packages/arduino/tools/openocd/0.10.0-arduino7 -prefs=runtime.tools.arduinoOTA.path=/home/conner/.arduino15/packages/arduino/tools/arduinoOTA/1.2.1 -prefs=runtime.tools.arduinoOTA-1.2.1.path=/home/conner/.arduino15/packages/arduino/tools/arduinoOTA/1.2.1 -prefs=runtime.tools.CMSIS.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0 -prefs=runtime.tools.CMSIS-4.5.0.path=/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0 -verbose /usr/share/arduino/examples/01.Basics/Blink/Blink.ino

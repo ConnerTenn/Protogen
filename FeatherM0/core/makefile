@@ -1,11 +1,4 @@
 
-ARMBIN=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin
-GCC=$(ARMBIN)/arm-none-eabi-gcc -std=gnu11
-GPP=$(ARMBIN)/arm-none-eabi-g++ -std=gnu++11 -fno-threadsafe-statics -fno-rtti -fno-exceptions 
-LD=$(ARMBIN)/arm-none-eabi-ld
-AR=$(ARMBIN)/arm-none-eabi-ar
-OBJDMP=$(ARMBIN)/arm-none-eabi-objdump
-OBJCPY=$(ARMBIN)/arm-none-eabi-objcopy
 
 INCLUDES= \
 	-I/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ \
@@ -132,36 +125,6 @@ core:
 	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/PluggableUSB.cpp -c -o USB_PluggableUSB.cpp.o
 	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.cpp -c -o USB_USBCore.cpp.o
 	$(AR) rcs core.a *.o
-	# $(AR) rcs core.a pulse_asm.S.o
-	# $(AR) rcs core.a USB_samd21_host.c.o
-	# $(AR) rcs core.a WInterrupts.c.o
-	# $(AR) rcs core.a avr_dtostrf.c.o
-	# $(AR) rcs core.a cortex_handlers.c.o
-	# $(AR) rcs core.a delay.c.o
-	# $(AR) rcs core.a hooks.c.o
-	# $(AR) rcs core.a itoa.c.o
-	# $(AR) rcs core.a pulse.c.o
-	# $(AR) rcs core.a startup.c.o
-	# $(AR) rcs core.a wiring.c.o
-	# $(AR) rcs core.a wiring_analog.c.o
-	# $(AR) rcs core.a wiring_digital.c.o
-	# $(AR) rcs core.a wiring_private.c.o
-	# $(AR) rcs core.a wiring_shift.c.o
-	# $(AR) rcs core.a IPAddress.cpp.o
-	# $(AR) rcs core.a Print.cpp.o
-	# $(AR) rcs core.a Reset.cpp.o
-	# $(AR) rcs core.a SERCOM.cpp.o
-	# $(AR) rcs core.a Stream.cpp.o
-	# $(AR) rcs core.a Tone.cpp.o
-	# $(AR) rcs core.a USB_CDC.cpp.o
-	# $(AR) rcs core.a USB_PluggableUSB.cpp.o
-	# $(AR) rcs core.a USB_USBCore.cpp.o
-	# $(AR) rcs core.a Uart.cpp.o
-	# $(AR) rcs core.a WMath.cpp.o
-	# $(AR) rcs core.a WString.cpp.o
-	# $(AR) rcs core.a abi.cpp.o
-	# $(AR) rcs core.a main.cpp.o
-	# $(AR) rcs core.a new.cpp.o
 
 
 
