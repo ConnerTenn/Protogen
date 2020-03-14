@@ -1,11 +1,15 @@
 .vscode/
+
 Modeling/
 log
+
 *.bin
 *.elf
 *.hex
-
 *.o
+*.a
+*.out
+
 program
 test
 main
