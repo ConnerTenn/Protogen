@@ -56,20 +56,23 @@ all: prog.bin
 
 
 
-prog.elf: core main.o
+prog.elf: main.o core/core.a 
+	@echo -e "\nCreating $@\n"
 	# $(GCC) $(CFLAGS) $? -o $@
-	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? /tmp/arduino_build_749933/core/variant.cpp.o core/core.a -o $@
+	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@
 
 prog.bin: prog.elf
+	@echo -e "\nCreating $@\n"
 	$(OBJDMP) -D $? > prog.list
 	$(OBJCPY) $? -O binary $@
 
-core:
-	$(MAKE) core -C core
+core/core.a:
+	@echo -e "\nCreating $@\n"
+	$(MAKE) -C core/ -j 4 core.a
 
 clean:
-	$(MAKE) clean -C core 
-	rm -f *.elf *.bin *.o prog.list
+	$(MAKE) -C core/ clean
+	rm -f *.elf *.bin *.o *.a prog.list
 
 upload:
 	#avr-size --mcu=atmega328p -A prog.elf
