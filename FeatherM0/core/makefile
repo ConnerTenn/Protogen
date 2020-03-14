@@ -18,7 +18,7 @@ DEFINES= \
 	"-DUSB_MANUFACTURER=\"Arduino LLC\"" \
 	"-DUSB_PRODUCT=\"Arduino Zero\""
 
-CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror -nostdlib #-nostartfiles -ffreestanding
+CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib #-nostartfiles -ffreestanding
 
 .PHONY: all prog.hex
 
@@ -44,15 +44,47 @@ core.a: core
 clean:
 	rm -f *.o *.a
 
+# OBJS= \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse_asm.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/cortex_handlers.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/itoa.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/startup.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_analog.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_digital.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_private.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_shift.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/samd21_host.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/avr/dtostrf.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/IPAddress.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/SERCOM.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Print.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Reset.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Stream.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Tone.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Uart.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WMath.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WString.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/abi.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/new.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/CDC.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/PluggableUSB.o \
+# 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.o
+
 OBJS= \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse_asm.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/cortex_handlers.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/itoa.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/startup.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring.o \
@@ -60,23 +92,14 @@ OBJS= \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_digital.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_private.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_shift.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/samd21_host.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/avr/dtostrf.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/IPAddress.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/SERCOM.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Print.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Reset.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Stream.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Tone.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Uart.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WMath.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WString.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/abi.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/new.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/CDC.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/PluggableUSB.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.o
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/new.o
 	
 core: $(OBJS)
 	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.cpp -c -o variant.cpp.o
