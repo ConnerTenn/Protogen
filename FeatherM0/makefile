@@ -36,13 +36,16 @@ DEFINES= \
 
 CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib -nostartfiles -ffreestanding
 
-.PHONY: all prog.bin clean core
+.PHONY: all start prog.bin clean core
 
-all: prog.bin
+all: start prog.bin
 
+start:
+	@echo -e "\nCompiling...\n"
 
 %.o: %.c
-	$(GCC) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
+	@echo $<
+	@$(GCC) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
 
 %.o: %.bin
 	# $(LD) -r -b binary $< -o $@
@@ -58,12 +61,13 @@ all: prog.bin
 
 prog.elf: main.o core/core.a 
 	@echo -e "\nCreating $@\n"
-	# $(GCC) $(CFLAGS) $? -o $@
+	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@
+
 
 prog.bin: prog.elf
 	@echo -e "\nCreating $@\n"
-	$(OBJDMP) -D $? > prog.list
+	@$(OBJDMP) -D $? > prog.list
 	$(OBJCPY) $? -O binary $@
 
 core/core.a:
