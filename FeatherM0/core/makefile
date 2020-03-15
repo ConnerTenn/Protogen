@@ -82,12 +82,18 @@ clean:
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.o
 
 OBJS= \
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/cortex_handlers.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/startup.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring.o \
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_analog.o \
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_digital.o \
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_private.o \
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_shift.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/SERCOM.o \
+	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Print.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Reset.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Uart.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.o

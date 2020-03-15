@@ -17,7 +17,13 @@ export OBJDMP
 export OBJCPY
 
 INCLUDES= \
-	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/variants/feather_m0
+	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/ \
+	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/variants/feather_m0 \
+	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/cores/arduino \
+	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ \
+	-I /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/libraries/ \
+	-I /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/libraries/SPI \
+
 DEFINES= \
 	-D F_CPU=48000000L \
 	-D ARDUINO=10812 \
@@ -46,6 +52,10 @@ start:
 %.o: %.c
 	@echo $<
 	@$(GCC) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
+
+%.o: %.cpp
+	@echo $<
+	@$(GPP) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
 
 %.o: %.bin
 	# $(LD) -r -b binary $< -o $@
