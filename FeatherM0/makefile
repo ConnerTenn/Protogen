@@ -18,27 +18,11 @@ export OBJCPY
 
 INCLUDES= \
 	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/ \
-	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/variants/feather_m0 \
-	-I /home/conner/.arduino15/packages/adafruit/hardware/samd/1.5.11/cores/arduino \
-	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ \
-	-I /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/libraries/ \
-	-I /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/libraries/SPI \
+	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ 
 
 DEFINES= \
 	-D F_CPU=48000000L \
-	-D ARDUINO=10812 \
-	-D ARDUINO_SAMD_ZERO \
-	-D ARDUINO_ARCH_SAMD \
-	-D ARDUINO_SAMD_ZERO \
-	-D ARM_MATH_CM0PLUS \
-	-D ADAFRUIT_FEATHER_M0 \
 	-D __SAMD21G18A__ \
-	-D USB_VID=0x239A \
-	-D USB_PID=0x800B \
-	-D USBCON \
-	-D USB_CONFIG_POWER=100 \
-	-D USB_MANUFACTURER="Adafruit" \
-	-D USB_PRODUCT="Feather M0"
 
 CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib -nostartfiles -ffreestanding
 
@@ -69,7 +53,7 @@ start:
 
 
 
-prog.elf: main.o core/core.a libraries/libraries.a
+prog.elf: main.o core/core.a # libraries/libraries.a
 	@echo -e "\nCreating $@\n"
 	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@

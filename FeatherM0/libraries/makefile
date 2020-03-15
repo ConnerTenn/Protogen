@@ -55,7 +55,7 @@ libraries.a: libraries
 clean:
 	rm -f *.o *.a
 
-OBJS= \
+OBJS= #\
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/libraries/SPI/SPI.o
 	
 libraries: $(OBJS)

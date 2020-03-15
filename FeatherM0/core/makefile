@@ -8,22 +8,13 @@ OBJDMP=$(ARMBIN)/arm-none-eabi-objdump
 OBJCPY=$(ARMBIN)/arm-none-eabi-objcopy
 
 INCLUDES= \
-	-I/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ \
-	-I/home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/ \
-	-I/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino \
-	-I/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero 
-	
+	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/ \
+	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/ \
+	-I /home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ 
+
 DEFINES= \
-	-DF_CPU=48000000L \
-	-DARDUINO=10812 \
-	-DARDUINO_SAMD_ZERO \
-	-DARDUINO_ARCH_SAMD \
-	-D__SAMD21G18A__ \
-	-DUSB_VID=0x2341 \
-	-DUSB_PID=0x804d \
-	-DUSBCON \
-	"-DUSB_MANUFACTURER=\"Arduino LLC\"" \
-	"-DUSB_PRODUCT=\"Arduino Zero\""
+	-D F_CPU=48000000L \
+	-D __SAMD21G18A__ \
 
 CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib #-nostartfiles -ffreestanding
 
@@ -87,7 +78,7 @@ clean:
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/PluggableUSB.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.o
 
-OBJS= \
+OBJS= #\
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.o \
@@ -103,7 +94,11 @@ OBJS= \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Reset.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Uart.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.o
-	
+
+OBJS= \
+	handlers.o \
+	startup.o
+
 core: $(OBJS)
 
 coreold:
