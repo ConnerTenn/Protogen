@@ -58,7 +58,6 @@ clean:
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse_asm.o \
-	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.o \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/cortex_handlers.o \
