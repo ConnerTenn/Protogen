@@ -1,5 +1,5 @@
 
-
+#include "sam.h"
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -32,7 +32,7 @@ typedef unsigned int u32;
 int main()
 {
 
-	REG(volatile u32, 0x40000400) = 0;
+	// REG(volatile u32, 0x40000400) = 0;
 
 	// //Periphial Access 0  Enable EIC, WDT, GCLK, SYSCTRL, PM
 	// REG(volatile u32, 0x40000000) = 0x0000005E;
@@ -62,18 +62,18 @@ int main()
 	ENBIT(volatile u32, 0x41004400+0x80*1+0x00, 11); //DDRB11:Out 
 
 	//PINMUX
-	//SCK (ODD) Peripheral D (SERCOM4 P3), MOSI (EVEN) Peripheral D (SERCOM4 P2)
-	SETREG(volatile u8, 0x41004400+0x80*1+0x30+(10/2), 0x33, 0xFF);
-	//MISO (EVEN) Peripheral D (SERCOM4 P0)
-	SETREG(volatile u8, 0x41004400+0x80*0+0x30+(12/2), 0x03, 0x0F);
+	// //SCK (ODD) Peripheral D (SERCOM4 P3), MOSI (EVEN) Peripheral D (SERCOM4 P2)
+	// SETREG(volatile u8, 0x41004400+0x80*1+0x30+(10/2), 0x33, 0xFF);
+	// //MISO (EVEN) Peripheral D (SERCOM4 P0)
+	// SETREG(volatile u8, 0x41004400+0x80*0+0x30+(12/2), 0x03, 0x0F);
 
-	//PINCFG
-	//MOSI Strong Drive, Pin Mux Enable
-	SETREG(volatile u32, 0x41004400+0x80*1+0x40+10, 0x41, 0xFF); //DDRB10:Out 
-	//MISO Strong Drive, Pin Mux Enable
-	SETREG(volatile u32, 0x41004400+0x80*0+0x40+12, 0x41, 0xFF); //DDRA12:IN
-	//SCK Strong Drive, Pin Mux Enable
-	SETREG(volatile u32, 0x41004400+0x80*1+0x40+11, 0x41, 0xFF); //DDRB11:Out 
+	// //PINCFG
+	// //MOSI Strong Drive, Pin Mux Enable
+	// SETREG(volatile u32, 0x41004400+0x80*1+0x40+10, 0x41, 0xFF); //DDRB10:Out 
+	// //MISO Strong Drive, Pin Mux Enable
+	// SETREG(volatile u32, 0x41004400+0x80*0+0x40+12, 0x41, 0xFF); //DDRA12:IN
+	// //SCK Strong Drive, Pin Mux Enable
+	// SETREG(volatile u32, 0x41004400+0x80*1+0x40+11, 0x41, 0xFF); //DDRB11:Out 
 
 
 

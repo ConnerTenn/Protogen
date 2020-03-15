@@ -31,7 +31,7 @@ void Dummy_Handler(void)
 #if defined DEBUG
 	__BKPT(3);
 #endif
-	(1) { }
+	while (1) { }
 }
 
 /* Cortex-M0+ core handlers */
@@ -170,6 +170,8 @@ void Reset_Handler( void )
 
 	/* Initialize the C library */
 	//  __libc_init_array();
+
+	SystemInit();
 
 	main();
 
