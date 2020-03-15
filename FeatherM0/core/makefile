@@ -1,4 +1,11 @@
 
+ARMBIN=/home/conner/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/7-2017q4/bin
+GCC=$(ARMBIN)/arm-none-eabi-gcc -std=gnu11
+GPP=$(ARMBIN)/arm-none-eabi-g++ -std=gnu++11 -fno-threadsafe-statics -fno-rtti -fno-exceptions 
+LD=$(ARMBIN)/arm-none-eabi-ld
+AR=$(ARMBIN)/arm-none-eabi-ar
+OBJDMP=$(ARMBIN)/arm-none-eabi-objdump
+OBJCPY=$(ARMBIN)/arm-none-eabi-objcopy
 
 INCLUDES= \
 	-I/home/conner/.arduino15/packages/arduino/tools/CMSIS/4.5.0/CMSIS/Include/ \
@@ -99,38 +106,70 @@ OBJS= \
 	/home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.o
 	
 core: $(OBJS)
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.cpp -c -o variant.cpp.o
-	@# $(GCC) -x assembler-with-cpp $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse_asm.S -c -o pulse_asm.S.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.c -c -o WInterrupts.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.c -c -o delay.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.c -c -o hooks.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/cortex_handlers.c -c -o cortex_handlers.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/itoa.c -c -o itoa.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse.c -c -o pulse.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/startup.c -c -o startup.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring.c -c -o wiring.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_analog.c -c -o wiring_analog.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_digital.c -c -o wiring_digital.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_private.c -c -o wiring_private.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_shift.c -c -o wiring_shift.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/samd21_host.c -c -o USB_samd21_host.c.o
-	@# $(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/avr/dtostrf.c -c -o avr_dtostrf.c.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/IPAddress.cpp -c -o IPAddress.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/SERCOM.cpp -c -o SERCOM.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Print.cpp -c -o Print.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Reset.cpp -c -o Reset.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Stream.cpp -c -o Stream.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Tone.cpp -c -o Tone.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Uart.cpp -c -o Uart.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WMath.cpp -c -o WMath.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WString.cpp -c -o WString.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/abi.cpp -c -o abi.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.cpp -c -o main.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/new.cpp -c -o new.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/CDC.cpp -c -o USB_CDC.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/PluggableUSB.cpp -c -o USB_PluggableUSB.cpp.o
-	@# $(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.cpp -c -o USB_USBCore.cpp.o
-	
+
+coreold:
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/variants/arduino_zero/variant.cpp -c -o variant.cpp.o
+	$(GCC) -x assembler-with-cpp $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse_asm.S -c -o pulse_asm.S.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WInterrupts.c -c -o WInterrupts.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/delay.c -c -o delay.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/hooks.c -c -o hooks.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/cortex_handlers.c -c -o cortex_handlers.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/itoa.c -c -o itoa.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/pulse.c -c -o pulse.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/startup.c -c -o startup.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring.c -c -o wiring.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_analog.c -c -o wiring_analog.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_digital.c -c -o wiring_digital.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_private.c -c -o wiring_private.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/wiring_shift.c -c -o wiring_shift.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/samd21_host.c -c -o USB_samd21_host.c.o
+	$(GCC) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/avr/dtostrf.c -c -o avr_dtostrf.c.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/IPAddress.cpp -c -o IPAddress.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/SERCOM.cpp -c -o SERCOM.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Print.cpp -c -o Print.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Reset.cpp -c -o Reset.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Stream.cpp -c -o Stream.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Tone.cpp -c -o Tone.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/Uart.cpp -c -o Uart.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WMath.cpp -c -o WMath.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/WString.cpp -c -o WString.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/abi.cpp -c -o abi.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/main.cpp -c -o main.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/new.cpp -c -o new.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/CDC.cpp -c -o USB_CDC.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/PluggableUSB.cpp -c -o USB_PluggableUSB.cpp.o
+	$(GPP) $(CFLAGS) -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES) /home/conner/.arduino15/packages/arduino/hardware/samd/1.8.5/cores/arduino/USB/USBCore.cpp -c -o USB_USBCore.cpp.o
+	$(AR) rcs core.a variant.cpp.o
+	$(AR) rcs core.a pulse_asm.S.o
+	$(AR) rcs core.a USB_samd21_host.c.o
+	$(AR) rcs core.a WInterrupts.c.o
+	$(AR) rcs core.a avr_dtostrf.c.o
+	$(AR) rcs core.a cortex_handlers.c.o
+	$(AR) rcs core.a delay.c.o
+	$(AR) rcs core.a hooks.c.o
+	$(AR) rcs core.a itoa.c.o
+	$(AR) rcs core.a pulse.c.o
+	$(AR) rcs core.a startup.c.o
+	$(AR) rcs core.a wiring.c.o
+	$(AR) rcs core.a wiring_analog.c.o
+	$(AR) rcs core.a wiring_digital.c.o
+	$(AR) rcs core.a wiring_private.c.o
+	$(AR) rcs core.a wiring_shift.c.o
+	$(AR) rcs core.a IPAddress.cpp.o
+	$(AR) rcs core.a Print.cpp.o
+	$(AR) rcs core.a Reset.cpp.o
+	$(AR) rcs core.a SERCOM.cpp.o
+	$(AR) rcs core.a Stream.cpp.o
+	$(AR) rcs core.a Tone.cpp.o
+	$(AR) rcs core.a USB_CDC.cpp.o
+	$(AR) rcs core.a USB_PluggableUSB.cpp.o
+	$(AR) rcs core.a USB_USBCore.cpp.o
+	$(AR) rcs core.a Uart.cpp.o
+	$(AR) rcs core.a WMath.cpp.o
+	$(AR) rcs core.a WString.cpp.o
+	$(AR) rcs core.a abi.cpp.o
+	$(AR) rcs core.a main.cpp.o
+	$(AR) rcs core.a new.cpp.o
 
 
 
