@@ -69,7 +69,7 @@ start:
 
 
 
-prog.elf: main.o core/core.a 
+prog.elf: main.o core/core.a libraries/libraries.a
 	@echo -e "\nCreating $@\n"
 	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@
@@ -84,8 +84,13 @@ core/core.a:
 	@echo -e "\nCreating $@\n"
 	$(MAKE) -C core/ -j 4 core.a
 
+libraries/libraries.a:
+	@echo -e "\nCreating $@\n"
+	$(MAKE) -C libraries/ -j 4 libraries.a
+
 clean:
 	$(MAKE) -C core/ clean
+	$(MAKE) -C libraries/ clean
 	rm -f *.elf *.bin *.o *.a prog.list
 
 upload:

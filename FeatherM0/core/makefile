@@ -27,9 +27,9 @@ DEFINES= \
 
 CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib #-nostartfiles -ffreestanding
 
-.PHONY: all prog.hex
+.PHONY: all
 
-all: prog.hex
+all: core.a
 
 
 %.o: %.c
