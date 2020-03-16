@@ -19,13 +19,20 @@ typedef unsigned int u32;
 
 48 Peripherals Address Space Summary
 
+95: Generic Clock Controller (GCLK)
+102: GCLK Register Summary
+
 117: Power manager
 127: Power manager Register Summary
+
+148: System Controller (SYSCTRL)
+165: SYSCTRL Register Summary
 
 379: PORT section
 379: PORT Register Summary
 
 432: Serial Communication Interface (SERCOM)
+454: SERCOM Register Summary
 
 */
 
@@ -47,41 +54,33 @@ int main()
 	// REG(volatile u32, 0x42000000) = 0x00800040;
 
 
-
-	ENBIT(volatile u32, 0x41004400+0x00, 17); //DDRA17:Out 
-	DABIT(volatile u32, 0x41004400+0x10, 17); //DRA17 OFF
-	ENBIT(volatile u32, 0x41004400+0x10, 17); //DRA17 ON
-	DABIT(volatile u32, 0x41004400+0x10, 17); //DRA17 OFF
+	PORT->Group[0].DIRSET.reg = 1<<17; //DDRA17:Out
 
 	//DDR
 	//MOSI
-	ENBIT(volatile u32, 0x41004400+0x80*1+0x00, 10); //DDRB10:Out 
+	PORT->Group[1].DIRSET.reg = 1<<10; //DDRB10:Out 
 	//MISO
-	DABIT(volatile u32, 0x41004400+0x80*0+0x00, 12); //DDRA12:IN
+	PORT->Group[0].DIRCLR.reg = 1<<11; //DDRA12:IN
 	//SCK
-	ENBIT(volatile u32, 0x41004400+0x80*1+0x00, 11); //DDRB11:Out 
+	PORT->Group[1].DIRSET.reg = 1<<11; //DDRB11:Out
+
 
 	//PINMUX
-	// //SCK (ODD) Peripheral D (SERCOM4 P3), MOSI (EVEN) Peripheral D (SERCOM4 P2)
-	// SETREG(volatile u8, 0x41004400+0x80*1+0x30+(10/2), 0x33, 0xFF);
-	// //MISO (EVEN) Peripheral D (SERCOM4 P0)
-	// SETREG(volatile u8, 0x41004400+0x80*0+0x30+(12/2), 0x03, 0x0F);
+	// SCK (ODD) Peripheral D (SERCOM4 P3), MOSI (EVEN) Peripheral D (SERCOM4 P2)
+	PORT->Group[1].PMUX[10/2].reg = PORT_PMUX_PMUXE(PORT_PMUX_PMUXE_D_Val) | PORT_PMUX_PMUXO(PORT_PMUX_PMUXO_D);
+	// MISO (EVEN) Peripheral D (SERCOM4 P0)
+	PORT->Group[0].PMUX[12/2].reg = PORT_PMUX_PMUXE(PORT_PMUX_PMUXE_D_Val);
 
-	// //PINCFG
-	// //MOSI Strong Drive, Pin Mux Enable
-	// SETREG(volatile u32, 0x41004400+0x80*1+0x40+10, 0x41, 0xFF); //DDRB10:Out 
-	// //MISO Strong Drive, Pin Mux Enable
-	// SETREG(volatile u32, 0x41004400+0x80*0+0x40+12, 0x41, 0xFF); //DDRA12:IN
-	// //SCK Strong Drive, Pin Mux Enable
-	// SETREG(volatile u32, 0x41004400+0x80*1+0x40+11, 0x41, 0xFF); //DDRB11:Out 
-
-
+	//PINCFG
+	PORT->Group[1].PINCFG[10].bit.PMUXEN = 1; //MOSI
+	PORT->Group[0].PINCFG[12].bit.PMUXEN = 1; //MISO
+	PORT->Group[1].PINCFG[11].bit.PMUXEN = 1; //SCK
+	
 
 	u8 i=0; (void)i;
 	while (1)
 	{
-		ENBIT(volatile u32, 0x41004400+0x10, 17); //DRA17 ON
-		DABIT(volatile u32, 0x41004400+0x10, 17); //DRA17 OFF
+		PORT->Group[0].OUTTGL.reg = 1<<17; //DRA17: Toggle
 		// REG(volatile u32, 0x41004400+0x1C) = 1<<17; //DRA17 TOGGLE
 	}
 
