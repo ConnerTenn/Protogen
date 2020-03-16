@@ -32,7 +32,10 @@ typedef unsigned int u32;
 379: PORT Register Summary
 
 432: Serial Communication Interface (SERCOM)
-454: SERCOM Register Summary
+440: SERCOM USART
+454: SERCOM USART Register Summary
+478: SERCOM SPI
+489: SERCOM SPI Register Summary
 
 */
 
@@ -56,6 +59,10 @@ int main()
 
 	PORT->Group[0].DIRSET.reg = 1<<17; //DDRA17:Out
 
+	//MOSI: DDRB10 SERCOM4 PAD[2]
+	//MISO: DDRA12 SERCOM4 PAD[0]
+	//SCK:  DDRB11 SERCOM4 PAD[3]
+
 	//DDR
 	//MOSI
 	PORT->Group[1].DIRSET.reg = 1<<10; //DDRB10:Out 
@@ -63,6 +70,8 @@ int main()
 	PORT->Group[0].DIRCLR.reg = 1<<11; //DDRA12:IN
 	//SCK
 	PORT->Group[1].DIRSET.reg = 1<<11; //DDRB11:Out
+
+	PORT->Group[1].OUTCLR.reg = (1<<10) | (1<<11); //DDRB10:Out 
 
 
 	//PINMUX
@@ -76,6 +85,37 @@ int main()
 	PORT->Group[0].PINCFG[12].bit.PMUXEN = 1; //MISO
 	PORT->Group[1].PINCFG[11].bit.PMUXEN = 1; //SCK
 	
+	//Put Generic Clock Generator 1 as source for SERCOM4
+	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_SERCOM4_CORE) | // Generic Clock Multiplexer 0
+						GCLK_CLKCTRL_GEN_GCLK1 | // Generic Clock Generator 1 is source
+						GCLK_CLKCTRL_CLKEN ;
+	//Wait for synchronization
+	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
+
+	SERCOM4->SPI.CTRLA.bit.SWRST = 1;
+	//Wait for synchronization
+	while (SERCOM4->SPI.SYNCBUSY.bit.SWRST) {}
+
+	SERCOM4->SPI.CTRLA.reg = SERCOM_SPI_CTRLA_MODE_SPI_MASTER; //Set Master Mode
+	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_CPOL | SERCOM_SPI_CTRLA_CPHA; //Mode 3: CLK Idle High, sample rising
+	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_FORM(0); //SPI Frame Only
+	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DIPO(0); //DIn(MISO) is PAD[0]
+	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DOPO(1); //DOut(MOSI) is PAD[2], SCK is PAD[3]: Mode 1
+	//SERCOM4->SPI.CTRLA.reg |=  SERCOM_SPI_CTRLA_IBON | //STATUS.BUFOVF asserted immediately upon overflow
+
+	SERCOM4->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_CHSIZE(0); //8 Bit charsize
+
+	//MSB first: commented out //SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DORD; 
+
+	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(100);
+
+
+	SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
+
+	SERCOM4->SPI.CTRLA.bit.ENABLE = 1;
+	while (SERCOM4->SPI.SYNCBUSY.bit.ENABLE) {}
+
+
 
 	u8 i=0; (void)i;
 	while (1)
