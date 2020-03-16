@@ -88,7 +88,7 @@ int main()
 	//Put Generic Clock Generator 1 as source for SERCOM4
 	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_SERCOM4_CORE) | // Generic Clock Multiplexer 0
 						GCLK_CLKCTRL_GEN_GCLK1 | // Generic Clock Generator 1 is source
-						GCLK_CLKCTRL_CLKEN ;
+						GCLK_CLKCTRL_CLKEN;
 	//Wait for synchronization
 	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
 

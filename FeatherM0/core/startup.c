@@ -67,17 +67,16 @@ uint32_t SystemCoreClock = __SYSTEM_CLOCK;/*!< System Clock Frequency (Core Cloc
  * 7) Put OSC8M as source for Generic Clock Generator 3
  */
 // Constants for Clock generators
-#define GENERIC_CLOCK_GENERATOR_MAIN      (0u)
-#define GENERIC_CLOCK_GENERATOR_XOSC32K   (1u)
-#define GENERIC_CLOCK_GENERATOR_OSC32K    (1u)
-#define GENERIC_CLOCK_GENERATOR_OSCULP32K (2u) /* Initialized at reset for WDT */
-#define GENERIC_CLOCK_GENERATOR_OSC8M     (3u)
+#define GENERIC_CLOCK_GENERATOR_MAIN      (GCLK_CLKCTRL_GEN_GCLK0_Val)
+#define GENERIC_CLOCK_GENERATOR_XOSC32K    (GCLK_CLKCTRL_GEN_GCLK1_Val)
+// #define GENERIC_CLOCK_GENERATOR_OSCULP32K (2u) /* Initialized at reset for WDT */
+#define GENERIC_CLOCK_GENERATOR_OSC8M     (GCLK_CLKCTRL_GEN_GCLK3_Val)
 // Frequency of the board main oscillator
 #define VARIANT_MAINOSC (32768ul)
 // Master clock frequency
 #define VARIANT_MCK     (48000000ul)
 // Constants for Clock multiplexers
-#define GENERIC_CLOCK_MULTIPLEXER_DFLL48M (0u)
+// #define GENERIC_CLOCK_MULTIPLEXER_DFLL48M (0u)
 
 void SystemInit( void )
 {
@@ -86,13 +85,13 @@ void SystemInit( void )
 
 	/* Turn on the digital interface clock */
 	// PM->APBAMASK.reg = PM->APBAMASK.reg | PM_APBAMASK_GCLK;
-	PM->APBCMASK.reg = PM->APBCMASK.reg | PM_APBCMASK_SERCOM4;
+	PM->APBCMASK.bit.SERCOM4_ = 1; //PM->APBCMASK.reg | PM_APBCMASK_SERCOM4;
 
 	// ----------------------------------------------------------------------------------------------
 	// 1) Enable XOSC32K clock (External on-board 32.768Hz oscillator)
 
 	//Startup 65536 cycles, output enable, external crystal enable
-	SYSCTRL->XOSC32K.reg = SYSCTRL_XOSC32K_STARTUP( 0x6u ) | SYSCTRL_XOSC32K_XTALEN | SYSCTRL_XOSC32K_EN32K ;
+	SYSCTRL->XOSC32K.reg = SYSCTRL_XOSC32K_STARTUP(0x6u) | SYSCTRL_XOSC32K_XTALEN | SYSCTRL_XOSC32K_EN32K ;
 	SYSCTRL->XOSC32K.bit.ENABLE = 1; //Enable. Made as separate call
 
 	// Wait for oscillator stabilization
@@ -114,7 +113,7 @@ void SystemInit( void )
 	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
 
 	/* Write Generic Clock Generator 1 configuration */
-	GCLK->GENCTRL.reg = GCLK_GENCTRL_ID( GENERIC_CLOCK_GENERATOR_OSC32K ) | // Generic Clock Generator 1
+	GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(GENERIC_CLOCK_GENERATOR_XOSC32K) | // Generic Clock Generator 1
 						GCLK_GENCTRL_SRC_XOSC32K | // Selected source is External 32KHz Oscillator
 						GCLK_GENCTRL_GENEN;
 	// Wait for synchronization
@@ -123,9 +122,9 @@ void SystemInit( void )
 	// ----------------------------------------------------------------------------------------------
 	// 3) Put Generic Clock Generator 1 as source for Generic Clock Multiplexer 0 (DFLL48M reference)
 
-	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID( GENERIC_CLOCK_MULTIPLEXER_DFLL48M ) | // Generic Clock Multiplexer 0
+	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_DFLL48) | // Generic Clock Multiplexer 0
 						GCLK_CLKCTRL_GEN_GCLK1 | // Generic Clock Generator 1 is source
-						GCLK_CLKCTRL_CLKEN ;
+						GCLK_CLKCTRL_CLKEN;
 	// Wait for synchronization
 	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
 
@@ -138,9 +137,9 @@ void SystemInit( void )
 	// Wait for synchronization
 	while ((SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0) { }
 
-	SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP( 31 ) | // Coarse step is 31, half of the max value
-							SYSCTRL_DFLLMUL_FSTEP( 511 ) | // Fine step is 511, half of the max value
-							SYSCTRL_DFLLMUL_MUL( (VARIANT_MCK + VARIANT_MAINOSC/2) / VARIANT_MAINOSC ); // External 32KHz is the reference
+	SYSCTRL->DFLLMUL.reg = SYSCTRL_DFLLMUL_CSTEP(31) | // Coarse step is 31, half of the max value
+							SYSCTRL_DFLLMUL_FSTEP(511) | // Fine step is 511, half of the max value
+							SYSCTRL_DFLLMUL_MUL((VARIANT_MCK + VARIANT_MAINOSC/2) / VARIANT_MAINOSC); // External 32KHz is the reference
 	// Wait for synchronization
 	while ((SYSCTRL->PCLKSR.reg & SYSCTRL_PCLKSR_DFLLRDY) == 0) { }
 
@@ -163,17 +162,17 @@ void SystemInit( void )
 	// ----------------------------------------------------------------------------------------------
 	// 5) Switch Generic Clock Generator 0 to DFLL48M. CPU will run at 48MHz.
 
-	GCLK->GENDIV.reg = GCLK_GENDIV_ID( GENERIC_CLOCK_GENERATOR_MAIN ); // Generic Clock Generator 0
+	GCLK->GENDIV.reg = GCLK_GENDIV_ID(GENERIC_CLOCK_GENERATOR_MAIN); // Generic Clock Generator 0
 	// Wait for synchronization
-	while ( GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY ) { }
+	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
 
 	/* Write Generic Clock Generator 0 configuration */
-	GCLK->GENCTRL.reg = GCLK_GENCTRL_ID( GENERIC_CLOCK_GENERATOR_MAIN ) | // Generic Clock Generator 0
+	GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(GENERIC_CLOCK_GENERATOR_MAIN) | // Generic Clock Generator 0
 						GCLK_GENCTRL_SRC_DFLL48M | // Selected source is DFLL 48MHz
 						GCLK_GENCTRL_IDC | // Set 50/50 duty cycle
 						GCLK_GENCTRL_GENEN;
 	// Wait for synchronization
-	while ( GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY ) { }
+	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
 
 
 	// ----------------------------------------------------------------------------------------------
@@ -184,21 +183,21 @@ void SystemInit( void )
 	/* ----------------------------------------------------------------------------------------------
 	* 7) Put OSC8M as source for Generic Clock Generator 3
 	*/
-	GCLK->GENDIV.reg = GCLK_GENDIV_ID( GENERIC_CLOCK_GENERATOR_OSC8M ) ; // Generic Clock Generator 3
+	GCLK->GENDIV.reg = GCLK_GENDIV_ID(GENERIC_CLOCK_GENERATOR_OSC8M); // Generic Clock Generator 3
 
 	/* Write Generic Clock Generator 3 configuration */
-	GCLK->GENCTRL.reg = GCLK_GENCTRL_ID( GENERIC_CLOCK_GENERATOR_OSC8M ) | // Generic Clock Generator 3
+	GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(GENERIC_CLOCK_GENERATOR_OSC8M) | // Generic Clock Generator 3
 						GCLK_GENCTRL_SRC_OSC8M | // Selected source is RC OSC 8MHz (already enabled at reset)
-						GCLK_GENCTRL_GENEN ;
+						GCLK_GENCTRL_GENEN;
 	// Wait for synchronization
 	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
 
 	// Now that all system clocks are configured, we can set CPU and APBx BUS clocks.
 	// There values are normally the one present after Reset.
-	PM->CPUSEL.reg  = PM_CPUSEL_CPUDIV_DIV1 ;
-	PM->APBASEL.reg = PM_APBASEL_APBADIV_DIV1_Val ;
-	PM->APBBSEL.reg = PM_APBBSEL_APBBDIV_DIV1_Val ;
-	PM->APBCSEL.reg = PM_APBCSEL_APBCDIV_DIV1_Val ;
+	PM->CPUSEL.reg  = PM_CPUSEL_CPUDIV_DIV1;
+	PM->APBASEL.reg = PM_APBASEL_APBADIV_DIV1_Val;
+	PM->APBBSEL.reg = PM_APBBSEL_APBBDIV_DIV1_Val;
+	PM->APBCSEL.reg = PM_APBCSEL_APBCDIV_DIV1_Val;
 
 	SystemCoreClock=VARIANT_MCK;
 
