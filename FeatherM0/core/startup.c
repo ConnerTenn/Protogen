@@ -85,6 +85,7 @@ void SystemInit( void )
 
 	/* Turn on the digital interface clock */
 	// PM->APBAMASK.reg = PM->APBAMASK.reg | PM_APBAMASK_GCLK;
+	PM->APBAMASK.bit.GCLK_ = 1;
 	PM->APBCMASK.bit.SERCOM4_ = 1; //PM->APBCMASK.reg | PM_APBCMASK_SERCOM4;
 
 	// ----------------------------------------------------------------------------------------------
@@ -191,6 +192,7 @@ void SystemInit( void )
 						GCLK_GENCTRL_GENEN;
 	// Wait for synchronization
 	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
+
 
 	// Now that all system clocks are configured, we can set CPU and APBx BUS clocks.
 	// There values are normally the one present after Reset.

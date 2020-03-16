@@ -71,7 +71,7 @@ int main()
 	//SCK
 	PORT->Group[1].DIRSET.reg = 1<<11; //DDRB11:Out
 
-	PORT->Group[1].OUTSET.reg = (1<<10) | (1<<11); //DDRB10:Out 
+	PORT->Group[1].OUTSET.reg = (1<<10) | (0<<11); //DDRB10:Out 
 
 
 	//PINMUX
@@ -96,22 +96,23 @@ int main()
 	//Wait for synchronization
 	while (SERCOM4->SPI.SYNCBUSY.bit.SWRST) {}
 
-	SERCOM4->SPI.CTRLA.reg = SERCOM_SPI_CTRLA_MODE_SPI_MASTER; //Set Master Mode
-	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_CPOL | SERCOM_SPI_CTRLA_CPHA; //Mode 3: CLK Idle High, sample rising
-	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_FORM(0); //SPI Frame Only
-	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DIPO(0); //DIn(MISO) is PAD[0]
-	SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DOPO(1); //DOut(MOSI) is PAD[2], SCK is PAD[3]: Mode 1
-	//SERCOM4->SPI.CTRLA.reg |=  SERCOM_SPI_CTRLA_IBON | //STATUS.BUFOVF asserted immediately upon overflow
-
-	SERCOM4->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_CHSIZE(0); //8 Bit charsize
-
+	SERCOM4->SPI.CTRLA.reg = 
+		SERCOM_SPI_CTRLA_MODE_SPI_MASTER | //Set Master Mode
+		SERCOM_SPI_CTRLA_CPOL | SERCOM_SPI_CTRLA_CPHA | //Mode 3: CLK Idle High, sample rising
+		SERCOM_SPI_CTRLA_FORM(0) | //SPI Frame Only
+		SERCOM_SPI_CTRLA_DIPO(0) | //DIn(MISO) is PAD[0]
+		SERCOM_SPI_CTRLA_DOPO(1) | //DOut(MOSI) is PAD[2], SCK is PAD[3]: Mode 1
+		SERCOM_SPI_CTRLA_IBON; //STATUS.BUFOVF asserted immediately upon overflow
 	//MSB first: commented out //SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DORD; 
 
+	SERCOM4->SPI.CTRLB.reg = 
+		SERCOM_SPI_CTRLB_CHSIZE(0) | //8 Bit charsize
+		SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
+
+	//Set Baud Rate
 	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(100);
 
-
-	SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
-
+	//Enable SPI
 	SERCOM4->SPI.CTRLA.bit.ENABLE = 1;
 	while (SERCOM4->SPI.SYNCBUSY.bit.ENABLE) {}
 
