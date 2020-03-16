@@ -29,7 +29,7 @@ typedef unsigned int u32;
 165: SYSCTRL Register Summary
 
 379: PORT section
-379: PORT Register Summary
+387: PORT Register Summary
 
 432: Serial Communication Interface (SERCOM)
 440: SERCOM USART
@@ -67,18 +67,18 @@ int main()
 	//MOSI
 	PORT->Group[1].DIRSET.reg = 1<<10; //DDRB10:Out 
 	//MISO
-	PORT->Group[0].DIRCLR.reg = 1<<11; //DDRA12:IN
+	PORT->Group[0].DIRCLR.reg = 1<<12; //DDRA12:IN
 	//SCK
 	PORT->Group[1].DIRSET.reg = 1<<11; //DDRB11:Out
 
-	PORT->Group[1].OUTCLR.reg = (1<<10) | (1<<11); //DDRB10:Out 
+	PORT->Group[1].OUTSET.reg = (1<<10) | (1<<11); //DDRB10:Out 
 
 
 	//PINMUX
 	// SCK (ODD) Peripheral D (SERCOM4 P3), MOSI (EVEN) Peripheral D (SERCOM4 P2)
-	PORT->Group[1].PMUX[10/2].reg = PORT_PMUX_PMUXE(PORT_PMUX_PMUXE_D_Val) | PORT_PMUX_PMUXO(PORT_PMUX_PMUXO_D);
+	PORT->Group[1].PMUX[10/2].reg = PORT_PMUX_PMUXO_D | PORT_PMUX_PMUXE_D;
 	// MISO (EVEN) Peripheral D (SERCOM4 P0)
-	PORT->Group[0].PMUX[12/2].reg = PORT_PMUX_PMUXE(PORT_PMUX_PMUXE_D_Val);
+	PORT->Group[0].PMUX[12/2].reg = PORT_PMUX_PMUXE_D;
 
 	//PINCFG
 	PORT->Group[1].PINCFG[10].bit.PMUXEN = 1; //MOSI
