@@ -70,6 +70,8 @@ int main()
 	PORT->Group[0].DIRCLR.reg = 1<<12; //DDRA12:IN
 	//SCK
 	PORT->Group[1].DIRSET.reg = 1<<11; //DDRB11:Out
+	//SS
+	PORT->Group[1].DIRSET.reg = 1<<9; //DDRB09:Out
 
 	PORT->Group[1].OUTSET.reg = (1<<10) | (0<<11); //DDRB10:Out 
 
@@ -79,15 +81,18 @@ int main()
 	PORT->Group[1].PMUX[10/2].reg = PORT_PMUX_PMUXO_D | PORT_PMUX_PMUXE_D;
 	// MISO (EVEN) Peripheral D (SERCOM4 P0)
 	PORT->Group[0].PMUX[12/2].reg = PORT_PMUX_PMUXE_D;
+	// SS (ODD) Peripheral D (SERCOM4 P1)
+	PORT->Group[1].PMUX[9/2].reg = PORT_PMUX_PMUXO_D;
 
 	//PINCFG
 	PORT->Group[1].PINCFG[10].bit.PMUXEN = 1; //MOSI
 	PORT->Group[0].PINCFG[12].bit.PMUXEN = 1; //MISO
 	PORT->Group[1].PINCFG[11].bit.PMUXEN = 1; //SCK
+	PORT->Group[1].PINCFG[ 9].bit.PMUXEN = 1; //SS
 	
 	//Put Generic Clock Generator 1 as source for SERCOM4
-	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_SERCOM4_CORE) | // Generic Clock Multiplexer 0
-						GCLK_CLKCTRL_GEN_GCLK1 | // Generic Clock Generator 1 is source
+	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_SERCOM4_CORE) | // Generic Clock Multiplexer SERCOM4
+						GCLK_CLKCTRL_GEN_GCLK0 | // Generic Clock Generator 0 is source
 						GCLK_CLKCTRL_CLKEN;
 	//Wait for synchronization
 	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
@@ -105,17 +110,26 @@ int main()
 		SERCOM_SPI_CTRLA_IBON; //STATUS.BUFOVF asserted immediately upon overflow
 	//MSB first: commented out //SERCOM4->SPI.CTRLA.reg |= SERCOM_SPI_CTRLA_DORD; 
 
-	SERCOM4->SPI.CTRLB.reg = 
-		SERCOM_SPI_CTRLB_CHSIZE(0) | //8 Bit charsize
+	SERCOM4->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_CHSIZE(0) | //8 Bit charsize
 		SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
 
 	//Set Baud Rate
-	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(100);
+	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(23); //Target 1MHz: 48MHz/(2*1MHz) - 1 = 23
 
 	//Enable SPI
 	SERCOM4->SPI.CTRLA.bit.ENABLE = 1;
 	while (SERCOM4->SPI.SYNCBUSY.bit.ENABLE) {}
 
+
+	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
+	SERCOM4->SPI.DATA.reg = 0xF2; //Data Out
+	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
+
+	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
+	SERCOM4->SPI.DATA.reg = 0xC5; //Data Out
+	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
 
 
 	u8 i=0; (void)i;
