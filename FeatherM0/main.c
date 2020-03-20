@@ -76,7 +76,58 @@ VBUS     _         _              _          _          _           _           
 478: SERCOM SPI
 489: SERCOM SPI Register Summary
 
+
+610: Timer/Counter (TC)
+624: TC Register Summary
+
+651: Timer/Counter for Control (TCC)
+684: TCC Register Summary
+
+1104: Table Of Contents
 */
+
+void TC3_Handler()
+{
+	PORT->Group[0].OUTTGL.reg = PORT_PA02;
+
+	TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_OVF;
+}
+
+void InitTimers()
+{
+	//Enable TC3 in Power Manager
+	PM->APBCMASK.bit.TC3_ = 1;
+
+	//Put Generic Clock Generator 0 as source for SERCOM4
+	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_TCC2_TC3) | // Generic Clock Multiplexer SERCOM4
+						GCLK_CLKCTRL_GEN_GCLK0 | // Generic Clock Generator 0 is source
+						GCLK_CLKCTRL_CLKEN;
+	//Wait for synchronization
+	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
+
+	TC3->COUNT16.CTRLA.bit.SWRST = 1;
+	//Wait for synchronization
+	while (TC3->COUNT16.STATUS.bit.SYNCBUSY) {}
+
+	TC3->COUNT16.CTRLA.reg = 
+		TC_CTRLA_PRESCSYNC_RESYNC | //Reset on the next generic clock, rset prescaler counter
+		TC_CTRLA_PRESCALER_DIV1 | //Divide by 1
+		TC_CTRLA_WAVEGEN_MFRQ | //Match Frequency mode; Top is CC0
+		TC_CTRLA_MODE_COUNT16; //16Bit Counter
+
+	TC3->COUNT16.CC[0].reg = 48000; //Target 1kHz: 48MHz/1kHz = 48000
+
+	//Enable TC3
+	TC3->COUNT16.CTRLA.bit.ENABLE = 1;
+	while (TC3->COUNT16.STATUS.bit.SYNCBUSY) {}
+
+
+	//Enable TC3 interrupts
+	NVIC_EnableIRQ(TC3_IRQn);
+
+	//Enable Intterupts
+	TC3->COUNT16.INTENSET.bit.OVF = 1;
+}
 
 int main()
 {
@@ -88,6 +139,10 @@ int main()
 
 	IntiUART();
 
+	PORT->Group[0].OUTTGL.reg = PORT_PA02;
+	PORT->Group[0].OUTTGL.reg = PORT_PA02;
+	
+	InitTimers();
 
 	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
 	SPITransmit(0xF2);
