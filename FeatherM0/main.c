@@ -88,9 +88,18 @@ VBUS     _         _              _          _          _           _           
 
 void TC3_Handler()
 {
-	PORT->Group[0].OUTTGL.reg = PORT_PA02;
+	if (TC3->COUNT16.INTFLAG.bit.MC0) //1kHz Timer
+	{
+		PORT->Group[0].OUTTGL.reg = PORT_PA02;
 
-	TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_OVF;
+		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC0;
+	}
+	if (TC3->COUNT16.INTFLAG.bit.MC1) //1kHz Timer @50% Phase offset
+	{
+		PORT->Group[0].OUTTGL.reg = PORT_PA17;
+
+		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC1;
+	}
 }
 
 void InitTimers()
@@ -116,6 +125,7 @@ void InitTimers()
 		TC_CTRLA_MODE_COUNT16; //16Bit Counter
 
 	TC3->COUNT16.CC[0].reg = 48000; //Target 1kHz: 48MHz/1kHz = 48000
+	TC3->COUNT16.CC[1].reg = 24000; //48000/2 = 24000
 
 	//Enable TC3
 	TC3->COUNT16.CTRLA.bit.ENABLE = 1;
@@ -126,7 +136,8 @@ void InitTimers()
 	NVIC_EnableIRQ(TC3_IRQn);
 
 	//Enable Intterupts
-	TC3->COUNT16.INTENSET.bit.OVF = 1;
+	TC3->COUNT16.INTENSET.bit.MC0 = 1;
+	TC3->COUNT16.INTENSET.bit.MC1 = 1;
 }
 
 int main()
@@ -164,7 +175,7 @@ int main()
 	u8 i=0; (void)i;
 	while (1)
 	{
-		PORT->Group[0].OUTTGL.reg = 1<<17; //DRA17: Toggle
+		// PORT->Group[0].OUTTGL.reg = 1<<17; //DRA17: Toggle
 		// REG(volatile u32, 0x41004400+0x1C) = 1<<17; //DRA17 TOGGLE
 	}
 
