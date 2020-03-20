@@ -100,19 +100,19 @@ Max7219 DisplayListCOM1[] =
 		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
 	};
 
-Max7219 DisplayListCOM4[] = 
-	{//Must be listed in the order of connection
-		// {.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
-		// {.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
-		// {.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
-	};
+// Max7219 DisplayListCOM4[] = 
+// 	{//Must be listed in the order of connection
+// 		// {.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
+// 		// {.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
+// 		// {.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
+// 	};
 
-Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
+// Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
 	
-u8 TotalSegmentsCOM1, TotalSegmentsCOM4;
+u8 TotalSegmentsCOM1;//, TotalSegmentsCOM4;
 
 const u8 NumDisplaysCOM1 = sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]);
-const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
+// const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
 
 u16 RefreshTimer;
 
@@ -202,12 +202,12 @@ int main()
 		TotalSegmentsCOM1 += DisplayListCOM1[i].NumSegments;
 		DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
 	}
-	TotalSegmentsCOM4=0;
-	for (u8 i=0; i<NumDisplaysCOM4; i++)
-	{
-		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
-		DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
-	}
+	// TotalSegmentsCOM4=0;
+	// for (u8 i=0; i<NumDisplaysCOM4; i++)
+	// {
+	// 	TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
+	// 	DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+	// }
 
 	RefreshTimer = 0;
 

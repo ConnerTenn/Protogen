@@ -311,22 +311,22 @@ void Max7219InitCOM1(u8 numSegments)
 
 	Max7219SendCmdCOM1(0x0C01, numSegments);  //Enable
 }
-void Max7219InitCOM4(u8 numSegments)
-{
-	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
-	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
-	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
-	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
-	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
+// void Max7219InitCOM4(u8 numSegments)
+// {
+// 	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
+// 	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+// 	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+// 	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+// 	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
 
-	//Blank Display
-	for (u16 l=1; l<=8; l++)
-	{
-		Max7219SendCmdCOM4(l<<8, numSegments); 
-	}
+// 	//Blank Display
+// 	for (u16 l=1; l<=8; l++)
+// 	{
+// 		Max7219SendCmdCOM4(l<<8, numSegments); 
+// 	}
 
-	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
-}
+// 	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+// }
 
 void Max7219RefreshCOM1(u8 numSegments)
 {
@@ -337,15 +337,15 @@ void Max7219RefreshCOM1(u8 numSegments)
 
 	Max7219SendCmdCOM1(0x0C01, numSegments);  //Enable
 }
-void Max7219RefreshCOM4(u8 numSegments)
-{
-	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
-	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
-	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
-	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
+// void Max7219RefreshCOM4(u8 numSegments)
+// {
+// 	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+// 	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+// 	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+// 	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
 
-	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
-}
+// 	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+// }
 
 void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
 {
@@ -356,15 +356,15 @@ void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
 	}
 	PORT->Group[0].OUTSET.reg = PORT_PA22;
 }
-void Max7219SendCmdCOM4(u16 cmd, u8 numSegments)
-{
-	PORT->Group[0].OUTCLR.reg = PORT_PA23;
-	for (u8 d=0; d<numSegments; d++) 
-	{ 
-		SPI_TRANSMIT16_SERCOM4(cmd);
-	}
-	PORT->Group[0].OUTSET.reg = PORT_PA23;
-}
+// void Max7219SendCmdCOM4(u16 cmd, u8 numSegments)
+// {
+// 	PORT->Group[0].OUTCLR.reg = PORT_PA23;
+// 	for (u8 d=0; d<numSegments; d++) 
+// 	{ 
+// 		SPI_TRANSMIT16_SERCOM4(cmd);
+// 	}
+// 	PORT->Group[0].OUTSET.reg = PORT_PA23;
+// }
 
 
 void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
@@ -390,115 +390,25 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 	}
 }
 
-void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays)
-{
-	u16 i[numDisplays]; //Index into data. Will increment independently for every display
-
-	for (u16 y=0; y<8; y++)
-	{
-		u16 cmd = ((y+1)<<8); //select row
-
-		PORT->Group[0].OUTCLR.reg = PORT_PA22;
-		//From last display to the first; The data for the end must be sent first
-		for (u8 d=numDisplays-1; d<numDisplays; d--)
-		{
-			if (y==0) { i[d] = 0; }
-
-			for (u8 s=0; s<displays[d].NumSegments; s++)
-			{
-				SPI_TRANSMIT16_SERCOM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
-			}
-		}
-		PORT->Group[0].OUTSET.reg = PORT_PA22;
-	}
-}
-
-// void Max7219Send4Frame(u8 *data, u8 cs)
+// void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays)
 // {
-// 	u16 y, n, i=0, l;
-// 	for (y=0; y<8; y++)
-// 	{
-// 		l=(y+1)<<8;
-// 		DISPDESEL(cs);
-// 		SPITransmit16(l | data[i++]);
-// 		SPITransmit16(l | data[i++]);
-// 		SPITransmit16(l | data[i++]);
-// 		SPITransmit16(l | data[i++]);
-// 		DISPSEL(cs);
-// 	}
-// }
-// void Max7219Send2Frame(u8 *data, u8 cs)
-// {
-// 	u16 y, n, i=0, l;
-// 	for (y=0; y<8; y++)
-// 	{
-// 		l=(y+1)<<8;
-// 		DISPDESEL(cs);
-// 		SPITransmit16(l | data[i++]);
-// 		SPITransmit16(l | data[i++]);
-// 		DISPSEL(cs);
-// 	}
-// }
-// void Max7219Send1Frame(u8 *data, u8 cs)
-// {
-// 	u16 y, n, i=0;
-// 	for (y=0; y<8; y++)
-// 	{
-// 		DISPDESEL(cs);
-// 		SPITransmit16(((y+1)<<8) | data[i++]);
-// 		DISPSEL(cs);
-// 	}
-// }
-
-// void Max7219SendData(u8 **data, u8 *numSegments, u8 numDisplays, u8 cs)
-// {
-// 	u16 i[numDisplays];
+// 	u16 i[numDisplays]; //Index into data. Will increment independently for every display
 
 // 	for (u16 y=0; y<8; y++)
 // 	{
 // 		u16 cmd = ((y+1)<<8); //select row
 
-// 		DISPDESEL(cs);
+// 		PORT->Group[0].OUTCLR.reg = PORT_PA22;
 // 		//From last display to the first; The data for the end must be sent first
 // 		for (u8 d=numDisplays-1; d<numDisplays; d--)
 // 		{
 // 			if (y==0) { i[d] = 0; }
 
-// 			for (u8 s=0; s<numSegments[d]; s++)
+// 			for (u8 s=0; s<displays[d].NumSegments; s++)
 // 			{
-// 				SPITransmit16(cmd | data[d][i[d]++]);
+// 				SPI_TRANSMIT16_SERCOM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
 // 			}
 // 		}
-// 		DISPSEL(cs);
+// 		PORT->Group[0].OUTSET.reg = PORT_PA22;
 // 	}
 // }
-
-// #include "frames.h"
-
-// void Max7219SendFrames(u16 *indexes, u8 *numSegments, u8 numDisplays, u8 cs)
-// {
-// 	u16 i[numDisplays];
-
-// 	for (u16 y=0; y<8; y++)
-// 	{
-// 		u16 cmd = ((y+1)<<8); //select row
-
-// 		DISPDESEL(cs);
-// 		//From last display to the first; The data for the end must be sent first
-// 		for (u8 d=numDisplays-1; d<numDisplays; d--)
-// 		{
-// 			if (y==0) { i[d] = 0; }
-
-// 			for (u8 s=0; s<numSegments[d]; s++)
-// 			{
-				
-// 				SPITransmit16(cmd | FRAME_DAT_ACC_8(indexes[d], i[d]++));
-// 			}
-// 		}
-// 		DISPSEL(cs);
-// 	}
-// }
-
-
-
-
