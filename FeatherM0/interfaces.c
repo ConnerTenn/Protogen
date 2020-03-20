@@ -91,34 +91,34 @@ void SPITransmit16(const u16 data)
 
 
 
-// u8 TX_Ring[256];
-// u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
+volatile u8 TX_Ring[256];
+volatile u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
+
+volatile u8 RX_Ring[256];
+volatile u8 RX_Head=0, RX_Tail=0;
 
 
-// u8 RX_Ring[256];
-// u8 RX_Head=0, RX_Tail=0;
-
-// ISR(USART_RX_vect)
-// {
-// 	RX_Ring[RX_Head] = UDR0;
-// 	if (RX_Head+(u8)1 == RX_Tail) { RX_Tail++; }
-// 	RX_Head++;
-// }
-// ISR(USART_TX_vect)
-// {
-// 	cli();
-// 	TX_Ongoing=0;
-// 	DABITS(UCSR0B,(1<<UDRIE0));
-// 	sei();
-// }
-// ISR(USART_UDRE_vect)
-// {
-// 	if (TX_Tail != TX_Head) { UDR0 = TX_Ring[TX_Tail++]; }
-// 	else { DABITS(UCSR0B,(1<<UDRIE0)); }
-// }
-
-// #define BAUD 9600
-// #define UBRR (F_CPU/16/BAUD-1)
+void SERCOM0_Handler()
+{
+	// PORT->Group[0].OUTTGL.reg = PORT_PA02;
+	if (SERCOM0->USART.INTFLAG.bit.RXC) //Receive Complete
+	{
+		RX_Ring[RX_Head] = SERCOM0->USART.DATA.reg;
+		if (RX_Head+(u8)1 == RX_Tail) { RX_Tail++; }
+		RX_Head++;
+	}
+	if (SERCOM0->USART.INTFLAG.bit.TXC) //Transmit Complete
+	{
+		TX_Ongoing = 0;
+		SERCOM0->USART.INTFLAG.reg |= SERCOM_USART_INTFLAG_TXC; //Clear Transmit complete flag
+		SERCOM0->USART.INTENCLR.bit.TXC = 1;
+	}
+	if (SERCOM0->USART.INTFLAG.bit.DRE) //Data Register Empty
+	{
+		if (TX_Tail != TX_Head) { SERCOM0->USART.DATA.reg = TX_Ring[TX_Tail++]; }
+		else { SERCOM0->USART.INTENCLR.bit.DRE = 1; SERCOM0->USART.INTENSET.bit.TXC = 1;  }
+	}
+}
 
 void IntiUART()
 {
@@ -172,48 +172,56 @@ void IntiUART()
 	SERCOM0->USART.CTRLB.reg = SERCOM_USART_CTRLB_RXEN | SERCOM_USART_CTRLB_TXEN; //RX and TX enabled
 	while (SERCOM0->USART.SYNCBUSY.bit.CTRLB) {}
 
-	//Enable SPI
+	//Enable UART
 	SERCOM0->USART.CTRLA.bit.ENABLE = 1;
 	while (SERCOM0->USART.SYNCBUSY.bit.ENABLE) {}
+
+	//Enable SERCOM0 interrupts
+	NVIC_EnableIRQ(SERCOM0_IRQn);
+
+	//Enable interrupts
+	SERCOM0->USART.INTENSET.reg = SERCOM_USART_INTENSET_RXC; //Receive complete 
 }
 
 void SerialTransmitByte(u8 data)
 {
-	while (!SERCOM0->USART.INTFLAG.bit.DRE) {} //Wait for data empty
+	// while (!SERCOM0->USART.INTFLAG.bit.DRE) {} //Wait for data empty
 	SERCOM0->USART.DATA.reg = data; //Data Out
+	while (!SERCOM0->USART.INTFLAG.bit.TXC) {} //Wait for data empty
 }
 
 
-// void SerialTransmit(u8 *data, u8 len)
-// {
-// 	for (u8 i=0; i<len; i++)
-// 	{
-// 		TX_Ring[TX_Head] = data[i];
-// 		if (TX_Head+(u8)1 == TX_Tail) { return; }
-// 		TX_Head++;
-// 	}
-// 	ENBITS(UCSR0B,(1<<UDRIE0));
-// }
-// void SerialFlush()
-// {
-// 	while (TX_Ongoing==1) {}
-// }
+void SerialTransmit(u8 *data, u8 len)
+{
+	for (u8 i=0; i<len; i++)
+	{
+		TX_Ring[TX_Head] = data[i];
+		if (TX_Head+(u8)1 == TX_Tail) { return; }
+		TX_Head++;
+	}
+	TX_Ongoing = 1;
+	SERCOM0->USART.INTENSET.bit.DRE = 1;
+}
+void SerialFlush()
+{
+	while (TX_Ongoing==1) {}
+}
 
 
-// u8 SerialRead(u8 *data, u8 len)
-// {
-// 	u8 i=0;
-// 	while (i<len && RX_Tail != RX_Head)
-// 	{
-// 		data[i++] = RX_Ring[RX_Tail++];
-// 	}
-// 	return i;
-// }
+u8 SerialRead(u8 *data, u8 len)
+{
+	u8 i=0;
+	while (i<len && RX_Tail != RX_Head)
+	{
+		data[i++] = RX_Ring[RX_Tail++];
+	}
+	return i;
+}
 
-// u8 SerialAvail()
-// {
-// 	return RX_Head-RX_Tail+(RX_Tail>RX_Head?1:0);
-// }
+u8 SerialAvail()
+{
+	return RX_Head-RX_Tail+(RX_Tail>RX_Head?1:0);
+}
 
 
 // #define DISPSEL(cs) ENBITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))

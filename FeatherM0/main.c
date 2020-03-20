@@ -52,6 +52,8 @@ VBUS     _         _              _          _          _           _           
 
 28: Address Space
 
+34: Nested Vector Interrupt Controller (NVIC)
+
 41: Periphial Access controller
 
 48 Peripherals Address Space Summary
@@ -80,6 +82,7 @@ int main()
 {
 
 	PORT->Group[0].DIRSET.reg = 1<<17; //DDRA17:Out
+	PORT->Group[0].DIRSET.reg = PORT_PA02; //Out
 
 	IntiSPI();
 
@@ -91,8 +94,10 @@ int main()
 	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
 
 	
-	SerialTransmitByte(0x53);
-	SerialTransmitByte(0xAA);
+	// SerialTransmitByte(0x53);
+	// SerialTransmitByte(0xAA);
+	SerialTransmit((u8 *)"Hello", 6);
+	SerialFlush();
 
 	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
 	SPITransmit(0xC5);

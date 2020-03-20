@@ -141,7 +141,7 @@ __attribute__ ((section(".isr_vector"))) const DeviceVectors exception_table =
  * \brief This is the code that gets called on processor reset.
  * Initializes the device and call the main() routine.
  */
-void Reset_Handler( void )
+void Reset_Handler(void)
 {
 	uint32_t *pSrc, *pDest;
 
