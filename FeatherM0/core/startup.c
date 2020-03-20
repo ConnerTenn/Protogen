@@ -86,7 +86,6 @@ void SystemInit( void )
 	/* Turn on the digital interface clock */
 	// PM->APBAMASK.reg = PM->APBAMASK.reg | PM_APBAMASK_GCLK;
 	PM->APBAMASK.bit.GCLK_ = 1;
-	PM->APBCMASK.bit.SERCOM4_ = 1; //PM->APBCMASK.reg | PM_APBCMASK_SERCOM4;
 
 	// ----------------------------------------------------------------------------------------------
 	// 1) Enable XOSC32K clock (External on-board 32.768Hz oscillator)
