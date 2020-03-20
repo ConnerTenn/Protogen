@@ -145,7 +145,7 @@ void TC3_Handler()
 			if (DisplayListCOM1[i].FrameDelay==0)
 			{
 				DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
-				DisplayListCOM1[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameOffset;
+				DisplayListCOM1[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameNext;
 			}
 		}
 
@@ -218,8 +218,8 @@ int main()
 	InitTimers();
 
 
-	SerialTransmit((u8 *)"Hello!", 6);
-	SerialTransmit(FRAME_DATA, FRAME_LEN);
+	// SerialTransmit((u8 *)"Hello!", 6);
+	// SerialTransmit(FRAME_DATA, FRAME_LEN);
 	
 	SerialFlush();
 

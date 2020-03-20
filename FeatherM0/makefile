@@ -48,9 +48,9 @@ start:
 FrameData.bin: bin
 
 bin:
-	echo -en "Testing Data" > FrameData.bin
-# 	python GenFrames5.py
-	# rm FrameData.bin; fallocate -l 2000 FrameData.bin
+	# echo -en "Testing Data" > FrameData.bin
+	python GenFrames5.py
+	# rm -f FrameData.bin; fallocate -l 8000 FrameData.bin
 
 
 
