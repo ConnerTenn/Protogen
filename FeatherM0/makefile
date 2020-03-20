@@ -53,7 +53,7 @@ start:
 
 
 
-prog.elf: main.o core/core.a # libraries/libraries.a
+prog.elf: main.o core/core.a interfaces.o # libraries/libraries.a
 	@echo -e "\nCreating $@\n"
 	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@
@@ -63,6 +63,8 @@ prog.bin: prog.elf
 	@echo -e "\nCreating $@\n"
 	@$(OBJDMP) -D $? > prog.list
 	$(OBJCPY) $? -O binary $@
+
+	@echo -e "\nDone!\n"
 
 core/core.a:
 	@echo -e "\nCreating $@\n"

@@ -1,14 +1,7 @@
 
-#include "sam.h"
+#include "interfaces.h"
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
 
-#define REG(t, r) (*(t *)(r))
-#define SETREG(t, r, v, m)  ( REG(t, r) = ((REG(t, r) & (~(m))) | ((v) & (m))) )
-#define ENBIT(t, r, b) SETREG(t, r, 1<<(b), 1<<(b))
-#define DABIT(t, r, b) SETREG(t, r, 0, 1<<(b))
 
 
 /*
@@ -46,7 +39,10 @@ VBUS     _         _              _          _          _           _           
 24:PA15  EINT[15]  _              SERCOM2:3  SERCOM4:3  TC3/WO[1]   TCC0/WO[5]  _           GCLK[1]  
 32:PA23  EINT[7]   _              SERCOM3:1  SERCOM5:1  TC4/WO[1]   TCC0/WO[5]  USB/SOF     GCLK[7]  
 31:PA22  EINT[6]   _              SERCOM3:0  SERCOM5:0  TC4/WO[0]   TCC0/WO[4]  _           GCLK[6]  
-
+                                                                                                     
+13:PA08
+30:PA21
+11:PA06
 
 
 */
