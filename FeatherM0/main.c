@@ -156,7 +156,7 @@ int main()
 	InitTimers();
 
 	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
-	SPITransmit(0xF2);
+	SPI_TRANSMIT8_SERCOM4(0xF2);
 	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
 
 	
@@ -169,7 +169,7 @@ int main()
 	SerialFlush();
 
 	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
-	SPITransmit(0xC5);
+	SPI_TRANSMIT16_SERCOM1(0xC506);
 	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
 
 	u8 i=0; (void)i;

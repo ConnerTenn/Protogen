@@ -4,8 +4,28 @@
 
 //Page 135
 void IntiSPI();
-void SPITransmit(const u8 data);
-void SPITransmit16(const u16 data);
+// void SPITransmit(const u8 data);
+// void SPITransmit16(const u16 data);
+
+#define SPI_TRANSMIT8_SERCOM4(data) ( \
+	SERCOM4->SPI.DATA.reg = (data), /*Data Out*/ \
+	({ while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} /*Wait for transmit complete*/ }) \
+	)
+
+#define SPI_TRANSMIT16_SERCOM4(data) ( \
+	SPI_TRANSMIT8_SERCOM4((data>>8)&0xFF), \
+	SPI_TRANSMIT8_SERCOM4(data&0xFF) \
+	)
+
+#define SPI_TRANSMIT8_SERCOM1(data) ( \
+	SERCOM1->SPI.DATA.reg = (data), /*Data Out*/ \
+	({ while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} /*Wait for transmit complete*/ }) \
+	)
+
+#define SPI_TRANSMIT16_SERCOM1(data) ( \
+	SPI_TRANSMIT8_SERCOM1((data>>8)&0xFF), \
+	SPI_TRANSMIT8_SERCOM1(data&0xFF) \
+	)
 
 // #define SPI_TRANSMIT(data) 
 

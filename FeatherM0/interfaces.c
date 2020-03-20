@@ -9,6 +9,8 @@
 
 void IntiSPI()
 {
+	// == SERCOM4 ==
+
 	//Enable SERCOM4 in Power Manager
 	PM->APBCMASK.bit.SERCOM4_ = 1;
 
@@ -72,22 +74,85 @@ void IntiSPI()
 	//Enable SPI
 	SERCOM4->SPI.CTRLA.bit.ENABLE = 1;
 	while (SERCOM4->SPI.SYNCBUSY.bit.ENABLE) {}
+
+
+
+	// == SERCOM1 ==
+
+	//Enable SERCOM1 in Power Manager
+	PM->APBCMASK.bit.SERCOM1_ = 1;
+
+	//MOSI: DDRA18 SERCOM2 PAD[2]
+	//MISO: DDRA16 SERCOM2 PAD[0]
+	//SCK:  DDRA19 SERCOM2 PAD[3]
+
+	//DDR
+	//MOSI
+	PORT->Group[0].DIRSET.reg = PORT_PA18C_SERCOM1_PAD2; //DDRA18:Out 
+	//MISO
+	PORT->Group[0].DIRCLR.reg = PORT_PA16C_SERCOM1_PAD0; //DDRA16:IN
+	//SCK
+	PORT->Group[0].DIRSET.reg = PORT_PA19C_SERCOM1_PAD3; //DDRA19:Out
+
+
+	//PINMUX
+	// SCK (ODD) Peripheral D (SERCOM1 P3), MOSI (EVEN) Peripheral D (SERCOM1 P2)
+	PORT->Group[0].PMUX[18/2].reg = PORT_PMUX_PMUXO_C | PORT_PMUX_PMUXE_C;
+	// MISO (EVEN) Peripheral D (SERCOM1 P0)
+	PORT->Group[0].PMUX[16/2].reg = PORT_PMUX_PMUXE_C;
+	// // SS (ODD) Peripheral D (SERCOM1 P1)
+	// PORT->Group[1].PMUX[9/2].reg = PORT_PMUX_PMUXO_D;
+
+	//PINCFG
+	PORT->Group[0].PINCFG[18].bit.PMUXEN = 1; //MOSI
+	PORT->Group[0].PINCFG[16].bit.PMUXEN = 1; //MISO
+	PORT->Group[0].PINCFG[19].bit.PMUXEN = 1; //SCK
+	
+	//Put Generic Clock Generator 0 as source for SERCOM4
+	GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(GCLK_CLKCTRL_ID_SERCOM1_CORE) | // Generic Clock Multiplexer SERCOM4
+						GCLK_CLKCTRL_GEN_GCLK0 | // Generic Clock Generator 0 is source
+						GCLK_CLKCTRL_CLKEN;
+	//Wait for synchronization
+	while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY) { }
+
+	SERCOM1->SPI.CTRLA.bit.SWRST = 1;
+	//Wait for synchronization
+	while (SERCOM1->SPI.SYNCBUSY.bit.SWRST) {}
+
+	SERCOM1->SPI.CTRLA.reg = 
+		SERCOM_SPI_CTRLA_MODE_SPI_MASTER | //Set Master Mode
+		SERCOM_SPI_CTRLA_CPOL | SERCOM_SPI_CTRLA_CPHA | //Mode 3: CLK Idle High, sample rising
+		SERCOM_SPI_CTRLA_FORM(0) | //SPI Frame Only
+		SERCOM_SPI_CTRLA_DIPO(0) | //DIn(MISO) is PAD[0]
+		SERCOM_SPI_CTRLA_DOPO(1) | //DOut(MOSI) is PAD[2], SCK is PAD[3]: Mode 1
+		SERCOM_SPI_CTRLA_IBON; //STATUS.BUFOVF asserted immediately upon overflow
+	//MSB first
+
+	SERCOM1->SPI.CTRLB.reg = SERCOM_SPI_CTRLB_CHSIZE(0); //8 Bit charsize
+	// SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
+
+	//Set Baud Rate
+	SERCOM1->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(23); //Target 1MHz: 48MHz/(2*1MHz) - 1 = 23
+
+	//Enable SPI
+	SERCOM1->SPI.CTRLA.bit.ENABLE = 1;
+	while (SERCOM1->SPI.SYNCBUSY.bit.ENABLE) {}
 }
 
-void SPITransmit(const u8 data)
-{
-	SERCOM4->SPI.DATA.reg = data; //Data Out
-	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
-}
+// void SPITransmit(const u8 data)
+// {
+// 	SERCOM4->SPI.DATA.reg = data; //Data Out
+// 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+// }
 
-void SPITransmit16(const u16 data)
-{
-	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
-	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+// void SPITransmit16(const u16 data)
+// {
+// 	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
+// 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 
-	SERCOM4->SPI.DATA.reg = (data&0xFF); //Data Out
-	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
-}
+// 	SERCOM4->SPI.DATA.reg = (data&0xFF); //Data Out
+// 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+// }
 
 
 
