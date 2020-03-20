@@ -42,18 +42,19 @@ start:
 	@$(GPP) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
 
 %.o: %.bin
-	# $(LD) -r -b binary $< -o $@
-	# avr-objcopy -I binary -O elf32-avr -B avr --rename-section .data=.text,readonly,rom,noload,contents $< $@
+	$(LD) -r -b binary $< -o $@
+	$(OBJCPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.text,readonly,rom,noload,contents $< $@
 
-# FrameData.bin: bin
+FrameData.bin: bin
 
-# bin:
+bin:
+	echo -en "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10" > FrameData.bin
 # 	python GenFrames5.py
 	# rm FrameData.bin; fallocate -l 2000 FrameData.bin
 
 
 
-prog.elf: main.o core/core.a interfaces.o # libraries/libraries.a
+prog.elf: main.o core/core.a interfaces.o FrameData.o # libraries/libraries.a
 	@echo -e "\nCreating $@\n"
 	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@
@@ -62,6 +63,7 @@ prog.elf: main.o core/core.a interfaces.o # libraries/libraries.a
 prog.bin: prog.elf
 	@echo -e "\nCreating $@\n"
 	@$(OBJDMP) -D $? > prog.list
+	$(OBJCPY) $? -O ihex prog.hex
 	$(OBJCPY) $? -O binary $@
 
 	@echo -e "\nDone!\n"
@@ -77,7 +79,7 @@ libraries/libraries.a:
 clean:
 	$(MAKE) -C core/ clean
 	$(MAKE) -C libraries/ clean
-	rm -f *.elf *.bin *.o *.a prog.list
+	rm -f *.elf *.bin *.hex *.o *.a prog.list
 
 upload:
 	#avr-size --mcu=atmega328p -A prog.elf

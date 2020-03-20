@@ -1,6 +1,6 @@
 
 #include "interfaces.h"
-
+#include "frames.h"
 
 
 
@@ -96,7 +96,10 @@ int main()
 	
 	// SerialTransmitByte(0x53);
 	// SerialTransmitByte(0xAA);
-	SerialTransmit((u8 *)"Hello", 6);
+	SerialTransmit((u8 *)"Hello!", 6);
+	SerialTransmit((u8 *)&_binary_FrameData_bin_start, 6);
+	
+
 	SerialFlush();
 
 	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
