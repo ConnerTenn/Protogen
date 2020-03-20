@@ -97,7 +97,7 @@ int main()
 	// SerialTransmitByte(0x53);
 	// SerialTransmitByte(0xAA);
 	SerialTransmit((u8 *)"Hello!", 6);
-	SerialTransmit((u8 *)&_binary_FrameData_bin_start, 6);
+	SerialTransmit(FRAME_DATA, FRAME_LEN);
 	
 
 	SerialFlush();

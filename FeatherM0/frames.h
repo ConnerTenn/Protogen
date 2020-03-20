@@ -3,6 +3,8 @@
 
 extern const u8 _binary_FrameData_bin_start;
 extern const u8 _binary_FrameData_bin_end;
+#define FRAME_DATA ( (u8 *)&_binary_FrameData_bin_start )
+#define FRAME_LEN ( (u32)((&_binary_FrameData_bin_end)-(&_binary_FrameData_bin_start)) )
 // #define BIN_FRAME_DATA_START ((const PROGMEM u8 *const)(&_binary_FrameData_bin_start))
 // extern PROGMEM const u8 *const FrameData;
 // extern PROGMEM const u8 *const FrameDataEnd;
