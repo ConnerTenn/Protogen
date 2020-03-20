@@ -1,6 +1,6 @@
 
-#include "interfaces.h"
 
+#include "interfaces.h"
 
 // ISR(SPI_STC_vect)
 // {
@@ -14,9 +14,10 @@ void IntiSPI()
 	//Enable SERCOM4 in Power Manager
 	PM->APBCMASK.bit.SERCOM4_ = 1;
 
-	//MOSI: DDRB10 SERCOM4 PAD[2]
-	//MISO: DDRA12 SERCOM4 PAD[0]
-	//SCK:  DDRB11 SERCOM4 PAD[3]
+	//MOSI: PB10 SERCOM4 PAD[2]
+	//MISO: PA12 SERCOM4 PAD[0]
+	//SCK:  PB11 SERCOM4 PAD[3]
+	//SS:   PA23
 
 	//DDR
 	//MOSI
@@ -25,10 +26,9 @@ void IntiSPI()
 	PORT->Group[0].DIRCLR.reg = PORT_PA12D_SERCOM4_PAD0; //DDRA12:IN
 	//SCK
 	PORT->Group[1].DIRSET.reg = PORT_PB11D_SERCOM4_PAD3; //DDRB11:Out
-	// //SS
+	//SS
+	PORT->Group[0].DIRSET.reg = PORT_PA23; //DDRA23:Out
 	// PORT->Group[1].DIRSET.reg = 1<<9; //DDRB09:Out
-
-	// PORT->Group[1].OUTSET.reg = (1<<10) | (1<<11);
 
 
 	//PINMUX
@@ -69,7 +69,7 @@ void IntiSPI()
 	// SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
 
 	//Set Baud Rate
-	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(23); //Target 1MHz: 48MHz/(2*1MHz) - 1 = 23
+	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(3); //Target 6MHz: 48MHz/(2*6MHz) - 1 = 3
 
 	//Enable SPI
 	SERCOM4->SPI.CTRLA.bit.ENABLE = 1;
@@ -82,9 +82,10 @@ void IntiSPI()
 	//Enable SERCOM1 in Power Manager
 	PM->APBCMASK.bit.SERCOM1_ = 1;
 
-	//MOSI: DDRA18 SERCOM2 PAD[2]
-	//MISO: DDRA16 SERCOM2 PAD[0]
-	//SCK:  DDRA19 SERCOM2 PAD[3]
+	//MOSI: PA18 SERCOM2 PAD[2]
+	//MISO: PA16 SERCOM2 PAD[0]
+	//SCK:  PA19 SERCOM2 PAD[3]
+	//SS:   PA22
 
 	//DDR
 	//MOSI
@@ -93,6 +94,8 @@ void IntiSPI()
 	PORT->Group[0].DIRCLR.reg = PORT_PA16C_SERCOM1_PAD0; //DDRA16:IN
 	//SCK
 	PORT->Group[0].DIRSET.reg = PORT_PA19C_SERCOM1_PAD3; //DDRA19:Out
+	//SS
+	PORT->Group[0].DIRSET.reg = PORT_PA22; //DDRA23:Out
 
 
 	//PINMUX
@@ -132,7 +135,7 @@ void IntiSPI()
 	// SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
 
 	//Set Baud Rate
-	SERCOM1->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(23); //Target 1MHz: 48MHz/(2*1MHz) - 1 = 23
+	SERCOM1->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(3); //Target 6MHz: 48MHz/(2*6MHz) - 1 = 3
 
 	//Enable SPI
 	SERCOM1->SPI.CTRLA.bit.ENABLE = 1;
@@ -292,46 +295,123 @@ u8 SerialAvail()
 // #define DISPSEL(cs) ENBITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))
 // #define DISPDESEL(cs) DABITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (0<<2))
 
-// void Max7219Init(u8 numSegments, u8 cs)
-// {
-// 	DISPSEL(cs);
+void Max7219InitCOM1(u8 numSegments)
+{
+	Max7219SendCmdCOM1(0x0C00, numSegments); //Disable
+	Max7219SendCmdCOM1(0x0F00, numSegments); //Test off
+	Max7219SendCmdCOM1(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM1(0x0900, numSegments); //Decode off
+	Max7219SendCmdCOM1(0x0B07, numSegments); //Scan 7
 
-// 	Max7219SendCmd(0x0C00, numSegments, cs); //Disable
-// 	Max7219SendCmd(0x0F00, numSegments, cs); //Test off
-// 	Max7219SendCmd(0x0A00, numSegments, cs); //Intensity 0 (minimum)
-// 	Max7219SendCmd(0x0900, numSegments, cs); //Decode off
-// 	Max7219SendCmd(0x0B07, numSegments, cs); //Scan 7
+	//Blank Display
+	for (u16 l=1; l<=8; l++)
+	{
+		Max7219SendCmdCOM1(l<<8, numSegments); 
+	}
 
-// 	//Blank Display
-// 	for (u16 l=1; l<=8; l++)
-// 	{
-// 		Max7219SendCmd(l<<8, numSegments, cs); 
-// 	}
+	Max7219SendCmdCOM1(0x0C01, numSegments);  //Enable
+}
+void Max7219InitCOM4(u8 numSegments)
+{
+	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
+	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
 
-// 	Max7219SendCmd(0x0C01, numSegments, cs);  //Enable
-// }
+	//Blank Display
+	for (u16 l=1; l<=8; l++)
+	{
+		Max7219SendCmdCOM4(l<<8, numSegments); 
+	}
 
-// void Max7219Refresh(u8 numSegments, u8 cs)
-// {
-// 	DISPSEL(cs);
+	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+}
 
-// 	Max7219SendCmd(0x0F00, numSegments, cs); //Test off
-// 	Max7219SendCmd(0x0A00, numSegments, cs); //Intensity 0 (minimum)
-// 	Max7219SendCmd(0x0900, numSegments, cs); //Decode off
-// 	Max7219SendCmd(0x0B07, numSegments, cs); //Scan 7
+void Max7219RefreshCOM1(u8 numSegments)
+{
+	Max7219SendCmdCOM1(0x0F00, numSegments); //Test off
+	Max7219SendCmdCOM1(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM1(0x0900, numSegments); //Decode off
+	Max7219SendCmdCOM1(0x0B07, numSegments); //Scan 7
 
-// 	Max7219SendCmd(0x0C01, numSegments, cs);  //Enable
-// }
+	Max7219SendCmdCOM1(0x0C01, numSegments);  //Enable
+}
+void Max7219RefreshCOM4(u8 numSegments)
+{
+	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
 
-// void Max7219SendCmd(u16 cmd, u8 numSegments, u8 cs)
-// {
-// 	DISPDESEL(cs); 
-// 	for (u8 d=0; d<numSegments; d++) 
-// 	{ 
-// 		SPITransmit16(cmd);
-// 	}
-// 	DISPSEL(cs);
-// }
+	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+}
+
+void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
+{
+	PORT->Group[0].OUTCLR.reg = PORT_PA22;
+	for (u8 d=0; d<numSegments; d++) 
+	{ 
+		SPI_TRANSMIT16_SERCOM1(cmd);
+	}
+	PORT->Group[0].OUTSET.reg = PORT_PA22;
+}
+void Max7219SendCmdCOM4(u16 cmd, u8 numSegments)
+{
+	PORT->Group[0].OUTCLR.reg = PORT_PA23;
+	for (u8 d=0; d<numSegments; d++) 
+	{ 
+		SPI_TRANSMIT16_SERCOM4(cmd);
+	}
+	PORT->Group[0].OUTSET.reg = PORT_PA23;
+}
+
+
+void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
+{
+	u16 i[numDisplays]; //Index into data. Will increment independently for every display
+
+	for (u16 y=0; y<8; y++)
+	{
+		u16 cmd = ((y+1)<<8); //select row
+
+		PORT->Group[0].OUTCLR.reg = PORT_PA22;
+		//From last display to the first; The data for the end must be sent first
+		for (u8 d=numDisplays-1; d<numDisplays; d--)
+		{
+			if (y==0) { i[d] = 0; }
+
+			for (u8 s=0; s<displays[d].NumSegments; s++)
+			{
+				SPI_TRANSMIT16_SERCOM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
+			}
+		}
+		PORT->Group[0].OUTSET.reg = PORT_PA22;
+	}
+}
+
+void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays)
+{
+	u16 i[numDisplays]; //Index into data. Will increment independently for every display
+
+	for (u16 y=0; y<8; y++)
+	{
+		u16 cmd = ((y+1)<<8); //select row
+
+		PORT->Group[0].OUTCLR.reg = PORT_PA22;
+		//From last display to the first; The data for the end must be sent first
+		for (u8 d=numDisplays-1; d<numDisplays; d--)
+		{
+			if (y==0) { i[d] = 0; }
+
+			for (u8 s=0; s<displays[d].NumSegments; s++)
+			{
+				SPI_TRANSMIT16_SERCOM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
+			}
+		}
+		PORT->Group[0].OUTSET.reg = PORT_PA22;
+	}
+}
 
 // void Max7219Send4Frame(u8 *data, u8 cs)
 // {

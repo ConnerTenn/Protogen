@@ -1,23 +1,24 @@
 
+
+#ifndef _FRAMES_H_
+#define _FRAMES_H_
+
 #include "globals.h"
 
 extern const u8 _binary_FrameData_bin_start;
 extern const u8 _binary_FrameData_bin_end;
 #define FRAME_DATA ( (u8 *)&_binary_FrameData_bin_start )
 #define FRAME_LEN ( (u32)((&_binary_FrameData_bin_end)-(&_binary_FrameData_bin_start)) )
-// #define BIN_FRAME_DATA_START ((const PROGMEM u8 *const)(&_binary_FrameData_bin_start))
-// extern PROGMEM const u8 *const FrameData;
-// extern PROGMEM const u8 *const FrameDataEnd;
 
-// typedef struct 
-// {
-// 	u16 FrameOffset;
-// 	u16 FrameNext;
-// 	u16 FrameDelay;
-// } Frame;
+typedef struct 
+{
+	u16 FrameOffset;
+	u16 FrameNext;
+	u16 FrameDelay;
+} Frame;
 
-// // #define FrameHeaderAcc(i) ((Frame *)(FrameData+i*sizeof(Frame)))
-// // #define FrameDataAcc(i) ((u8 *)(FrameData + FrameHeaderAcc(i)->FrameOffset))
+#define FRAME_HEADER_ACC(i) ((Frame *)(FRAME_DATA+i*sizeof(Frame)))
+#define FRAME_DATA_ACC(i) ((u8 *)(FRAME_DATA + FRAME_HEADER_ACC(i)->FrameOffset))
 
 
 // #define FRAME_OFF_ACC_16(idx) ( (u16)(pgm_read_word_near(BIN_FRAME_DATA_START+idx*sizeof(Frame)+0)) )
@@ -34,3 +35,5 @@ extern const u8 _binary_FrameData_bin_end;
 // void FrameTransDown(u8 *data, u8 numSegments, u8 num);
 // void FrameTransLeft(u8 *data, u8 numSegments, u8 num);
 // void FrameTransRight(u8 *data, u8 numSegments, u8 num);
+
+#endif

@@ -1,7 +1,5 @@
 
 #include "interfaces.h"
-#include "frames.h"
-
 
 
 /*
@@ -86,17 +84,70 @@ VBUS     _         _              _          _          _           _           
 1104: Table Of Contents
 */
 
+
+//MOSI: DDRA18 SERCOM2 PAD[2]
+//MISO: DDRA16 SERCOM2 PAD[0]
+//SCK:  DDRA19 SERCOM2 PAD[3]
+
+//MOSI: DDRB10 SERCOM4 PAD[2]
+//MISO: DDRA12 SERCOM4 PAD[0]
+//SCK:  DDRB11 SERCOM4 PAD[3]
+
+Max7219 DisplayListCOM1[] = 
+	{//Must be listed in the order of connection
+		{.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
+		{.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
+		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
+	};
+
+Max7219 DisplayListCOM4[] = 
+	{//Must be listed in the order of connection
+		// {.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
+		// {.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
+		// {.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
+	};
+
+Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
+	
+u8 TotalSegmentsCOM1, TotalSegmentsCOM4;
+
+const u8 NumDisplaysCOM1 = sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]);
+const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
+
+u16 RefreshTimer;
+
 void TC3_Handler()
 {
 	if (TC3->COUNT16.INTFLAG.bit.MC0) //1kHz Timer
 	{
 		PORT->Group[0].OUTTGL.reg = PORT_PA02;
 
+		if (RefreshTimer == 0)
+		{
+			Max7219RefreshCOM1(TotalSegmentsCOM1);
+			RefreshTimer = REFRESH_INTERVAL;
+		}
+		else { RefreshTimer--; }
+
+		Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
+
+
 		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC0;
 	}
 	if (TC3->COUNT16.INTFLAG.bit.MC1) //1kHz Timer @50% Phase offset
 	{
-		PORT->Group[0].OUTTGL.reg = PORT_PA17;
+		for (u8 i=0; i<NumDisplaysCOM1; i++)
+		{
+			if (DisplayListCOM1[i].FrameDelay!=-1)
+			{
+				DisplayListCOM1[i].FrameDelay--;
+			}
+			if (DisplayListCOM1[i].FrameDelay==0)
+			{
+				DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
+				DisplayListCOM1[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameOffset;
+			}
+		}
 
 		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC1;
 	}
@@ -142,41 +193,42 @@ void InitTimers()
 
 int main()
 {
-
-	PORT->Group[0].DIRSET.reg = 1<<17; //DDRA17:Out
 	PORT->Group[0].DIRSET.reg = PORT_PA02; //Out
+
+
+	TotalSegmentsCOM1=0;
+	for (u8 i=0; i<NumDisplaysCOM1; i++)
+	{
+		TotalSegmentsCOM1 += DisplayListCOM1[i].NumSegments;
+		DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
+	}
+	TotalSegmentsCOM4=0;
+	for (u8 i=0; i<NumDisplaysCOM4; i++)
+	{
+		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
+		DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+	}
+
+	RefreshTimer = 0;
 
 	IntiSPI();
 
 	IntiUART();
 
-	PORT->Group[0].OUTTGL.reg = PORT_PA02;
-	PORT->Group[0].OUTTGL.reg = PORT_PA02;
-	
 	InitTimers();
 
-	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
-	SPI_TRANSMIT8_SERCOM4(0xF2);
-	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
 
-	
-	// SerialTransmitByte(0x53);
-	// SerialTransmitByte(0xAA);
 	SerialTransmit((u8 *)"Hello!", 6);
 	SerialTransmit(FRAME_DATA, FRAME_LEN);
 	
-
 	SerialFlush();
 
-	PORT->Group[0].OUTCLR.reg = 1<<17; //SS Low
-	SPI_TRANSMIT16_SERCOM1(0xC506);
-	PORT->Group[0].OUTSET.reg = 1<<17; //SS High
+
 
 	u8 i=0; (void)i;
 	while (1)
 	{
-		// PORT->Group[0].OUTTGL.reg = 1<<17; //DRA17: Toggle
-		// REG(volatile u32, 0x41004400+0x1C) = 1<<17; //DRA17 TOGGLE
+		PORT->Group[0].OUTTGL.reg = PORT_PA02;
 	}
 
 	return 0;
