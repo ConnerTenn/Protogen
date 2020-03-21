@@ -51,4 +51,6 @@ void Max7219SendCmdCOM1(u16 cmd, u8 numSegments);
 void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays);
 // void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays);
 
+void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displaysCom4, u8 numDisplaysCom4);
+
 #endif

@@ -132,6 +132,8 @@ void TC3_Handler()
 		else { RefreshTimer--; }
 
 		Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
+		// Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
+		// Max7219SendFrames(DisplayListCOM1, NumDisplaysCOM1, DisplayListCOM1, NumDisplaysCOM1);
 
 
 		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC0;

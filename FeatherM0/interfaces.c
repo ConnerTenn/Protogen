@@ -157,22 +157,41 @@ void SPITransmitCOM1(const u8 data)
 
 void SPITransmit16COM1(const u16 data)
 {
-	// while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
 	SERCOM1->SPI.DATA.reg = (data>>8); //Data Out
 	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 
-	// while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
 	SERCOM1->SPI.DATA.reg = (data&0xFF); //Data Out
 	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 }
-// void SPITransmit16COM4(const u16 data)
-// {
-// 	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
-// 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+void SPITransmit16COM4(const u16 data)
+{
+	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
+	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 
-// 	SERCOM4->SPI.DATA.reg = (data&0xFF); //Data Out
-// 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
-// }
+	SERCOM4->SPI.DATA.reg = (data&0xFF); //Data Out
+	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+}
+
+void SPITransmit16COM1Fast(const u16 data)
+{
+	while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM1->SPI.DATA.reg = (data>>8); //Data Out
+	// while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+
+	while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM1->SPI.DATA.reg = (data&0xFF); //Data Out
+	// while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+}
+void SPITransmit16COM4Fast(const u16 data)
+{
+	while (!SERCOM4->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
+	// while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+
+	while (!SERCOM4->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM4->SPI.DATA.reg = (data&0xFF); //Data Out
+	// while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+}
 
 
 
@@ -407,25 +426,91 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 	}
 }
 
-// void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays)
-// {
-// 	u16 i[numDisplays]; //Index into data. Will increment independently for every display
+void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displaysCom4, u8 numDisplaysCom4)
+{
+	u16 iCom1[numDisplaysCom1], iCom4[numDisplaysCom4]; //Index into data. Will increment independently for every display
+	u16 yCom1=0, yCom4=0;
+	u8 dCom1=numDisplaysCom1-1, dCom4=numDisplaysCom4-1;
+	u8 sCom1=0, sCom4=0;
 
-// 	for (u16 y=0; y<8; y++)
-// 	{
-// 		u16 cmd = ((y+1)<<8); //select row
+	for (u8 d=numDisplaysCom1-1; d<numDisplaysCom1; d--)
+	{
+		iCom1[d]=0;
+	}
+	for (u8 d=numDisplaysCom4-1; d<numDisplaysCom4; d--)
+	{
+		iCom4[d]=0;
+	}
 
-// 		PORT->Group[0].OUTCLR.reg = PORT_PA22;
-// 		//From last display to the first; The data for the end must be sent first
-// 		for (u8 d=numDisplays-1; d<numDisplays; d--)
-// 		{
-// 			if (y==0) { i[d] = 0; }
+	while(yCom1<8 || yCom4<8)
+	{
+		u16 cmdCom1 = ((yCom1+1)<<8); //select row
+		u16 cmdCom4 = ((yCom4+1)<<8); //select row
 
-// 			for (u8 s=0; s<displays[d].NumSegments; s++)
-// 			{
-// 				SPI_TRANSMIT16_SERCOM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
-// 			}
-// 		}
-// 		PORT->Group[0].OUTSET.reg = PORT_PA22;
-// 	}
-// }
+		if (yCom1 < 8)
+		{
+			if (dCom1 == numDisplaysCom1-1) 
+			{ 
+				PORT->Group[0].OUTCLR.reg = PORT_PA22; 
+			}
+			
+			if (dCom1 < numDisplaysCom1)
+			{
+				// if (yCom1 == 0 && sCom1 == 0) { iCom1[dCom1] = 0; }
+
+				if (sCom1 < displaysCom1[dCom1].NumSegments)
+				{
+					SPITransmit16COM1Fast(cmdCom1 | FRAME_DATA_ACC(displaysCom1[dCom1].FrameIndex)[iCom1[dCom1]++]);
+					sCom1++;
+				}
+				if (!(sCom1 < displaysCom1[dCom1].NumSegments))
+				{
+					sCom1 = 0;
+					dCom1--;
+				}
+			}
+			else
+			{
+				dCom1 = numDisplaysCom1-1;
+				while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+				PORT->Group[0].OUTSET.reg = PORT_PA22;
+				yCom1++;
+			}
+		}
+
+		if (yCom4 < 8)
+		{
+			if (dCom4 == numDisplaysCom4-1) 
+			{ 
+				PORT->Group[0].OUTCLR.reg = PORT_PA23;
+			}
+			
+			if (dCom4 < numDisplaysCom4)
+			{
+				// if (yCom4 == 0 && sCom4 == 0) { iCom4[dCom4] = 0; }
+
+				if (sCom4 < displaysCom4[dCom4].NumSegments)
+				{
+					SPITransmit16COM4Fast(cmdCom4 | FRAME_DATA_ACC(displaysCom4[dCom4].FrameIndex)[iCom4[dCom4]++]);
+					sCom4++;
+				}
+				
+				if (!(sCom4 < displaysCom4[dCom4].NumSegments))
+				{
+					sCom4 = 0;
+					dCom4--;
+				}
+			}
+			else
+			{
+				dCom4 = numDisplaysCom4-1;
+				while (!SERCOM4->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+				PORT->Group[0].OUTSET.reg = PORT_PA23;
+				yCom4++;
+			}
+		}
+		
+	}
+}
+
+
