@@ -17,8 +17,8 @@ typedef struct
 	u16 FrameDelay;
 } Frame;
 
-#define FRAME_HEADER_ACC(i) ((Frame *)(FRAME_DATA+i*sizeof(Frame)))
-#define FRAME_DATA_ACC(i) ((u8 *)(FRAME_DATA + FRAME_HEADER_ACC(i)->FrameOffset))
+#define FRAME_HEADER_ACC(i) ((Frame *)(FRAME_DATA+(i)*sizeof(Frame)))
+#define FRAME_DATA_ACC(i) ((u8 *)(FRAME_DATA + (u32)(FRAME_HEADER_ACC(i)->FrameOffset)))
 
 
 // #define FRAME_OFF_ACC_16(idx) ( (u16)(pgm_read_word_near(BIN_FRAME_DATA_START+idx*sizeof(Frame)+0)) )

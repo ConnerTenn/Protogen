@@ -142,13 +142,29 @@ void IntiSPI()
 	while (SERCOM1->SPI.SYNCBUSY.bit.ENABLE) {}
 }
 
-// void SPITransmit(const u8 data)
+void SPITransmitCOM1(const u8 data)
+{
+	// while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM1->SPI.DATA.reg = data; //Data Out
+	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+}
+// void SPITransmitCOM4(const u8 data)
 // {
 // 	SERCOM4->SPI.DATA.reg = data; //Data Out
 // 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 // }
 
-// void SPITransmit16(const u16 data)
+void SPITransmit16COM1(const u16 data)
+{
+	// while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM1->SPI.DATA.reg = (data>>8); //Data Out
+	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+
+	// while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
+	SERCOM1->SPI.DATA.reg = (data&0xFF); //Data Out
+	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+}
+// void SPITransmit16COM4(const u16 data)
 // {
 // 	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
 // 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
@@ -352,7 +368,7 @@ void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
 	PORT->Group[0].OUTCLR.reg = PORT_PA22;
 	for (u8 d=0; d<numSegments; d++) 
 	{ 
-		SPI_TRANSMIT16_SERCOM1(cmd);
+		SPITransmit16COM1(cmd);
 	}
 	PORT->Group[0].OUTSET.reg = PORT_PA22;
 }
@@ -383,7 +399,7 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 
 			for (u8 s=0; s<displays[d].NumSegments; s++)
 			{
-				SPI_TRANSMIT16_SERCOM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
+				SPITransmit16COM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
 			}
 		}
 		PORT->Group[0].OUTSET.reg = PORT_PA22;
