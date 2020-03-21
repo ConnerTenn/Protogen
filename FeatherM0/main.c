@@ -95,9 +95,9 @@ VBUS     _         _              _          _          _           _           
 
 Max7219 DisplayListCOM1[] = 
 	{//Must be listed in the order of connection
-		{.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
-		{.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
-		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
+		{.NumSegments=2, .FrameIndex=11, .FrameDelay=-1, .QueuedIndex=-1}, //Eye
+		{.NumSegments=1, .FrameIndex=9 , .FrameDelay=-1, .QueuedIndex=-1}, //Nose
+		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1, .QueuedIndex=-1}, //Mouth
 	};
 
 // Max7219 DisplayListCOM4[] = 
@@ -109,10 +109,12 @@ Max7219 DisplayListCOM1[] =
 
 // Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
 	
-u8 TotalSegmentsCOM1;//, TotalSegmentsCOM4;
 
 const u8 NumDisplaysCOM1 = sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]);
 // const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
+
+
+u8 TotalSegmentsCOM1;//, TotalSegmentsCOM4;
 
 u16 RefreshTimer;
 

@@ -36,6 +36,7 @@ typedef struct
 	u8 NumSegments;
 	u32 FrameIndex;
 	u16 FrameDelay;
+	u32 QueuedIndex;
 } Max7219;
 
 void Max7219InitCOM1(u8 numSegments);
