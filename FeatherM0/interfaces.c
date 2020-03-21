@@ -28,7 +28,7 @@ void IntiSPI()
 	PORT->Group[1].DIRSET.reg = PORT_PB11D_SERCOM4_PAD3; //DDRB11:Out
 	//SS
 	PORT->Group[0].DIRSET.reg = PORT_PA23; //DDRA23:Out
-	// PORT->Group[1].DIRSET.reg = 1<<9; //DDRB09:Out
+	PORT->Group[0].OUTSET.reg = PORT_PA23; //DDRA23:Idle High
 
 
 	//PINMUX
@@ -69,7 +69,7 @@ void IntiSPI()
 	// SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
 
 	//Set Baud Rate
-	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(3); //Target 6MHz: 48MHz/(2*6MHz) - 1 = 3
+	SERCOM4->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(1); //Target 12MHz: 48MHz/(2*12MHz) - 1 = 1
 
 	//Enable SPI
 	SERCOM4->SPI.CTRLA.bit.ENABLE = 1;
@@ -95,7 +95,8 @@ void IntiSPI()
 	//SCK
 	PORT->Group[0].DIRSET.reg = PORT_PA19C_SERCOM1_PAD3; //DDRA19:Out
 	//SS
-	PORT->Group[0].DIRSET.reg = PORT_PA22; //DDRA23:Out
+	PORT->Group[0].DIRSET.reg = PORT_PA22; //DDRA22:Out
+	PORT->Group[0].OUTSET.reg = PORT_PA22; //DDRA22:Idle High
 
 
 	//PINMUX
@@ -135,7 +136,7 @@ void IntiSPI()
 	// SERCOM4->SPI.CTRLB.reg |= SERCOM_SPI_CTRLB_MSSEN; //Hardware controlled SS pin
 
 	//Set Baud Rate
-	SERCOM1->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(3); //Target 6MHz: 48MHz/(2*6MHz) - 1 = 3
+	SERCOM1->SPI.BAUD.reg = SERCOM_SPI_BAUD_BAUD(1); //Target 12MHz: 48MHz/(2*12MHz) - 1 = 1
 
 	//Enable SPI
 	SERCOM1->SPI.CTRLA.bit.ENABLE = 1;
