@@ -323,6 +323,14 @@ u8 SerialRead(u8 *data, u8 len)
 	}
 	return i;
 }
+u8 SerialGetCh()
+{
+	if (RX_Tail != RX_Head)
+	{
+		return RX_Ring[RX_Tail++];
+	}
+	return 0;
+}
 
 u8 SerialAvail()
 {

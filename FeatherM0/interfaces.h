@@ -28,15 +28,16 @@ void SerialTransmit(u8 *data, u8 len);
 void SerialTransmitStr(char *data);
 
 u8 SerialRead(u8 *data, u8 len);
+u8 SerialGetCh();
 u8 SerialAvail();
 
 
 typedef struct
 {
 	u8 NumSegments;
-	u32 FrameIndex;
+	u16 FrameIndex;
 	u16 FrameDelay;
-	u32 QueuedIndex;
+	u16 QueuedIndex;
 } Max7219;
 
 void Max7219InitCOM1(u8 numSegments);

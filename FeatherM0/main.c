@@ -118,11 +118,66 @@ u8 TotalSegmentsCOM1;//, TotalSegmentsCOM4;
 
 u16 RefreshTimer;
 
+u8 CmdFill=0;
+
+union
+{
+	struct 
+	{
+		u8 Type;
+		u8 Arg1;
+		u16 Arg2;
+		u8 Hash;
+	} Command;
+	struct
+	{
+		u8 Type;
+		u8 Display;
+		u16 Index;
+		u8 Hash;
+	} DisplaySet;
+	struct
+	{
+		u8 Type;
+		u8 Data[3];
+		u8 Hash;
+	} Common;
+	struct
+	{
+		u8 Data[5];
+	} Raw;
+} CmdBuffer;
+
+void ParseCmd(u8 numChars)
+{
+	for (u8 i=0; i<numChars; i++)
+	{
+		CmdBuffer.Raw.Data[CmdFill++] = SerialGetCh();
+		if (CmdFill == sizeof(CmdBuffer))
+		{
+			
+			u8 hash = CmdBuffer.Common.Type ^ CmdBuffer.Common.Data[0] ^ CmdBuffer.Common.Data[1] ^ CmdBuffer.Common.Data[2];
+			if (hash == CmdBuffer.Common.Hash)
+			{
+				//Execute Command
+			}
+
+			CmdFill=0;
+		}
+	}
+}
+
 void TC3_Handler()
 {
 	if (TC3->COUNT16.INTFLAG.bit.MC0) //1kHz Timer
 	{
 		PORT->Group[0].OUTTGL.reg = PORT_PA02;
+
+		u8 numChars;
+		if ((numChars = SerialAvail()))
+		{
+			ParseCmd(numChars);
+		}
 
 		if (RefreshTimer == 0)
 		{
