@@ -28,7 +28,7 @@ CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib -nostartfiles -
 
 .PHONY: all start prog.bin clean core
 
-all: start prog.bin
+all: start prog.bin finishinfo
 
 start:
 	@echo -e "\nCompiling...\n"
@@ -58,6 +58,7 @@ prog.elf: main.o core/core.a interfaces.o FrameData.o # libraries/libraries.a
 	@echo -e "\nCreating $@\n"
 	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@
+	$(OBJCPY) -O elf32-littlearm -j .text -j .data $@ $@ #remove extra sections
 
 
 prog.bin: prog.elf
@@ -65,8 +66,6 @@ prog.bin: prog.elf
 	@$(OBJDMP) -D $? > prog.list
 	$(OBJCPY) $? -O ihex prog.hex
 	$(OBJCPY) $? -O binary $@
-
-	@echo -e "\nDone!\n"
 
 core/core.a:
 	@echo -e "\nCreating $@\n"
@@ -86,6 +85,12 @@ upload:
 	#avrdude -v -p atmega328p -c arduino -P $(shell ls /dev/ttyUSB* | head -n 1) -b 57600 -D  -U flash:w:prog.hex:i
 	/home/conner/.arduino15/packages/arduino/tools/bossac/1.7.0-arduino3/bossac -i -d --port=$(shell ls /dev/ttyACM* | head -n 1) -U true -i -e -w -v prog.bin -R
 
+finishinfo:
+	@echo -e "\n\nDone!\n"
+
+	@echo -e "Image Size: $(shell ls -l prog.bin | cut -d ' ' -f5) B"
+	@$(ARMBIN)/arm-none-eabi-size -A prog.elf
+	@echo
 
 
 
