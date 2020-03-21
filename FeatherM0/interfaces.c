@@ -158,16 +158,18 @@ void SPITransmitCOM1(const u8 data)
 void SPITransmit16COM1(const u16 data)
 {
 	SERCOM1->SPI.DATA.reg = (data>>8); //Data Out
-	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+	// while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 
+	while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
 	SERCOM1->SPI.DATA.reg = (data&0xFF); //Data Out
 	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 }
 void SPITransmit16COM4(const u16 data)
 {
 	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
-	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+	// while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 
+	while (!SERCOM4->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
 	SERCOM4->SPI.DATA.reg = (data&0xFF); //Data Out
 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 }

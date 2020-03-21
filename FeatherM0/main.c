@@ -136,7 +136,7 @@ void TC3_Handler()
 		// Max7219SendFrames(DisplayListCOM1, NumDisplaysCOM1, DisplayListCOM1, NumDisplaysCOM1);
 
 
-		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC0;
+		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC0; //Clear MCO interrupt
 	}
 	if (TC3->COUNT16.INTFLAG.bit.MC1) //1kHz Timer @50% Phase offset
 	{
@@ -153,7 +153,7 @@ void TC3_Handler()
 			}
 		}
 
-		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC1;
+		TC3->COUNT16.INTFLAG.reg = TC_INTFLAG_MC1; //Clear MC1 interrupt
 	}
 }
 
@@ -180,7 +180,7 @@ void InitTimers()
 		TC_CTRLA_MODE_COUNT16; //16Bit Counter
 
 	TC3->COUNT16.CC[0].reg = 48000; //Target 1kHz: 48MHz/1kHz = 48000
-	TC3->COUNT16.CC[1].reg = 24000; //48000/2 = 24000
+	TC3->COUNT16.CC[1].reg = 32000; //48000*2/3 = 32000
 
 	//Enable TC3
 	TC3->COUNT16.CTRLA.bit.ENABLE = 1;
