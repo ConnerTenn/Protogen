@@ -12,12 +12,14 @@ all: prog.hex
 	$(GCC) $(CFLAGS) $< -c -o $@
 
 %.o: %.bin
-	$(LD) -r -b binary $< -o $@
+	# $(LD) -r -b binary $< -o $@
+	avr-objcopy -I binary -O elf32-avr -B avr --rename-section .data=.text,readonly,rom,noload,contents $< $@
 
 FrameData.bin: bin
 
 bin:
-	python GenFrames.py
+	python GenFrames5.py
+	# rm FrameData.bin; fallocate -l 2000 FrameData.bin
 
 
 

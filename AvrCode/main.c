@@ -15,11 +15,12 @@ typedef struct
 } Max7219;
 
 Max7219 DisplayList[] = 
-	{
-		{2, 2, -1},
-		{1, 1, -1},
-		{4, 3, -1},
+	{//Must be listed in the order of connection
+		{.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
+		{.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
+		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
 	};
+	
 u8 NumDisplays;
 u8 TotalSegments;
 #define CSPIN 0
@@ -52,19 +53,31 @@ ISR(TIMER1_COMPA_vect)
 			// FrameIndex=in;//(in-'0';
 			// FrameDelay=FrameHeaderAcc(FrameIndex)->FrameDelay;
 			DisplayList[display].FrameIndex=frame;
-			DisplayList[display].FrameDelay=FrameHeaderAcc(frame)->FrameDelay;
+			DisplayList[display].FrameDelay=FRAME_DLY_ACC_16(frame);
 		}
 		
 	}
-
+	
 	if (RefreshTimer == 0)
 	{
 		Max7219Refresh(TotalSegments, CSPIN);
 		RefreshTimer = REFRESH_INTERVAL;
+		// for (u8 d=0; d<NumDisplays; d++)
+		// {
+		// 	u8 buff[100];
+		// 	sprintf(buff,"Disp: %u\n\tDelay: %u/%u\n\tNext: %u\n\tOffset: %u\n", DisplayList[d].FrameIndex, 
+		// 		DisplayList[d].FrameDelay, FRAME_DLY_ACC_16(DisplayList[d].FrameIndex),
+		// 		FRAME_NXT_ACC_16(DisplayList[d].FrameIndex),
+		// 		FRAME_OFF_ACC_16(DisplayList[d].FrameIndex));
+		// 	SerialTransmit(buff, strlen(buff));
+		// 	SerialTransmit("Hello", 6);
+		// }
+		// SerialTransmit("\n\n", 3);
 	}
 	else { RefreshTimer--; }
 
-	u8 *data[NumDisplays]; //array of pointers
+	//u8 *data[NumDisplays]; //array of pointers
+	u16 indexes[NumDisplays];
 	u8 numSegments[NumDisplays];
 	for (u8 d=0; d<NumDisplays; d++)
 	{
@@ -80,10 +93,11 @@ ISR(TIMER1_COMPA_vect)
 		// 	Max7219Send4Frame(FrameDataAcc(DisplayList[i].FrameIndex), DisplayList[i].CSPin);
 		// 	break;
 		// }
-		data[d] = FrameDataAcc(DisplayList[d].FrameIndex);
+		// memcpy_P(DisplayBuffer, (void *)FRAME_DAT_ADDR(DisplayList[d].FrameIndex), DisplayList[d].NumSegments);
+		indexes[d] = DisplayList[d].FrameIndex;
 		numSegments[d] = DisplayList[d].NumSegments;
 	}
-	Max7219SendData(data, numSegments, NumDisplays, CSPIN);
+	Max7219SendFrames(indexes, numSegments, NumDisplays, CSPIN);
 
 	DABITS(PORTC, 0x2);
 }
@@ -103,8 +117,8 @@ ISR(TIMER0_COMPA_vect)
 		}
 		if (DisplayList[i].FrameDelay==0)
 		{
-			DisplayList[i].FrameDelay=FrameHeaderAcc(DisplayList[i].FrameIndex)->FrameDelay;
-			DisplayList[i].FrameIndex=FrameHeaderAcc(DisplayList[i].FrameIndex)->FrameNext;
+			DisplayList[i].FrameDelay=FRAME_DLY_ACC_16(DisplayList[i].FrameIndex);
+			DisplayList[i].FrameIndex=FRAME_NXT_ACC_16(DisplayList[i].FrameIndex);
 		}
 	}
 	
@@ -150,6 +164,7 @@ int main()
 	for (u8 i=0; i<NumDisplays; i++)
 	{
 		TotalSegments += DisplayList[i].NumSegments;
+		DisplayList[i].FrameDelay=FRAME_DLY_ACC_16(DisplayList[i].FrameIndex);
 	}
 
 	RefreshTimer = 0;

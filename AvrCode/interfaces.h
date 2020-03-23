@@ -17,7 +17,7 @@ void SPITransmit16(const u16 data);
 #define DDRB_SCK 5
 #define DDRB_CS 2
 
-#define REFRESH_INTERVAL 100
+#define REFRESH_INTERVAL 300
 u16 RefreshTimer;
 
 //Page 143
@@ -42,3 +42,4 @@ void Max7219SendCmd(u16 cmd, u8 numSegments, u8 cs);
 // void Max7219Send1Frame(u8 *data, u8 cs);
 
 void Max7219SendData(u8 **data, u8 *numSegments, u8 numDisplays, u8 cs);
+void Max7219SendFrames(u16 *indexes, u8 *numSegments, u8 numDisplays, u8 cs);
