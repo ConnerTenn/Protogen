@@ -117,21 +117,20 @@ def ParseImage(path, expr, stage):
 	#parse the frame number out
 	imgnum = int(path.split("frame")[1].split(".bmp")[0])
 
-	newframes = [] #TODO: Remove array; not actually needed
 	frameData = []
 	l=0
 	for d in Displays:
 		#Add a new frame for the current display
-		newframes += [ ParseImageData(img, d["Rect"], d["Mirror"]) ]
+		newframe = ParseImageData(img, d["Rect"], d["Mirror"])
 		
 		name = expr + "_" + stage + "_" + str(imgnum) + "_" + d["Name"]
 		
 		#Check to see if the frame already exists
-		frameidx = ExistsInFrames(newframes[-1])
+		frameidx = ExistsInFrames(newframe)
 		if frameidx == -1:
 			#The frame doesn't so add it to the list
 			frameidx = len(Frames)
-			Frames += [ newframes[-1] ]
+			Frames += [ newframe ]
 
 		#Check if the last frame (of this display) is still the same
 		if Last[l] == None or Last[l]["FrameIdx"] != frameidx:
