@@ -211,17 +211,17 @@ def Parse():
 		FrameData += loopFrameData
 		FrameData += endFrameData
 		
-		ManifestStr += expr + "\n"
-		ManifestStr += "  Start" + "\n"
+		ManifestStr += expr
+		ManifestStr += "\n  Start: "
 		for i in range(len(Displays)):
-			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(startFrameData[i]["FrameIdx"]) + "\n"	
-		ManifestStr += "  LoopExit" + "\n"
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(startFrameData[i]["FrameIdx"]) + " "
+		ManifestStr += "\n  Loop:  "
 		for i in range(len(Displays)):
-			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(loopFrameData[i]["FrameIdx"]) + "\n"	
-		ManifestStr += "  End" + "\n"
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(loopFrameData[i]["FrameIdx"]) + " "
+		ManifestStr += "\n  End:   "
 		for i in range(len(Displays)):
-			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(endFrameData[i]["FrameIdx"]) + "\n"	
-		ManifestStr += "\n"
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(endFrameData[i]["FrameIdx"]) + " "
+		ManifestStr += "\n\n"
 
 		#Print data
 		i=0
