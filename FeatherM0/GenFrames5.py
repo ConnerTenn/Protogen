@@ -6,6 +6,7 @@ from PIL import Image
 F=None
 FFrames="Frames"
 FFrameData="FrameData.bin"
+FFrameManifest="FrameManifest.txt"
 Displays=[
 	#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
 	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":False},
@@ -19,6 +20,10 @@ Displays=[
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
 FFrameData=f
+
+try: f = open(FFrameManifest, 'w')
+except: print("Error opening file \"{0}\"".format(FFrameManifest)); exit(-1)
+FFrameManifest=f
 
 
 def Hx(val, length):
@@ -151,9 +156,12 @@ def ParseImage(path, expr, stage):
 	# exit()	
 	return frameData
 
+ManifestStr=""
+
 def Parse():
 	global FrameData
 	global Last
+	global ManifestStr
 
 	Expressions = os.listdir(FFrames)
 	for expr in Expressions:
@@ -203,6 +211,15 @@ def Parse():
 		FrameData += loopFrameData
 		FrameData += endFrameData
 		
+		ManifestStr += expr + "\n"
+		ManifestStr += "  Start" + "\n"
+		for i in range(len(Displays)):
+			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(startFrameData[i]["FrameIdx"]) + "\n"	
+		ManifestStr += "  End" + "\n"
+		for i in range(len(Displays)):
+			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(endFrameData[i]["FrameIdx"]) + "\n"	
+		ManifestStr += "\n"
+
 		#Print data
 		i=0
 		for f in FrameData:
@@ -243,16 +260,17 @@ for frame in FrameData:
 for imgdat in Frames:
 	for imgline in imgdat:
 		FrameStr+=imgline
-
 	
 
 print("Header: " + str(len(HeaderStr)) + "B")
 print("Frames: " + str(len(FrameStr)) + "B")
 
-print("Writing Data File")
+print("Writing Output Files")
 FFrameData.write(HeaderStr+FrameStr)
-
 FFrameData.close()
+
+FFrameManifest.write(ManifestStr)
+FFrameManifest.close()
 
 
 """
