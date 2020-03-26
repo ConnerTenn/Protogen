@@ -215,6 +215,9 @@ def Parse():
 		ManifestStr += "  Start" + "\n"
 		for i in range(len(Displays)):
 			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(startFrameData[i]["FrameIdx"]) + "\n"	
+		ManifestStr += "  LoopExit" + "\n"
+		for i in range(len(Displays)):
+			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(loopFrameData[i]["FrameIdx"]) + "\n"	
 		ManifestStr += "  End" + "\n"
 		for i in range(len(Displays)):
 			ManifestStr += "    " + Displays[i]["Name"] + ":" + str(endFrameData[i]["FrameIdx"]) + "\n"	
