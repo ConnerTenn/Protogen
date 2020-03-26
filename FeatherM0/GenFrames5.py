@@ -181,18 +181,19 @@ def Parse():
 
 		#Parse the frames for each section
 
+		Last=[None]*len(Displays) #Reset Last frames; start of each section must be recorded
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
 			startFrameData += ParseImage(path, expr, "start")
 		lastofstart = Last
 		
+		Last=[None]*len(Displays) #Reset Last frames; start of each section must be recorded
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
 			loopFrameData += ParseImage(path, expr, "loop")
 		lastofloop = Last
 
-		#Reset last so that the last of loop sequence can loop back 
-		Last=[None]*len(Displays)
+		Last=[None]*len(Displays) #Reset Last frames so that the last of loop sequence can loop back 
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
 			endFrameData += ParseImage(path, expr, "end")
