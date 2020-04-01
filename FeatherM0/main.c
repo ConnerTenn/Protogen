@@ -17,7 +17,7 @@ GND      _          _         _              _          _          _           _
 8 :PB09  _          EINT[9]   AIN[3]         _          SERCOM4:1  TC4/WO[1]   _           _           _        
 9 :PA04  _          EINT[4]   AIN[4],AIN[0]  _          SERCOM0:0  TCC0/WO[0]  _           _           _        
 10:PA05  _          EINT[5]   AIN[5],AIN[1]  _          SERCOM0:1  TCC0/WO[1]  _           _           _        
-47:PB02  _          EINT[2]   AIN[10]        _          SERCOM5:0  TC6/WO[0]   _           _           _        
+47:PB02  SS_COM4    EINT[2]   AIN[10]        _          SERCOM5:0  TC6/WO[0]   _           _           _        
 20:PB11  SCK_COM4   EINT[11]  _              _          SERCOM4:3  TC5/WO[1]   TCC0/WO[5]  I2S/SCK[1]  GCLK[5]  
 19:PB10  MOSI_COM4  EINT[10]  _              _          SERCOM4:2  TC5/WO[0]   TCC0/WO[4]  I2S/MCK[1]  GCLK[4]  
 21:PA12  MISO_COM4  EINT[21]  _              SERCOM2:0  SERCOM4:0  TCC2/WO[0]  TCC0/WO[6]  _           AC/CMP[0]
@@ -32,11 +32,11 @@ VBUS     _          _         _              _          _          _           _
 28:PA19  SCK_COM1   EINT[3]   _              SERCOM1:3  SERCOM3:3  TCC3/WO[1]  TCC0/WO[3]  I2S/SD[0]   AC/CMP[1]
 25:PA16  MISO_COM1  EINT[0]   _              SERCOM1:0  SERCOM3:0  TCC2/WO[0]  TCC0/WO[6]  _           GCLK[2]  
 27:PA18  MOSI_COM1  EINT[2]   _              SERCOM1:2  SERCOM3:2  TCC3/WO[0]  TCC0/WO[2]  _           AC/CMP[0]
-12:PA07  _          EINT[7]   AIN[7],AIN[3]  _          SERCOM0:3  TCC1/WO[1]  _           I2S/SD[0]   _        
+12:PA07  SS_COM1    EINT[7]   AIN[7],AIN[3]  _          SERCOM0:3  TCC1/WO[1]  _           I2S/SD[0]   _        
 29:PA20  _          EINT[4]   _              SERCOM5:2  SERCOM3:2  TC7/WO[0]   TCC0/WO[6]  I2S/SCK[0]  GCLK[4]  
 24:PA15  _          EINT[15]  _              SERCOM2:3  SERCOM4:3  TC3/WO[1]   TCC0/WO[5]  _           GCLK[1]  
-32:PA23  SS_COM4    EINT[7]   _              SERCOM3:1  SERCOM5:1  TC4/WO[1]   TCC0/WO[5]  USB/SOF     GCLK[7]  
-31:PA22  SS_COM1    EINT[6]   _              SERCOM3:0  SERCOM5:0  TC4/WO[0]   TCC0/WO[4]  _           GCLK[6]  
+32:PA23  _          EINT[7]   _              SERCOM3:1  SERCOM5:1  TC4/WO[1]   TCC0/WO[5]  USB/SOF     GCLK[7]  
+31:PA22  _          EINT[6]   _              SERCOM3:0  SERCOM5:0  TC4/WO[0]   TCC0/WO[4]  _           GCLK[6]  
                                                                                                                 
 13:PA08  _          NMI       AIN[16]        SERCOM0:0  SERCOM2:0  TCC0/WO[0]  TCC1/WO[2]  I2S/SD[1]   _        
 30:PA21  _          EINT[5]   _              SERCOM5:3  SERCOM3:3  TC7/WO[1]   TCC0/WO[7]  I2S/FS[0]   GCLK[5]  

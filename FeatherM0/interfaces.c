@@ -17,7 +17,7 @@ void IntiSPI()
 	//MOSI: PB10 SERCOM4 PAD[2]
 	//MISO: PA12 SERCOM4 PAD[0]
 	//SCK:  PB11 SERCOM4 PAD[3]
-	//SS:   PA23
+	//SS:   PB02
 
 	//DDR
 	//MOSI
@@ -27,8 +27,8 @@ void IntiSPI()
 	//SCK
 	PORT->Group[1].DIRSET.reg = PORT_PB11D_SERCOM4_PAD3; //DDRB11:Out
 	//SS
-	PORT->Group[0].DIRSET.reg = PORT_PA23; //DDRA23:Out
-	PORT->Group[0].OUTSET.reg = PORT_PA23; //DDRA23:Idle High
+	PORT->Group[0].DIRSET.reg = PORT_PB02; //DDRB02:Out
+	PORT->Group[0].OUTSET.reg = PORT_PB02; //DDRB02:Idle High
 
 
 	//PINMUX
@@ -85,7 +85,7 @@ void IntiSPI()
 	//MOSI: PA18 SERCOM1 PAD[2]
 	//MISO: PA16 SERCOM1 PAD[0]
 	//SCK:  PA19 SERCOM1 PAD[3]
-	//SS:   PA22
+	//SS:   PA07
 
 	//DDR
 	//MOSI
@@ -95,8 +95,8 @@ void IntiSPI()
 	//SCK
 	PORT->Group[0].DIRSET.reg = PORT_PA19C_SERCOM1_PAD3; //DDRA19:Out
 	//SS
-	PORT->Group[0].DIRSET.reg = PORT_PA22; //DDRA22:Out
-	PORT->Group[0].OUTSET.reg = PORT_PA22; //DDRA22:Idle High
+	PORT->Group[0].DIRSET.reg = PORT_PA07; //DDRA07:Out
+	PORT->Group[0].OUTSET.reg = PORT_PA07; //DDRA07:Idle High
 
 
 	//PINMUX
@@ -395,21 +395,21 @@ void Max7219RefreshCOM1(u8 numSegments)
 
 void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
 {
-	PORT->Group[0].OUTCLR.reg = PORT_PA22;
+	PORT->Group[0].OUTCLR.reg = PORT_PA07;
 	for (u8 d=0; d<numSegments; d++) 
 	{ 
 		SPITransmit16COM1(cmd);
 	}
-	PORT->Group[0].OUTSET.reg = PORT_PA22;
+	PORT->Group[0].OUTSET.reg = PORT_PA07;
 }
 // void Max7219SendCmdCOM4(u16 cmd, u8 numSegments)
 // {
-// 	PORT->Group[0].OUTCLR.reg = PORT_PA23;
+// 	PORT->Group[0].OUTCLR.reg = PORT_PB02;
 // 	for (u8 d=0; d<numSegments; d++) 
 // 	{ 
 // 		SPI_TRANSMIT16_SERCOM4(cmd);
 // 	}
-// 	PORT->Group[0].OUTSET.reg = PORT_PA23;
+// 	PORT->Group[0].OUTSET.reg = PORT_PB02;
 // }
 
 
@@ -421,7 +421,7 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 	{
 		u16 cmd = ((y+1)<<8); //select row
 
-		PORT->Group[0].OUTCLR.reg = PORT_PA22;
+		PORT->Group[0].OUTCLR.reg = PORT_PA07;
 		//From last display to the first; The data for the end must be sent first
 		for (u8 d=numDisplays-1; d<numDisplays; d--)
 		{
@@ -432,7 +432,7 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 				SPITransmit16COM1(cmd | FRAME_DATA_ACC(displays[d].FrameIndex)[i[d]++]);
 			}
 		}
-		PORT->Group[0].OUTSET.reg = PORT_PA22;
+		PORT->Group[0].OUTSET.reg = PORT_PA07;
 	}
 }
 
@@ -461,7 +461,7 @@ void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displ
 		{
 			if (dCom1 == numDisplaysCom1-1) 
 			{ 
-				PORT->Group[0].OUTCLR.reg = PORT_PA22; 
+				PORT->Group[0].OUTCLR.reg = PORT_PA07; 
 			}
 			
 			if (dCom1 < numDisplaysCom1)
@@ -483,7 +483,7 @@ void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displ
 			{
 				dCom1 = numDisplaysCom1-1;
 				while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
-				PORT->Group[0].OUTSET.reg = PORT_PA22;
+				PORT->Group[0].OUTSET.reg = PORT_PA07;
 				yCom1++;
 			}
 		}
@@ -492,7 +492,7 @@ void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displ
 		{
 			if (dCom4 == numDisplaysCom4-1) 
 			{ 
-				PORT->Group[0].OUTCLR.reg = PORT_PA23;
+				PORT->Group[0].OUTCLR.reg = PORT_PB02;
 			}
 			
 			if (dCom4 < numDisplaysCom4)
@@ -515,7 +515,7 @@ void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displ
 			{
 				dCom4 = numDisplaysCom4-1;
 				while (!SERCOM4->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
-				PORT->Group[0].OUTSET.reg = PORT_PA23;
+				PORT->Group[0].OUTSET.reg = PORT_PB02;
 				yCom4++;
 			}
 		}
