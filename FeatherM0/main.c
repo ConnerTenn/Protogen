@@ -100,21 +100,21 @@ Max7219 DisplayListCOM1[] =
 		{.NumSegments=4, .FrameIndex=10, .FrameDelay=-1, .QueuedIndex=-1}, //Mouth
 	};
 
-// Max7219 DisplayListCOM4[] = 
-// 	{//Must be listed in the order of connection
-// 		// {.NumSegments=2, .FrameIndex=11, .FrameDelay=-1}, //Eye
-// 		// {.NumSegments=1, .FrameIndex=9, .FrameDelay=-1}, //Nose
-// 		// {.NumSegments=4, .FrameIndex=10, .FrameDelay=-1}, //Mouth
-// 	};
+Max7219 DisplayListCOM4[] = 
+	{//Must be listed in the order of connection
+		{.NumSegments=2, .FrameIndex=6, .FrameDelay=-1}, //Eye
+		{.NumSegments=1, .FrameIndex=8, .FrameDelay=-1}, //Nose
+		{.NumSegments=4, .FrameIndex=7, .FrameDelay=-1}, //Mouth
+	};
 
 // Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
 	
 
 const u8 NumDisplaysCOM1 = sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]);
-// const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
+const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
 
 
-u8 TotalSegmentsCOM1;//, TotalSegmentsCOM4;
+u8 TotalSegmentsCOM1, TotalSegmentsCOM4;
 
 u16 RefreshTimer;
 
@@ -182,12 +182,13 @@ void TC3_Handler()
 		if (RefreshTimer == 0)
 		{
 			Max7219RefreshCOM1(TotalSegmentsCOM1);
+			Max7219RefreshCOM4(TotalSegmentsCOM4);
 			RefreshTimer = REFRESH_INTERVAL;
 		}
 		else { RefreshTimer--; }
 
 		Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
-		// Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
+		Max7219SendFramesCOM4(DisplayListCOM4, NumDisplaysCOM4);
 		// Max7219SendFrames(DisplayListCOM1, NumDisplaysCOM1, DisplayListCOM1, NumDisplaysCOM1);
 
 
@@ -205,6 +206,18 @@ void TC3_Handler()
 			{
 				DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
 				DisplayListCOM1[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameNext;
+			}
+		}
+		for (u8 i=0; i<NumDisplaysCOM4; i++)
+		{
+			if (DisplayListCOM4[i].FrameDelay!=-1)
+			{
+				DisplayListCOM4[i].FrameDelay--;
+			}
+			if (DisplayListCOM4[i].FrameDelay==0)
+			{
+				DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+				DisplayListCOM4[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameNext;
 			}
 		}
 
@@ -261,12 +274,12 @@ int main()
 		TotalSegmentsCOM1 += DisplayListCOM1[i].NumSegments;
 		DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
 	}
-	// TotalSegmentsCOM4=0;
-	// for (u8 i=0; i<NumDisplaysCOM4; i++)
-	// {
-	// 	TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
-	// 	DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
-	// }
+	TotalSegmentsCOM4=0;
+	for (u8 i=0; i<NumDisplaysCOM4; i++)
+	{
+		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
+		DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+	}
 
 	RefreshTimer = 0;
 
