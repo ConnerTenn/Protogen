@@ -6,19 +6,24 @@ from PIL import Image
 F=None
 FFrames="Frames"
 FFrameData="FrameData.bin"
+FFrameManifest="FrameManifest.txt"
 Displays=[
 	#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
-	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":False},
-	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":False},
-	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":False},
-	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":False},
-	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":True},
-	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":False},
+	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"YX"},
+	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":""},
+	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":"XY"},
+	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
+	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"X"},
+	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":""},
 ]
 
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
 FFrameData=f
+
+try: f = open(FFrameManifest, 'w')
+except: print("Error opening file \"{0}\"".format(FFrameManifest)); exit(-1)
+FFrameManifest=f
 
 
 def Hx(val, length):
@@ -31,20 +36,22 @@ def StrtoHx(string):
 # ImgDataTmp=b""
 
 
-def ParseImageData(img, imgrange, mirror):
+def ParseImageData(img, imgrange, mirrorx, mirrory):
 	data = [ ]
 	for y in range(imgrange["y1"],imgrange["y2"]+1):
+		if mirrory:
+			y=((imgrange["y2"])-imgrange["y1"])-(y-imgrange["y1"])+imgrange["y1"]
 		bit=7
 		byte=0x00
 		data += [ b"" ]
 		for x in range(imgrange["x1"],imgrange["x2"]+1):
 			#read the red channel at each pixel and set on/off
 			c = 1 if img.getpixel((x,y))[0]>127 else 0
-			byte |= c<<bit if not mirror else c<<(7-bit)
+			byte |= c<<bit if not mirrorx else c<<(7-bit)
 			bit-=1
 			#byte filled; save it and reset bits
 			if bit==-1:
-				if not mirror:
+				if not mirrorx:
 					data[-1] += Hx(byte,1)
 				else:
 					data[-1] = Hx(byte,1) + data[-1]
@@ -112,21 +119,20 @@ def ParseImage(path, expr, stage):
 	#parse the frame number out
 	imgnum = int(path.split("frame")[1].split(".bmp")[0])
 
-	newframes = [] #TODO: Remove array; not actually needed
 	frameData = []
 	l=0
 	for d in Displays:
 		#Add a new frame for the current display
-		newframes += [ ParseImageData(img, d["Rect"], d["Mirror"]) ]
+		newframe = ParseImageData(img, d["Rect"], d["Mirror"].find("X")!=-1, d["Mirror"].find("Y")!=-1)
 		
 		name = expr + "_" + stage + "_" + str(imgnum) + "_" + d["Name"]
 		
 		#Check to see if the frame already exists
-		frameidx = ExistsInFrames(newframes[-1])
+		frameidx = ExistsInFrames(newframe)
 		if frameidx == -1:
 			#The frame doesn't so add it to the list
 			frameidx = len(Frames)
-			Frames += [ newframes[-1] ]
+			Frames += [ newframe ]
 
 		#Check if the last frame (of this display) is still the same
 		if Last[l] == None or Last[l]["FrameIdx"] != frameidx:
@@ -151,9 +157,12 @@ def ParseImage(path, expr, stage):
 	# exit()	
 	return frameData
 
+ManifestStr=""
+
 def Parse():
 	global FrameData
 	global Last
+	global ManifestStr
 
 	Expressions = os.listdir(FFrames)
 	for expr in Expressions:
@@ -173,18 +182,19 @@ def Parse():
 
 		#Parse the frames for each section
 
+		Last=[None]*len(Displays) #Reset Last frames; start of each section must be recorded
 		for f in start:
 			path = FFrames+"/"+expr+"/start/"+f
 			startFrameData += ParseImage(path, expr, "start")
 		lastofstart = Last
 		
+		Last=[None]*len(Displays) #Reset Last frames; start of each section must be recorded
 		for f in loop:
 			path = FFrames+"/"+expr+"/loop/"+f
 			loopFrameData += ParseImage(path, expr, "loop")
 		lastofloop = Last
 
-		#Reset last so that the last of loop sequence can loop back 
-		Last=[None]*len(Displays)
+		Last=[None]*len(Displays) #Reset Last frames so that the last of loop sequence can loop back 
 		for f in end:
 			path = FFrames+"/"+expr+"/end/"+f
 			endFrameData += ParseImage(path, expr, "end")
@@ -203,6 +213,18 @@ def Parse():
 		FrameData += loopFrameData
 		FrameData += endFrameData
 		
+		ManifestStr += expr
+		ManifestStr += "\n  Start: "
+		for i in range(len(Displays)):
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(startFrameData[i]["Index"]) + " "
+		ManifestStr += "\n  Loop:  "
+		for i in range(len(Displays)):
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(loopFrameData[i]["Index"]) + " "
+		ManifestStr += "\n  End:   "
+		for i in range(len(Displays)):
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(endFrameData[i]["Index"]) + " "
+		ManifestStr += "\n\n"
+
 		#Print data
 		i=0
 		for f in FrameData:
@@ -243,16 +265,17 @@ for frame in FrameData:
 for imgdat in Frames:
 	for imgline in imgdat:
 		FrameStr+=imgline
-
 	
 
 print("Header: " + str(len(HeaderStr)) + "B")
 print("Frames: " + str(len(FrameStr)) + "B")
 
-print("Writing Data File")
+print("Writing Output Files")
 FFrameData.write(HeaderStr+FrameStr)
-
 FFrameData.close()
+
+FFrameManifest.write(ManifestStr)
+FFrameManifest.close()
 
 
 """
