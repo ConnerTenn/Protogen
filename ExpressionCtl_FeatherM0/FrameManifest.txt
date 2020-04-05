@@ -1,0 +1,5 @@
+CharlieIdle
+  Start: RightEye=6     RightMouth=7     RightNose=8     LeftNose=9     LeftMouth=10    LeftEye=11    
+  Loop:  RightEye=74    RightMouth=75    RightNose=76    LeftNose=77    LeftMouth=78    LeftEye=79    
+  End:   RightEye=202   RightMouth=203   RightNose=204   LeftNose=205   LeftMouth=206   LeftEye=207   
+
