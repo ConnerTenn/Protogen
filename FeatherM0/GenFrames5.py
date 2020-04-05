@@ -9,12 +9,12 @@ FFrameData="FrameData.bin"
 FFrameManifest="FrameManifest.txt"
 Displays=[
 	#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
-	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":False},
-	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":False},
-	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":False},
-	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":False},
-	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":True},
-	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":False},
+	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"YX"},
+	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":""},
+	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":"XY"},
+	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
+	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"X"},
+	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":""},
 ]
 
 try: f = open(FFrameData, 'wb')
@@ -36,20 +36,22 @@ def StrtoHx(string):
 # ImgDataTmp=b""
 
 
-def ParseImageData(img, imgrange, mirror):
+def ParseImageData(img, imgrange, mirrorx, mirrory):
 	data = [ ]
 	for y in range(imgrange["y1"],imgrange["y2"]+1):
+		if mirrory:
+			y=((imgrange["y2"])-imgrange["y1"])-(y-imgrange["y1"])+imgrange["y1"]
 		bit=7
 		byte=0x00
 		data += [ b"" ]
 		for x in range(imgrange["x1"],imgrange["x2"]+1):
 			#read the red channel at each pixel and set on/off
 			c = 1 if img.getpixel((x,y))[0]>127 else 0
-			byte |= c<<bit if not mirror else c<<(7-bit)
+			byte |= c<<bit if not mirrorx else c<<(7-bit)
 			bit-=1
 			#byte filled; save it and reset bits
 			if bit==-1:
-				if not mirror:
+				if not mirrorx:
 					data[-1] += Hx(byte,1)
 				else:
 					data[-1] = Hx(byte,1) + data[-1]
@@ -121,7 +123,7 @@ def ParseImage(path, expr, stage):
 	l=0
 	for d in Displays:
 		#Add a new frame for the current display
-		newframe = ParseImageData(img, d["Rect"], d["Mirror"])
+		newframe = ParseImageData(img, d["Rect"], d["Mirror"].find("X")!=-1, d["Mirror"].find("Y")!=-1)
 		
 		name = expr + "_" + stage + "_" + str(imgnum) + "_" + d["Name"]
 		
@@ -214,13 +216,13 @@ def Parse():
 		ManifestStr += expr
 		ManifestStr += "\n  Start: "
 		for i in range(len(Displays)):
-			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(startFrameData[i]["FrameIdx"]) + " "
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(startFrameData[i]["Index"]) + " "
 		ManifestStr += "\n  Loop:  "
 		for i in range(len(Displays)):
-			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(loopFrameData[i]["FrameIdx"]) + " "
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(loopFrameData[i]["Index"]) + " "
 		ManifestStr += "\n  End:   "
 		for i in range(len(Displays)):
-			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(endFrameData[i]["FrameIdx"]) + " "
+			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(endFrameData[i]["Index"]) + " "
 		ManifestStr += "\n\n"
 
 		#Print data
