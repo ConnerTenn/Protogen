@@ -9,9 +9,9 @@ R1=
 R2=
 R3=
 
-L1 > L1 > L2: "\x1A\xF3\x47"
+L1 > L1 > L2: " \x1A  \xF3\x47"
 
-L1 + R1: EXPR1 "\xF2"EXPR11 EXPR12
+L1 + R1:    EXPR1    "ggg""\xF2"EXPR11  EXPR12   
 # L1 + R2: EXPR2
 # L1 + R3: EXPR3
 

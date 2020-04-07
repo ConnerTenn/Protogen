@@ -137,15 +137,16 @@ def ParseLine(line):
 
 		quotes=False
 		while (len(cmdstr)):
-			cmdstr = cmdstr.lstrip()
+			if not quotes:
+				cmdstr = cmdstr.lstrip()
 			# print(cmdstr)
-			if First(" ", "\"", cmdstr) == " " or First(" ", "\"", cmdstr) == False:
+			if not quotes and (First(" ", "\"", cmdstr) == " " or First(" ", "\"", cmdstr) == False):
 				# Space is first
 				part = cmdstr.partition(" ")
 				# print("Space ", part)
 				cmdstr = part[2]
 				cmd += StrtoHx("["+part[0]+"]") ##TODO FIX WITH LABEL REPLACEMENT
-			elif First(" ", "\"", cmdstr) == "\"":
+			else:
 				# Quotes is first
 				part = cmdstr.partition("\"")
 				# print("Quotes ", part)
