@@ -28,10 +28,12 @@ L3=   #2  (Auto increment if left blank)
 R1=   #3
 R2=   #4
 
-L1 + R2; EXPR1        #Button L1 and L2 at the same time; Set expression to EXPR1
-L1 > L1; EXPR2        #Button L1 then L2, one after another; Set expression to EXPR2
-L1 + R1 > L3; EXPR3   #Button L1 and R1, then L3; Set expression to EXPR3
-L1 + L3; "\x12\xa3"   #Button L1 and L3; Send custom string (Useful for custom command sequences)
+L1 + R2: EXPR1             #Button L1 and L2 at the same time; Set expression to EXPR1
+L1 > L1: EXPR2             #Button L1 then L2, one after another; Set expression to EXPR2
+L1 + R1 > L3: EXPR3        #Button L1 and R1, then L3; Set expression to EXPR3
+L1 + L3: "\x12\xA3"        #Button L1 and L3; Send custom string (Useful for custom command sequences)
+$ R1 + R2: EXPR4           #As soon as R1 and R2 are pressed, set Expr4. Then return to the previous expression
+R2: "\xF3" EXPR5 "\xC5"    #transmit 0xF3, followed by EXPR5 code, followed by 0xC5
 
 
 == Notes ==
@@ -39,7 +41,7 @@ Confirmed on each rising edge
 Action after the last falling edge
 Leave button assignment blank for auto increment
 auto increment starts at 0
-
+Use "$" to signify momentary expressions. Return to previous expression after trigger has been released 
 
 == Code structure ==
 test each combo against the pressed buttons
