@@ -48,7 +48,7 @@ struct Combo
 	u8 Buttons[]
 }
 
-struct Combo
+struct Sequence
 {
 	u8 SequenceLen
 	Combo Sequence[]
@@ -56,8 +56,8 @@ struct Combo
 	u8 Active
 }
 
-u8 NumCombos
-Combo Combinations[]
+u8 NumSequences
+Sequence Sequences[]
 
 == Pseudo Code ==
 for each combo:
@@ -82,21 +82,40 @@ try: f = open(FButtonData, 'wb')
 except: print("Error opening file \"{0}\"".format(FButtonData)); exit(-1)
 FButtonData=f
 
+def ValtoHx(val, length):
+	return val.to_bytes(length, byteorder="little")
+
+def StrtoHx(string):
+	b = b''
+	for s in string:
+		b += ValtoHx(ord(s), 1)
+	return b
+
 
 Variables = { "Timeout":-1 }
 ButtonID = 0
 Buttons = { }
+Sequences = [ ]
 
+def First(seq1, seq2, string):
+	if seq1 in string and seq2 in string:
+		return seq1 if string.find(seq1) < string.find(seq2) else seq2
+	elif seq1 in string:
+		return seq1
+	elif seq2 in string:
+		return seq2
+	else:
+		return False
 
 def ParseLine(line):
 	global Variables
 	global ButtonID
 	global Buttons
 	
-	print("\"" + line + "\"")
+	print("\n\"" + line + "\"")
 
 	#Key-Value Pair
-	if (line.find("=") != -1):
+	if "=" in line:
 		keyval = line.split("=")
 		
 		specialvar=False
@@ -110,10 +129,34 @@ def ParseLine(line):
 			ButtonID+=1
 
 	#Combo Sequence
-	if (line.find(":") != -1):
-		combostr = line.split(":")[0]
-		cmdstr = line.split(":")[1]
+	if ":" in line:
+		sequstr = line.split(":")[0]
+		cmdstr = line.split(":")[1].rstrip()
 		cmd = b""
+		sequence = { }
+
+		quotes=False
+		while (len(cmdstr)):
+			cmdstr = cmdstr.lstrip()
+			# print(cmdstr)
+			if First(" ", "\"", cmdstr) == " " or First(" ", "\"", cmdstr) == False:
+				# Space is first
+				part = cmdstr.partition(" ")
+				# print("Space ", part)
+				cmdstr = part[2]
+				cmd += StrtoHx("["+part[0]+"]") ##TODO FIX WITH LABEL REPLACEMENT
+			elif First(" ", "\"", cmdstr) == "\"":
+				# Quotes is first
+				part = cmdstr.partition("\"")
+				# print("Quotes ", part)
+				if quotes: 
+					cmd += StrtoHx(bytes(part[0], "utf-8").decode("unicode_escape")) #Process escape codes
+				cmdstr = part[2]
+				quotes = not quotes
+
+
+		print(cmd)
+
 	
 
 DoParse=True

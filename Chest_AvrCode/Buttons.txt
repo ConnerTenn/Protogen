@@ -9,31 +9,31 @@ R1=
 R2=
 R3=
 
-L1 > L1 > L2: "\x1a\xf3\x33"
+L1 > L1 > L2: "\x1A\xF3\x47"
 
-L1 + R1: EXPR1
-L1 + R2: EXPR2
-L1 + R3: EXPR3
+L1 + R1: EXPR1 "\xF2"EXPR11 EXPR12
+# L1 + R2: EXPR2
+# L1 + R3: EXPR3
 
-L2 + R1: EXPR4
-L2 + R2: EXPR6
-L2 + R3: EXPR7
+# L2 + R1: EXPR4
+# L2 + R2: EXPR6
+# L2 + R3: EXPR7
 
-L3 + R1: EXPR8
-L3 + R2: EXPR9
-L3 + R3: EXPR10
+# L3 + R1: EXPR8
+# L3 + R2: EXPR9
+# L3 + R3: EXPR10
 
-L1 + L2 > R1: EXPR11
-L1 + L2 > R2: EXPR12
-L1 + L2 > R3: EXPR13
+# L1 + L2 > R1: EXPR11
+# L1 + L2 > R2: EXPR12
+# L1 + L2 > R3: EXPR13
 
-L2 + L3 > R1: EXPR14
-L2 + L3 > R2: EXPR15
-L2 + L3 > R3: EXPR16
+# L2 + L3 > R1: EXPR14
+# L2 + L3 > R2: EXPR15
+# L2 + L3 > R3: EXPR16
 
-L1 + L2 > R1 + R2: EXPR17
-L1 + L2 > R2 + R3: EXPR18
+# L1 + L2 > R1 + R2: EXPR17
+# L1 + L2 > R2 + R3: EXPR18
 
-L2 + L3 > R1 + R2: EXPR19
-L2 + L3 > R2 + R3: EXPR20
+# L2 + L3 > R1 + R2: EXPR19
+# L2 + L3 > R2 + R3: EXPR20
 
