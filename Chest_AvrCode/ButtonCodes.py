@@ -1,18 +1,4 @@
-#!/bin/python
-
-import os
-
-FButtons="Buttons.txt"
-FButtonData="ButtonData.bin"
-
-
-try: f = open(FButtons, 'r')
-except: print("Error opening file \"{0}\"".format(FButtons)); exit(-1)
-FButtons=f
-
-try: f = open(FButtonData, 'wb')
-except: print("Error opening file \"{0}\"".format(FButtonData)); exit(-1)
-FButtonData=f
+#!/bin/python3
 
 
 
@@ -79,5 +65,70 @@ for each combo:
 		set combo state to Pending
 
 
-
 '''
+
+
+import os
+
+FButtons="Buttons.txt"
+FButtonData="ButtonData.bin"
+
+
+try: f = open(FButtons, 'r')
+except: print("Error opening file \"{0}\"".format(FButtons)); exit(-1)
+FButtons=f
+
+try: f = open(FButtonData, 'wb')
+except: print("Error opening file \"{0}\"".format(FButtonData)); exit(-1)
+FButtonData=f
+
+
+Variables = { "Timeout":-1 }
+ButtonID = 0
+Buttons = { }
+
+
+def ParseLine(line):
+	global Variables
+	global ButtonID
+	global Buttons
+	
+	print("\"" + line + "\"")
+
+	#Key-Value Pair
+	if (line.find("=") != -1):
+		keyval = line.split("=")
+		
+		specialvar=False
+		for v in Variables: specialvar = True if keyval[0] == v else False
+		if specialvar:
+			Variables[keyval[0]] = keyval[1]
+		else:
+			if len(keyval[1]):
+				ButtonID = int(keyval[1])
+			Buttons[keyval[0]] = ButtonID
+			ButtonID+=1
+
+	#Combo Sequence
+	if (line.find(":") != -1):
+		combostr = line.split(":")[0]
+		cmdstr = line.split(":")[1]
+		cmd = b""
+	
+
+DoParse=True
+while DoParse:
+	line=FButtons.readline()
+	if (len(line)):
+		line=line.split("#")[0].rstrip()
+		if len(line):
+			ParseLine(line)
+
+
+	else:
+		DoParse=False
+
+print()
+print(Variables)
+print(Buttons)
+
