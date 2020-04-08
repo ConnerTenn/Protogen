@@ -278,5 +278,45 @@ for seq in Sequences:
 	print(seq)
 
 
+'''
+=== Write Output ===
+
+Binary Format
+
+u8 Timeout
+u8 NumSequences
+struct Sequences
+{
+	u8 Momentary
+	u8 NumCombos
+	struct Combos
+	{
+		u8 NumButtons
+		struct Buttons
+		{
+			u8 ButtonNum
+		}
+	}[NumCombos]
+	u8 CommandLen
+	u8 Command[CommandLen]
+}[NumSequences]
+
+'''
 
 
+ButtonDataBuffer = b""
+
+# ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1)
+ButtonDataBuffer += ValtoHx(len(Sequences),1)
+for sequence in Sequences: #Struct Sequences
+	ButtonDataBuffer += ValtoHx(1 if sequence["Momentary"] else 0,1) #Momentart
+	ButtonDataBuffer += ValtoHx(len(sequence["Sequence"]),1) #NumCombos
+	for combo in sequence["Sequence"]: #Struct Combos
+		ButtonDataBuffer += ValtoHx(len(combo),1) #NumButtons
+		for button in combo: #Struct Buttons
+			ButtonDataBuffer += ValtoHx(button,1) #ButtonNum
+
+	ButtonDataBuffer += ValtoHx(len(sequence["Command"]),1) #CommandLen
+	ButtonDataBuffer += sequence["Command"] #Command
+
+FButtonData.write(ButtonDataBuffer)
