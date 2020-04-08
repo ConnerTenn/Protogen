@@ -71,12 +71,17 @@ for each combo:
 import os
 
 FButtons="Buttons.txt"
+FFrameManifest="../ExpressionCtl_FeatherM0/FrameManifest.txt"
 FButtonData="ButtonData.bin"
 
 
 try: f = open(FButtons, 'r')
 except: print("Error opening file \"{0}\"".format(FButtons)); exit(-1)
 FButtons=f
+
+try: f = open(FFrameManifest, 'r')
+except: print("Error opening file \"{0}\"".format(FFrameManifest)); exit(-1)
+FFrameManifest=f
 
 try: f = open(FButtonData, 'wb')
 except: print("Error opening file \"{0}\"".format(FButtonData)); exit(-1)
@@ -91,6 +96,85 @@ def StrtoHx(string):
 		b += ValtoHx(ord(s), 1)
 	return b
 
+def ChecksumInt_u8(val, numbytes):
+	checksum = 0
+	for i in range(numbytes):
+		checksum = checksum ^ (val & 0xFF)
+		val = val >> 8
+	return checksum
+
+
+
+'''
+=== Parse FrameManifest.txt ===
+'''
+
+# Expression_template = {"Start":[], "Loop":[], "End":[]}
+Expressions = {}
+lastExpr = ""
+
+def ParseManifestLine(line):
+	global Expressions
+	global lastExpr
+	
+	if (not line[0].isspace()):
+		lastExpr = line
+		Expressions[lastExpr] = {} #{"Start":[], "Loop":[], "End":[]}
+	else:
+		line = line.lstrip()
+		section = line.split(":")
+		pairs = [i for i in section[1].split(" ") if len(i)] #split by spaces, ignoring large sections of spaces
+		
+		dispStartFrames = []
+		for keyval in pairs:
+			keyval = keyval.split("=")
+			dispStartFrames += [int(keyval[1])]
+			# print(keyval, end=" ")
+		# print()
+		# print(dispStartFrames)
+		Expressions[lastExpr][section[0]] = dispStartFrames
+		
+
+DoParse=True
+while DoParse:
+	line=FFrameManifest.readline()
+	if (len(line)):
+		line=line.split("#")[0].rstrip()
+		if len(line):
+			ParseManifestLine(line)
+	else:
+		DoParse=False
+
+for expr in Expressions:
+	print(expr)
+	for section in Expressions[expr]:
+		print("  ", section, ":", Expressions[expr][section])
+
+
+# u8 Display, u16 Index, u8 checksum
+def GenDisplayUpdateCmd(display, index):
+	checksum = ChecksumInt_u8(display, 1) ^ ChecksumInt_u8(index, 2)
+	return ValtoHx(display, 1) + ValtoHx(index, 2) + ValtoHx(checksum, 1)
+
+#Convert Expression name to hex command data
+def GetCmdFromExpr(exprname):
+	cmd = b""
+
+	if exprname in Expressions:
+		d = 0
+		for disp in Expressions[exprname]["Start"]:
+			cmd += GenDisplayUpdateCmd(disp, d)
+			d+=1
+	else:
+		return StrtoHx("["+exprname+"]")
+
+	return cmd
+
+
+
+'''
+=== Parse Buttons.txt ===
+'''
 
 Variables = { "Timeout":-1 }
 ButtonID = 0
@@ -159,7 +243,7 @@ def ParseLine(line):
 				part = cmdstr.partition(" ")
 				# print("Space ", part)
 				cmdstr = part[2]
-				cmd += StrtoHx("["+part[0]+"]") ##TODO FIX WITH LABEL REPLACEMENT
+				cmd += GetCmdFromExpr(part[0])
 			else:
 				# Quotes is first
 				part = cmdstr.partition("\"")
@@ -177,8 +261,6 @@ def ParseLine(line):
 		# print(cmd)
 
 
-	
-
 DoParse=True
 while DoParse:
 	line=FButtons.readline()
@@ -186,8 +268,6 @@ while DoParse:
 		line=line.split("#")[0].rstrip()
 		if len(line):
 			ParseLine(line)
-
-
 	else:
 		DoParse=False
 
@@ -196,4 +276,7 @@ print(Variables)
 print(Buttons)
 for seq in Sequences:
 	print(seq)
+
+
+
 

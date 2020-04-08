@@ -9,7 +9,7 @@ R1=
 R2=
 R3=
 
-L1 + R2: EXPR1             #Button L1 and L2 at the same time; Set expression to EXPR1
+L1 + R2: CharlieIdle       #Button L1 and L2 at the same time; Set expression to EXPR1
 L1 > L1: EXPR2             #Button L1 then L2, one after another; Set expression to EXPR2
 L1 + R3 > L3: EXPR3        #Button L1 and R1, then L3; Set expression to EXPR3
 L1 + L3: "\x12\xA3"        #Button L1 and L3; Send custom string (Useful for custom command sequences)
