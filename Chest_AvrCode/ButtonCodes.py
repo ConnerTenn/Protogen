@@ -111,6 +111,7 @@ def ParseLine(line):
 	global Variables
 	global ButtonID
 	global Buttons
+	global Sequences
 	
 	print("\n\"" + line + "\"")
 
@@ -130,11 +131,24 @@ def ParseLine(line):
 
 	#Combo Sequence
 	if ":" in line:
-		sequstr = line.split(":")[0]
+		sequstr = line.split(":")[0].replace(" ", "")
 		cmdstr = line.split(":")[1].rstrip()
 		cmd = b""
-		sequence = { }
+		sequence = [ ]
+		momentary = False
 
+
+		if "$" in sequstr:
+			momentary = True
+			sequstr = sequstr.replace("$", "")
+		#Button Combo
+		for combo in sequstr.split(">"):
+			if len(combo):
+				sequence += [[]]
+				for button in combo.split("+"):
+					sequence[-1] += [Buttons[button]]
+
+		#Command
 		quotes=False
 		while (len(cmdstr)):
 			if not quotes:
@@ -155,8 +169,13 @@ def ParseLine(line):
 				cmdstr = part[2]
 				quotes = not quotes
 
+		Sequences += [{}]
+		Sequences[-1]["Sequence"] = sequence
+		Sequences[-1]["Command"] = cmd
 
-		print(cmd)
+		# print(sequence)
+		# print(cmd)
+
 
 	
 
@@ -175,4 +194,6 @@ while DoParse:
 print()
 print(Variables)
 print(Buttons)
+for seq in Sequences:
+	print(seq)
 
