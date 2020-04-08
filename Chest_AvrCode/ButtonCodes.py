@@ -197,15 +197,13 @@ def ParseLine(line):
 	global Buttons
 	global Sequences
 	
-	print("\n\"" + line + "\"")
+	# print("\n\"" + line + "\"")
 
 	#Key-Value Pair
 	if "=" in line:
-		keyval = line.split("=")
+		keyval = line.replace(" ", "").split("=")
 		
-		specialvar=False
-		for v in Variables: specialvar = True if keyval[0] == v else False
-		if specialvar:
+		if keyval[0] in Variables:
 			Variables[keyval[0]] = keyval[1]
 		else:
 			if len(keyval[1]):
@@ -256,6 +254,7 @@ def ParseLine(line):
 		Sequences += [{}]
 		Sequences[-1]["Sequence"] = sequence
 		Sequences[-1]["Command"] = cmd
+		Sequences[-1]["Momentary"] = momentary
 
 		# print(sequence)
 		# print(cmd)
@@ -274,6 +273,7 @@ while DoParse:
 print()
 print(Variables)
 print(Buttons)
+print()
 for seq in Sequences:
 	print(seq)
 

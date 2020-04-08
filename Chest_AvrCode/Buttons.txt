@@ -1,5 +1,7 @@
 
 
+Timeout = 200 #-1
+
 #Buttons
 L1=1
 L2=
