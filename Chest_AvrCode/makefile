@@ -9,7 +9,7 @@ all: prog.hex
 
 
 %.o: %.c
-	$(GCC) $(CFLAGS) $< -c -o $@
+	$(GCC) $(CFLAGS) -D NUM_SEQUENCES=$(shell cat NumSequences.val) $< -c -o $@
 
 %.o: %.bin
 	# $(LD) -r -b binary $< -o $@
@@ -21,15 +21,15 @@ bin:
 	python3 ButtonCodes.py
 
 
-prog.elf: main.o globals.o interfaces.o ButtonData.o
+prog.elf: main.o globals.o interfaces.o buttonCtl.o ButtonData.o
 	$(GCC) $(CFLAGS) $? -o $@
 	
-prog.hex: prog.elf
+prog.hex: bin prog.elf
 	avr-objcopy -j .text -j .data -O ihex prog.elf prog.hex
 
 
 clean:
-	rm -f *.elf *.hex *.o
+	rm -f *.elf *.hex *.o NumSequences.val
 
 upload:
 	avr-size --mcu=atmega328p -A prog.elf

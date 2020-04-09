@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "interfaces.h"
+#include "buttonCtl.h"
 
 
 //Frame delay update
@@ -56,6 +57,8 @@ int main()
 
 
     IntiUART();
+
+	InitButtons();
 
 	
 

@@ -73,6 +73,7 @@ import os
 FButtons="Buttons.txt"
 FFrameManifest="../ExpressionCtl_FeatherM0/FrameManifest.txt"
 FButtonData="ButtonData.bin"
+FNumSequences="NumSequences.val"
 
 
 try: f = open(FButtons, 'r')
@@ -86,6 +87,10 @@ FFrameManifest=f
 try: f = open(FButtonData, 'wb')
 except: print("Error opening file \"{0}\"".format(FButtonData)); exit(-1)
 FButtonData=f
+
+try: f = open(FNumSequences, 'w')
+except: print("Error opening file \"{0}\"".format(FNumSequences)); exit(-1)
+FNumSequences=f
 
 def ValtoHx(val, length):
 	return val.to_bytes(length, byteorder="little")
@@ -284,7 +289,7 @@ for seq in Sequences:
 Binary Format
 
 u8 Timeout
-u8 NumSequences
+# u8 NumSequences
 struct Sequences
 {
 	u8 Momentary
@@ -306,8 +311,8 @@ struct Sequences
 
 ButtonDataBuffer = b""
 
-# ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1)
-ButtonDataBuffer += ValtoHx(len(Sequences),1)
+ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1)
+# ButtonDataBuffer += ValtoHx(len(Sequences),1)
 for sequence in Sequences: #Struct Sequences
 	ButtonDataBuffer += ValtoHx(1 if sequence["Momentary"] else 0,1) #Momentart
 	ButtonDataBuffer += ValtoHx(len(sequence["Sequence"]),1) #NumCombos
@@ -320,3 +325,5 @@ for sequence in Sequences: #Struct Sequences
 	ButtonDataBuffer += sequence["Command"] #Command
 
 FButtonData.write(ButtonDataBuffer)
+
+FNumSequences.write(str(len(Sequences)))
