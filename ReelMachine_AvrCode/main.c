@@ -25,19 +25,24 @@ ISR(TIMER0_COMPA_vect)
 {
 	sei(); //Enable Nested Interrupts
 
-	static u16 div = 50;
-	static u16 freq10 = 10;
+#define CHANGE_DELAY 50
+#define MIN_FREQ 5
+#define MAX_FREQ 40
+
+
+	static u16 div = CHANGE_DELAY;
+	static u16 freq10 = MIN_FREQ;
 	static u8 dir = 0;
-	if (div==50)
+	if (div==CHANGE_DELAY)
 	{
 		if (!dir)
 		{
-			if (freq10<60) { freq10++; }
+			if (freq10<MAX_FREQ) { freq10++; }
 			else { dir = 1; }
 		}
 		else
 		{
-			if (freq10>10) { freq10--; }
+			if (freq10>MIN_FREQ) { freq10--; }
 			else { dir = 0; }
 		}
 		OCR1A = (u16)50000 / freq10; //(16000000/(8*2))/(200/10)
