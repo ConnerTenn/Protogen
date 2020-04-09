@@ -39,6 +39,7 @@ typedef struct
 
 typedef struct
 {
+	u8 Active;
 	u8 NumButtons;
 	Button Buttons[0];
 } Combo;
@@ -55,3 +56,5 @@ extern u8 Timeout;
 extern Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons();
+u8 ReadButton(u8 id);
+
