@@ -11,9 +11,19 @@ all: prog.hex
 %.o: %.c
 	$(GCC) $(CFLAGS) $< -c -o $@
 
-prog.elf: main.o globals.o interfaces.o
-	$(GCC) $(CFLAGS) $? -o $@
+%.o: %.bin
+	# $(LD) -r -b binary $< -o $@
+	avr-objcopy -I binary -O elf32-avr -B avr --rename-section .data=.text,readonly,rom,noload,contents $< $@
 
+ButtonData.bin: bin
+
+bin:
+	python3 ButtonCodes.py
+
+
+prog.elf: main.o globals.o interfaces.o ButtonData.o
+	$(GCC) $(CFLAGS) $? -o $@
+	
 prog.hex: prog.elf
 	avr-objcopy -j .text -j .data -O ihex prog.elf prog.hex
 

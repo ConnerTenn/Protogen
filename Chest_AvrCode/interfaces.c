@@ -2,42 +2,6 @@
 #include "interfaces.h"
 
 
-ISR(SPI_STC_vect)
-{
-    //PORTC = !PORTC;
-}
-
-//Page 135
-//Page 140
-void IntiSPI()
-{
-    //Setup GPIO Pins
-    //Must set directions before enabling SPI
-    ENBITS(DDRB,(1<<DDRB_MOSI) | (1<<DDRB_SCK) | (1<<DDRB_CS));
-
-    //Setup SPI
-    SPCR = (1<<MSTR) | (1<<SPE) | (1<<CPOL) | (1<<CPHA);//Master & SPI enable
-    //SPSR = (1<<SPI2X);
-
-    //sei();
-}
-
-void SPITransmit(const u8 data)
-{
-    SPDR = data;
-    while(!(SPSR & (1<<SPIF))) {}
-}
-
-void SPITransmit16(const u16 data)
-{
-    SPDR = data >> 8;
-    while(!(SPSR & (1<<SPIF))) {}
-
-    SPDR = data;
-    while(!(SPSR & (1<<SPIF))) {}
-}
-
-
 
 u8 TX_Ring[256];
 u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
