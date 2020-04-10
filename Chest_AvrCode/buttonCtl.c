@@ -36,23 +36,33 @@ void InitButtons()
 
 void UpdateButtons()
 {
+	u8 numActiveButtons = 0;
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
 		Buttons[b].Active |= ReadButton(Buttons[b].ButtonNum);
+		if (Buttons[b].Active) { numActiveButtons++; }
 	}
 
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
 		Combo *combo = &(Sequences[s].Combos[Sequences[s].ActiveCombo]);
-		
+
+		u8 numactive = 0;
 		u8 allPressed = 1;
 		for (u8 b =0; b < combo->NumButtons; b++)
 		{
-			allPressed = allPressed & combo->Buttons[b]->Active;
+			if (combo->Buttons[b]->Active) { numactive++; }
+			else { allPressed = 0; }
 		}
-		if (allPressed == 1)
+		if (numActiveButtons != numactive)
 		{
-			// Sequences[s].ActiveCombo++;
+			//Reset Sequence
+			combo->Active = 0; 
+			Sequences[s].ActiveCombo = 0;
+		}
+		else if (allPressed == 1)
+		{
+			//Combo correct!
 			combo->Active = 1;
 		}
 
@@ -65,8 +75,16 @@ void UpdateButtons()
 			}
 			if (allReleased == 0)
 			{
+				//Advance to next stage of sequence
 				combo->Active = 0;
 				Sequences[s].ActiveCombo++;
+
+				if (Sequences[s].ActiveCombo == Sequences[s].NumCombos)
+				{ 
+					//Sequence Correct!
+
+					
+				}
 			}
 		}
 	}
