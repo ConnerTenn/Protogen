@@ -62,5 +62,4 @@ extern Sequence Sequences[NUM_SEQUENCES];
 void InitButtons();
 void UpdateButtons();
 u8 ReadButton(u8 id);
-void ReadButtons();
 

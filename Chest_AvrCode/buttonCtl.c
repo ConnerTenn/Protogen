@@ -20,6 +20,7 @@ void InitButtons()
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
 		Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
+		Buttons[b].Active = 0;
 	}
 
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
@@ -85,7 +86,8 @@ void InitButtons()
 
 void TriggerCmd(u8 *cmd, u8 len)
 {
-
+	SerialTransmit(cmd, len);
+	SerialTransmit("\n", 1);
 }
 
 void UpdateButtons()
@@ -179,11 +181,5 @@ u8 ReadButton(u8 id)
 #undef GET_INPUT
 
 	}
-	return !!b;
+	return !b;
 }
-
-void ReadButtons()
-{
-	
-}
-

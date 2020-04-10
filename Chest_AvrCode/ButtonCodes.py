@@ -320,12 +320,14 @@ print("CommandData:", CommandData)
 
 ButtonDataBuffer += CommandData
 
+print("Buttons")
 buttonIdx = {}
 bidx=0
 for button in Buttons:
 	b = int(Buttons[button])
+	print("\t", b)
 	ButtonDataBuffer += ValtoHx(b,1) #Buttons
-	buttonIdx[b] = bidx 
+	buttonIdx[b] = bidx
 	bidx+=1
 
 cmdoff = 0
