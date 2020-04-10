@@ -3,12 +3,12 @@
 
 
 
-u8 TX_Ring[256];
-u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
+volatile u8 TX_Ring[256];
+volatile u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
 
 
-u8 RX_Ring[256];
-u8 RX_Head=0, RX_Tail=0;
+volatile u8 RX_Ring[256];
+volatile u8 RX_Head=0, RX_Tail=0;
 
 ISR(USART_RX_vect)
 {
@@ -25,8 +25,9 @@ ISR(USART_TX_vect)
 }
 ISR(USART_UDRE_vect)
 {
+	TX_Ongoing=1;
     if (TX_Tail != TX_Head) { UDR0 = TX_Ring[TX_Tail++]; }
-    else { DABITS(UCSR0B,(1<<UDRIE0)); }
+    else { DABITS(UCSR0B,(1<<UDRIE0)); TX_Ongoing=0; }
 }
 
 #define BAUD 9600
