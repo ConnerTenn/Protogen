@@ -8,7 +8,7 @@ Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons()
 {
-	u8 off = 0;
+	u16 off = 0;
 	
 	Timeout = BUTTONDATA_ACC_8(off); off+=1;
 
@@ -29,7 +29,7 @@ void InitButtons()
 		Sequences[s].Momentary = BUTTONDATA_ACC_8(off); off+=1;
 
 		Sequences[s].CommandLen = BUTTONDATA_ACC_8(off); off+=1;
-		Sequences[s].Command = CommandData + BUTTONDATA_ACC_16(off); off+=1;
+		Sequences[s].Command = CommandData + BUTTONDATA_ACC_16(off); off+=2;
 
 		Sequences[s].NumCombos = BUTTONDATA_ACC_8(off); off+=1;
 		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
@@ -53,7 +53,8 @@ void InitButtons()
 
 #define CFG_BUTTON_PIN(port, bit) \
 		DDR##port = DABITS(DDR##port, 1<<bit); \
-		PORT##port = ENBITS(PORT##port, 1<<bit); //D8
+		PORT##port = ENBITS(PORT##port, 1<<bit); \
+		break;
 
 		case 20: CFG_BUTTON_PIN(B, 0) //D8
 		case 21: CFG_BUTTON_PIN(B, 1) //D9
@@ -105,7 +106,7 @@ void UpdateButtons()
 
 		u8 numactive = 0;
 		u8 allPressed = 1;
-		for (u8 b =0; b < combo->NumButtons; b++)
+		for (u8 b = 0; b < combo->NumButtons; b++)
 		{
 			if (combo->Buttons[b]->Active) { numactive++; }
 			else { allPressed = 0; }
@@ -153,7 +154,8 @@ u8 ReadButton(u8 id)
 	{ //TODO change to sequential numbers to allow Jump-table optimization
 
 #define GET_INPUT(port, bit) \
-		b = PIN##port & (1<<bit);
+		b = PIN##port & (1<<bit); \
+		break;
 
 	case 20: GET_INPUT(B, 0) //D8
 	case 21: GET_INPUT(B, 1) //D9

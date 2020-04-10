@@ -21,12 +21,13 @@ ISR(TIMER1_COMPA_vect)
 {
     sei(); //Enable Nested Interrupts
 
-	SerialTransmit("\033[1F", 4);
+	SerialTransmitStr("\033[1F");
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		SerialTransmit(Buttons[b].Active ? "1 " : "0 ", 2);
+		SerialTransmitStr(Buttons[b].Active ? "1 " : "0 ");
 	}
-	SerialTransmit("\n", 1);
+	SerialTransmitStr("\n");
+	SerialFlush();
 
 }
 
@@ -90,6 +91,8 @@ int main()
 		SerialTransmitStr("\tMomentary:");
 		SerialTransmitStr(Sequences[s].Momentary ? "Y\n" : "N\n");
 
+		PRINT_VAL("\tCommandLen:", Sequences[s].CommandLen);
+		PRINT_VAL("\tCommandOff:", Sequences[s].Command - CommandData);
 		SerialTransmitStr("\tCommand:");
 		for (u8 i = 0; i < Sequences[s].CommandLen; i++)
 		{
@@ -99,11 +102,19 @@ int main()
 		SerialTransmitStr("\n");
 
 		PRINT_VAL("\tNumCombos:", Sequences[s].NumCombos);
+		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
+		{
+			PRINT_VAL("\t\tNumButtons:", Sequences[s].Combos[c].NumButtons);
+			// for (u8 b = 0; b < Sequences[s].Combos[c].NumButtons; b++)
+			// {
+			// 	PRINT_VAL("\t\t\tButtonsIdx:", Sequences[s].Combos[c].Buttons[b]->ButtonNum;
+			// }
+		}
 	}
 
-	SerialTransmitStr("\n\n\n");
+	SerialTransmitStr("\n\n\n"); SerialFlush();
 
-    InitTimers();
+    // InitTimers();
 
     while (1)
     {

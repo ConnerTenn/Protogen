@@ -307,6 +307,7 @@ struct Sequences
 
 '''
 
+print()
 
 ButtonDataBuffer = b""
 
@@ -315,12 +316,10 @@ ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1) #Timeout
 CommandData=b""
 for sequence in Sequences:
 	CommandData += sequence["Command"] #CommandData
-
+ButtonDataBuffer += CommandData
 print("CommandData:", CommandData)
 
-ButtonDataBuffer += CommandData
-
-print("Buttons")
+print("Buttons:")
 buttonIdx = {}
 bidx=0
 for button in Buttons:
@@ -331,16 +330,31 @@ for button in Buttons:
 	bidx+=1
 
 cmdoff = 0
+s=0
 for sequence in Sequences: #Struct Sequences
+	print("Sequence:" + str(s))
+
 	ButtonDataBuffer += ValtoHx(1 if sequence["Momentary"] else 0,1) #Momentary
+	print("\tMomentary: " + ("Y" if sequence["Momentary"] else "N"))
+
 	ButtonDataBuffer += ValtoHx(len(sequence["Command"]),1) #CommandLen
+	print("\tCommandLen:", len(sequence["Command"]))
+
 	ButtonDataBuffer += ValtoHx(cmdoff,2) #CommandOffset
+	print("\tCommandOff:", cmdoff)
 	cmdoff += len(sequence["Command"])
+
 	ButtonDataBuffer += ValtoHx(len(sequence["Sequence"]),1) #NumCombos
+	print("\tNumCombos:", len(sequence["Sequence"]))
+
 	for combo in sequence["Sequence"]: #Struct Combos
 		ButtonDataBuffer += ValtoHx(len(combo),1) #NumButtons
+		print("\t\tNumButtons:", len(combo))
+
 		for button in combo: #Struct Buttons
 			ButtonDataBuffer += ValtoHx(buttonIdx[button],1) #ButtonIdx
+			print("\t\t\tButtonIdx:", buttonIdx[button])
+	s+=1
 
 FButtonData.write(ButtonDataBuffer)
 
