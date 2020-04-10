@@ -26,12 +26,17 @@ ISR(TIMER1_COMPA_vect)
 	for (u8 i = 0; i < ret; i++) { SerialTransmitStr("\033[1F"); }
 	ret = 0;
 
-	SerialTransmitStr("Buttons:");
+	SerialTransmitStr("Buttons:\n"); ret++;
+	for (u8 b = 0; b < NUM_BUTTONS; b++)
+	{
+		SerialTransmitStr(Buttons[b].Pressed ? "1 " : "0 ");
+	}
+	SerialTransmitStr("\n"); ret++;
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
 		SerialTransmitStr(Buttons[b].Active ? "1 " : "0 ");
 	}
-	SerialTransmitStr("\n"); ret++;
+	SerialTransmitStr("\n\n"); ret+=2;
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
 		PRINT_VAL("Sequence:", s); ret++;
@@ -53,12 +58,13 @@ ISR(TIMER1_COMPA_vect)
 	}
 
 	SerialTransmitStr("\nLast Command:"); ret++;
-	for (u8 i = 0; i < LastCmdLen; i++)
-	{
-		SerialTransmitStr("\\x");
-		SerialTransmitHexVal(LastCmd[i] & 0xFF);
-	}
-	SerialTransmitStr("\n"); ret++;
+	SerialTransmit(LastCmd, LastCmdLen);
+	// for (u8 i = 0; i < LastCmdLen; i++)
+	// {
+	// 	SerialTransmitStr("\\x");
+	// 	SerialTransmitHexVal(LastCmd[i] & 0xFF);
+	// }
+	// SerialTransmitStr("\n"); ret++;
 
 	SerialFlush();
 #endif

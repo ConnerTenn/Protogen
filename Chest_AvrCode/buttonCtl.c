@@ -28,8 +28,9 @@ void InitButtons()
 	// SerialTransmitStr("Buttons:\n");
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		Buttons[b].ButtonID = BUTTONDATA_ACC_8(roff); roff+=1;
+		Buttons[b].Pressed = 0;
 		Buttons[b].Active = 0;
+		Buttons[b].ButtonID = BUTTONDATA_ACC_8(roff); roff+=1;
 	
 		// PRINT_VAL("\tButtonID:", Buttons[b].ButtonID);
 	}
@@ -136,7 +137,7 @@ u8 LastCmdLen;
 void TriggerCmd(u8 *cmd, u8 len)
 {
 #ifndef DEBUG
-	SerialTransmit(cmd, len)
+	SerialTransmit(cmd, len);
 #else
 	// SerialTransmitStr("\n\n\n\n");
 	// SerialTransmitStr("\tCommand:");
@@ -154,22 +155,27 @@ void TriggerCmd(u8 *cmd, u8 len)
 void UpdateButtons()
 {
 	u8 numActiveButtons = 0;
+	u8 allReleased = 0;
+	u8 triggered = 0;
+
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		Buttons[b].Active |= ReadButton(Buttons[b].ButtonID);
+		Buttons[b].Pressed = ReadButton(Buttons[b].ButtonID);
+		allReleased |= Buttons[b].Pressed;
+		Buttons[b].Active |= Buttons[b].Pressed;
 		if (Buttons[b].Active) { numActiveButtons++; }
 	}
 
-	for (u8 s = 0; s < NUM_SEQUENCES; s++)
+	for (u8 s = 0; s < NUM_SEQUENCES && !triggered; s++)
 	{
 		Combo *combo = Sequences[s]->Combos[Sequences[s]->ActiveCombo];
 
 		u8 numactive = 0;
-		u8 allPressed = 1;
+		u8 allComboPressed = 1;
 		for (u8 b = 0; b < combo->NumButtons; b++)
 		{
 			if (combo->Buttons[b]->Active) { numactive++; }
-			else { allPressed = 0; }
+			else { allComboPressed = 0; }
 		}
 		if (numActiveButtons != numactive)
 		{
@@ -177,7 +183,7 @@ void UpdateButtons()
 			combo->Active = 0; 
 			Sequences[s]->ActiveCombo = 0;
 		}
-		else if (allPressed == 1)
+		else if (allComboPressed == 1)
 		{
 			//Combo correct!
 			combo->Active = 1;
@@ -185,11 +191,11 @@ void UpdateButtons()
 
 		if (combo->Active)
 		{
-			u8 allReleased = 0;
-			for (u8 b =0; b < combo->NumButtons; b++)
-			{
-				allReleased = allReleased | combo->Buttons[b]->Active;
-			}
+			// u8 allReleased = 0;
+			// for (u8 b =0; b < combo->NumButtons; b++)
+			// {
+			// 	allReleased = allReleased | combo->Buttons[b]->Active;
+			// }
 			if (allReleased == 0)
 			{
 				//Advance to next stage of sequence
@@ -200,8 +206,28 @@ void UpdateButtons()
 				{ 
 					//Sequence Correct!
 					TriggerCmd(Sequences[s]->Command, Sequences[s]->CommandLen);
-					
+					triggered = 1;
 				}
+			}
+		}
+	}
+
+	if (triggered)
+	{
+		for (u8 b = 0; b < NUM_BUTTONS; b++)
+		{
+			Buttons[b].Active = 0;
+		}
+		for (u8 s = 0; s < NUM_SEQUENCES; s++)
+		{
+			Sequences[s]->ActiveCombo = 0;
+			for (u8 c = 0; c < Sequences[s]->NumCombos; c++)
+			{
+				Sequences[s]->Combos[c]->Active = 0;
+				// for (u8 b = 0; b < Sequences[s]->Combos[c]->NumButtons; b++)
+				// {
+				// 	Sequences[s]->Combos[c]->Buttons[b].Active = 0;
+				// }
 			}
 		}
 	}

@@ -36,6 +36,7 @@ struct Sequences
 
 typedef struct
 {
+	u8 Pressed;
 	u8 Active;
 	u8 ButtonID;
 } Button;
