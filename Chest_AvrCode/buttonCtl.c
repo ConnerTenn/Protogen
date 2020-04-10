@@ -4,6 +4,7 @@
 u8 Timeout;
 u8 CommandData[COMMAND_DATA_LEN];
 Button Buttons[NUM_BUTTONS];
+Combo Combos[NUM_COMBOS];
 Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons()
@@ -11,44 +12,68 @@ void InitButtons()
 	u16 off = 0;
 	
 	Timeout = BUTTONDATA_ACC_8(off); off+=1;
+	PRINT_VAL("Timeout:", Timeout);
 
+	SerialTransmitStr("CommandData:");
 	for (u16 i = 0; i < COMMAND_DATA_LEN; i++)
 	{
 		CommandData[i] = BUTTONDATA_ACC_8(off); off+=1;
-	}
 
+		SerialTransmitStr("\\x");
+		SerialTransmitHexVal(CommandData[i] & 0xFF);
+	}
+	SerialTransmitStr("\n");
+
+	SerialTransmitStr("Buttons:\n");
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
+		Buttons[b].ButtonID = BUTTONDATA_ACC_8(off); off+=1;
 		Buttons[b].Active = 0;
+	
+		PRINT_VAL("\tButtonID:", Buttons[b].ButtonID);
 	}
 
+	SerialTransmitStr("Combos:\n");
+	for (u8 c = 0; c < NUM_COMBOS; c++)
+	{
+		Combos[c].Active = 0;
+		Combos[c].NumButtons = BUTTONDATA_ACC_8(off); off+=1;
+		PRINT_VAL("\tNumButtons:", Combos[c].NumButtons);
+
+		for (u8 b = 0; b < Combos[c].NumButtons; b++)
+		{
+			Combos[c].Buttons[b] = Buttons + BUTTONDATA_ACC_8(off) * sizeof(Button); off+=1;
+			PRINT_VAL("\t\tButtonIdx:", Combos[c].Buttons[b] - Buttons);
+		}
+
+	}
+
+
+	SerialTransmitStr("Sequences:\n");
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
 		Sequences[s].ActiveCombo = 0;
 		Sequences[s].Momentary = BUTTONDATA_ACC_8(off); off+=1;
+		SerialTransmitStr("\tMomentary:"); SerialTransmitStr(Sequences[s].Momentary ? "Y\n" : "N\n");
 
 		Sequences[s].CommandLen = BUTTONDATA_ACC_8(off); off+=1;
 		Sequences[s].Command = CommandData + BUTTONDATA_ACC_16(off); off+=2;
+		PRINT_VAL("\tCommandLen:", Sequences[s].CommandLen);
+		PRINT_VAL("\tCommandOff:", Sequences[s].Command - CommandData);
 
 		Sequences[s].NumCombos = BUTTONDATA_ACC_8(off); off+=1;
+		PRINT_VAL("\tNumCombos:", Sequences[s].NumCombos);
 		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
 		{
-			Sequences[s].Combos[c].Active = 0;
-			Sequences[s].Combos[c].NumButtons = BUTTONDATA_ACC_8(off); off+=1;
-			
-			for (u8 b =0; b < Sequences[s].Combos[c].NumButtons; b++)
-			{
-				// Sequences[s].Combos[c].Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
-				Sequences[s].Combos[c].Buttons[b] = &(Buttons[BUTTONDATA_ACC_8(off)]); off+=1;
-			}	
+			Sequences[s].Combos[c] = Combos + BUTTONDATA_ACC_8(off) * sizeof(Combo); off+=1;
+			PRINT_VAL("\t\tComboIdx:", Sequences[s].Combos[c] - Combos);
 		}
 	}
 
 
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		switch(Buttons[b].ButtonNum)
+		switch(Buttons[b].ButtonID)
 		{ //TODO change to sequential numbers to allow Jump-table optimization
 
 #define CFG_BUTTON_PIN(port, bit) \
@@ -96,13 +121,13 @@ void UpdateButtons()
 	u8 numActiveButtons = 0;
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		Buttons[b].Active |= ReadButton(Buttons[b].ButtonNum);
+		Buttons[b].Active |= ReadButton(Buttons[b].ButtonID);
 		if (Buttons[b].Active) { numActiveButtons++; }
 	}
 
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
-		Combo *combo = &(Sequences[s].Combos[Sequences[s].ActiveCombo]);
+		Combo *combo = Sequences[s].Combos[Sequences[s].ActiveCombo];
 
 		u8 numactive = 0;
 		u8 allPressed = 1;

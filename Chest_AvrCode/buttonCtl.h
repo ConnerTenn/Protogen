@@ -10,30 +10,33 @@ extern PROGMEM const char *const _binary_ButtonData_bin_end;
 #define BUTTONDATA_ACC_16(off) ( (u16)(pgm_read_word_near(BIN_BUTTONDATA_START+(off))) )
 
 
+#define PRINT_VAL(txt, val) SerialTransmitStr(txt); SerialTransmitHexVal(val); SerialTransmitStr("\n"); SerialFlush();
+	
 /*
 Binart Data Segment:
 
 u8 Timeout
 u8 CommandData[COMMAND_DATA_LEN]
 u8 Buttons[NUM_BUTTONS]
+struct Combos
+{
+	u8 NumButtons
+	u8 ButtonIdx[NumButtons]
+}[NUM_COMBOS]
 struct Sequences
 {
 	u8 Momentary
 	u8 CommandLen
 	u16 CommandOffset
 	u8 NumCombos
-	struct Combos
-	{
-		u8 NumButtons
-		u8 ButtonIdx
-	}[NumCombos]
+	u8 ComboIdx[NumCombos]
 }[NUM_SEQUENCES]
 
 */
 
 typedef struct
 {
-	u8 ButtonNum;
+	u8 ButtonID;
 	u8 Active;
 } Button;
 
@@ -51,12 +54,13 @@ typedef struct
 	u8 CommandLen;
 	u8 *Command;
 	u8 NumCombos;
-	Combo Combos[0];
+	Combo *Combos[0];
 } Sequence;
 
 extern u8 Timeout;
 extern u8 CommandData[COMMAND_DATA_LEN];
 extern Button Buttons[NUM_BUTTONS];
+extern Combo Combos[NUM_COMBOS];
 extern Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons();

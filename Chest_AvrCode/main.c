@@ -68,20 +68,13 @@ int main()
 
 
     IntiUART();
+	SerialTransmitStr("\n");
 
 	InitButtons();
 
     SerialTransmitStr("\nSetup Complete\n");
 
-#define PRINT_VAL(txt, val) SerialTransmitStr(txt); SerialTransmitHexVal(val); SerialTransmitStr("\n"); SerialFlush();
-	
 	PRINT_VAL("Timeout:", Timeout);
-	
-	PRINT_VAL("NumButtons:", NUM_BUTTONS);
-	for (u8 b = 0; b < NUM_BUTTONS; b++)
-	{
-		PRINT_VAL("\t", Buttons[b].ButtonNum);
-	}
 	
 	PRINT_VAL("NumSequences:", NUM_SEQUENCES);
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
@@ -104,11 +97,11 @@ int main()
 		PRINT_VAL("\tNumCombos:", Sequences[s].NumCombos);
 		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
 		{
-			PRINT_VAL("\t\tNumButtons:", Sequences[s].Combos[c].NumButtons);
-			// for (u8 b = 0; b < Sequences[s].Combos[c].NumButtons; b++)
-			// {
-			// 	PRINT_VAL("\t\t\tButtonsIdx:", Sequences[s].Combos[c].Buttons[b]->ButtonNum;
-			// }
+			PRINT_VAL("\t\tNumButtons:", Sequences[s].Combos[c]->NumButtons);
+			for (u8 b = 0; b < Sequences[s].Combos[c]->NumButtons; b++)
+			{
+				PRINT_VAL("\t\t\tButtonsId:", Sequences[s].Combos[c]->Buttons[b]->ButtonID);
+			}
 		}
 	}
 

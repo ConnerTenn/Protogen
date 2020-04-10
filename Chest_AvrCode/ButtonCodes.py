@@ -184,8 +184,12 @@ def GetCmdFromExpr(exprname):
 
 Variables = { "Timeout":-1 }
 ButtonID = 0
-Buttons = { }
-Sequences = [ ]
+Buttons =  { }; ButtonsTmpl = {"":{"ID":0, "Index":0}}
+Combos = [ ]; CombosTmpl = {"ButtonIdxs":[], "Index":0}
+Sequences = [ ]; SequencesTmpl = {"ComboIdxs":[], "Index":0}
+ButtonIdx = 0
+ComboIdx = 0
+SequenceIdx = 0
 
 def First(seq1, seq2, string):
 	if seq1 in string and seq2 in string:
@@ -200,8 +204,14 @@ def First(seq1, seq2, string):
 def ParseLine(line):
 	global Variables
 	global ButtonID
+
 	global Buttons
+	global Combos
 	global Sequences
+
+	global ButtonIdx
+	global ComboIdx
+	global SequenceIdx
 	
 	# print("\n\"" + line + "\"")
 
@@ -214,15 +224,16 @@ def ParseLine(line):
 		else:
 			if len(keyval[1]):
 				ButtonID = int(keyval[1])
-			Buttons[keyval[0]] = ButtonID
+			Buttons[keyval[0]] = {"ID":ButtonID, "Index":ButtonIdx}
 			ButtonID+=1
+			ButtonIdx+=1
 
 	#Combo Sequence
 	if ":" in line:
 		sequstr = line.split(":")[0].replace(" ", "")
 		cmdstr = line.split(":")[1].rstrip()
 		cmd = b""
-		sequence = [ ]
+		comboidxs = [ ]
 		momentary = False
 
 
@@ -232,9 +243,12 @@ def ParseLine(line):
 		#Button Combo
 		for combo in sequstr.split(">"):
 			if len(combo):
-				sequence += [[]]
+				buttonidxs = [ ]
 				for button in combo.split("+"):
-					sequence[-1] += [Buttons[button]]
+					buttonidxs += [Buttons[button]["Index"]]
+				Combos += [{"ButtonIdxs":buttonidxs, "Index":ComboIdx}]
+				comboidxs += [ComboIdx]
+				ComboIdx+=1
 
 		#Command
 		quotes=False
@@ -258,10 +272,12 @@ def ParseLine(line):
 				quotes = not quotes
 
 		Sequences += [{}]
-		Sequences[-1]["Sequence"] = sequence
+		# Sequences[-1]["Combos"] = combos
 		Sequences[-1]["Command"] = cmd
 		Sequences[-1]["Momentary"] = momentary
-
+		Sequences[-1]["ComboIdxs"] = comboidxs
+		Sequences[-1]["Index"] = SequenceIdx
+		SequenceIdx+=1
 		# print(sequence)
 		# print(cmd)
 
@@ -277,11 +293,21 @@ while DoParse:
 		DoParse=False
 
 print()
+print("Variables")
 print(Variables)
-print(Buttons)
 print()
+print("Buttons:")
+for button in Buttons:
+	print(button, Buttons[button])
+print()
+print("Combos:")
+for combo in Combos:
+	print(combo)
+print()
+print("Sequences:")
 for seq in Sequences:
 	print(seq)
+print()
 
 
 '''
@@ -320,14 +346,21 @@ ButtonDataBuffer += CommandData
 print("CommandData:", CommandData)
 
 print("Buttons:")
-buttonIdx = {}
-bidx=0
 for button in Buttons:
-	b = int(Buttons[button])
-	print("\t", b)
+	b = int(Buttons[button]["ID"])
 	ButtonDataBuffer += ValtoHx(b,1) #Buttons
-	buttonIdx[b] = bidx
-	bidx+=1
+	print("\tID:", str(b))
+
+
+print("Combos:")
+for combo in Combos:
+	ButtonDataBuffer += ValtoHx(len(combo["ButtonIdxs"]),1) #NumButtons
+	print("\tNumButtons:" + str(len(combo["ButtonIdxs"])))
+
+	for idx in combo["ButtonIdxs"]:
+		ButtonDataBuffer += ValtoHx(idx,1) #ButtonsIdx
+		print("\t\tButtonIdx:" + str(idx))
+
 
 cmdoff = 0
 s=0
@@ -344,22 +377,20 @@ for sequence in Sequences: #Struct Sequences
 	print("\tCommandOff:", cmdoff)
 	cmdoff += len(sequence["Command"])
 
-	ButtonDataBuffer += ValtoHx(len(sequence["Sequence"]),1) #NumCombos
-	print("\tNumCombos:", len(sequence["Sequence"]))
+	ButtonDataBuffer += ValtoHx(len(sequence["ComboIdxs"]),1) #NumCombos
+	print("\tNumCombos:", len(sequence["ComboIdxs"]))
 
-	for combo in sequence["Sequence"]: #Struct Combos
-		ButtonDataBuffer += ValtoHx(len(combo),1) #NumButtons
-		print("\t\tNumButtons:", len(combo))
+	for comboidx in sequence["ComboIdxs"]: 
+		ButtonDataBuffer += ValtoHx(comboidx,1) #ComboIdx
+		print("\t\tComboIdx:", comboidx)
 
-		for button in combo: #Struct Buttons
-			ButtonDataBuffer += ValtoHx(buttonIdx[button],1) #ButtonIdx
-			print("\t\t\tButtonIdx:", buttonIdx[button])
 	s+=1
 
 FButtonData.write(ButtonDataBuffer)
 
 FDefines.write("-D COMMAND_DATA_LEN=" + str(len(CommandData)) + " ")
 FDefines.write("-D NUM_BUTTONS=" + str(len(Buttons)) + " ")
+FDefines.write("-D NUM_COMBOS=" + str(len(Combos)) + " ")
 FDefines.write("-D NUM_SEQUENCES=" + str(len(Sequences)) + " ")
 
 print("Done ButtonData Gen", end="\n\n")
