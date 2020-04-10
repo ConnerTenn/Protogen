@@ -64,8 +64,6 @@ extern Button Buttons[NUM_BUTTONS];
 extern Combo *Combos[NUM_COMBOS];
 extern Sequence *Sequences[NUM_SEQUENCES];
 
-#define BSDA(off, type) (*((type *)(ButtonStructData+off)))
-
 void InitButtons();
 void UpdateButtons();
 u8 ReadButton(u8 id);

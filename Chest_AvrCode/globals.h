@@ -5,6 +5,8 @@
 #include <avr/io.h>
 #include <string.h>
 
+// #define DEBUG
+
 #define CEILDIV(n,d) ( ((int)(n)) / ((int)(d)) + ( ((int)(n))%((int)(d)) ? 1 : 0 ) )
 
 typedef uint8_t u8;

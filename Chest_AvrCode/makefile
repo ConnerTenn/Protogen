@@ -1,6 +1,7 @@
 
 GCC=avr-gcc
 LD=avr-ld
+OBJDMP=avr-objdump
 CFLAGS= -O3 -mmcu=atmega328p
 
 .PHONY: all prog.hex
@@ -25,9 +26,12 @@ bin:
 
 prog.elf: main.o globals.o interfaces.o buttonCtl.o ButtonData.o
 	$(GCC) $(CFLAGS) $? -o $@
+	$(OBJDMP) -D $@ > prog.list
 	
 prog.hex: bin prog.elf
 	avr-objcopy -j .text -j .data -O ihex prog.elf prog.hex
+	@echo -e "\nProgram Image Size:"
+	@wc -c prog.hex
 
 
 clean:

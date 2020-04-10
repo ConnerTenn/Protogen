@@ -10,12 +10,13 @@
 
 //Page 143
 void IntiUART();
-void SerialTransmitByte(u8 data);
-//void SerialTransmit(u8 *data, u8 len);
 void SerialFlush();
+// void SerialTransmitByte(u8 data);
 void SerialTransmit(u8 *data, u8 len);
+#ifdef DEBUG
 void SerialTransmitStr(char *data);
 void SerialTransmitHexVal(u16 val);
+#endif
 
 u8 SerialRead(u8 *data, u8 len);
 u8 SerialAvail();

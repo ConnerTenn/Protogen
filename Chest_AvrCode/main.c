@@ -21,6 +21,7 @@ ISR(TIMER1_COMPA_vect)
 {
     sei(); //Enable Nested Interrupts
 
+#ifdef DEBUG
 	SerialTransmitStr("\033[1F");
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
@@ -28,6 +29,7 @@ ISR(TIMER1_COMPA_vect)
 	}
 	SerialTransmitStr("\n");
 	SerialFlush();
+#endif
 
 }
 
@@ -68,12 +70,13 @@ int main()
 
 
     IntiUART();
-	SerialTransmitStr("\n");
+	SerialTransmit("\n", 1);
 
 	InitButtons();
 
-    SerialTransmitStr("\nSetup Complete\n");
+    SerialTransmit("\nSetup Complete\n", 17);
 
+#ifdef DEBUG
 	PRINT_VAL("Timeout:", Timeout);
 	
 	PRINT_VAL("NumSequences:", NUM_SEQUENCES);
@@ -106,7 +109,7 @@ int main()
 	}
 
 	SerialTransmitStr("Done\n\n\n"); SerialFlush();
-
+#endif
     // InitTimers();
 
     while (1)

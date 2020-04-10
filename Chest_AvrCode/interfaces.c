@@ -16,13 +16,13 @@ ISR(USART_RX_vect)
     if (RX_Head+(u8)1 == RX_Tail) { RX_Tail++; }
     RX_Head++;
 }
-ISR(USART_TX_vect)
-{
-    cli();
-    TX_Ongoing=0;
-    DABITS(UCSR0B,(1<<UDRIE0));
-    sei();
-}
+// ISR(USART_TX_vect)
+// {
+//     cli();
+//     TX_Ongoing=0;
+//     DABITS(UCSR0B,(1<<UDRIE0));
+//     sei();
+// }
 ISR(USART_UDRE_vect)
 {
 	TX_Ongoing=1;
@@ -53,13 +53,13 @@ void SerialFlush()
     while (TX_Ongoing==1) {}
 }
 
-void SerialTransmitByte(u8 data)
-{
-    //Wait for empty transmit buffer
-    while ( !( UCSR0A & (1<<UDRE0)) );
-    //Put data into buffer, sends the data
-    UDR0 = data;
-}
+// void SerialTransmitByte(u8 data)
+// {
+//     //Wait for empty transmit buffer
+//     while ( !( UCSR0A & (1<<UDRE0)) );
+//     //Put data into buffer, sends the data
+//     UDR0 = data;
+// }
 
 void SerialTransmit(u8 *data, u8 len)
 {
@@ -72,6 +72,7 @@ void SerialTransmit(u8 *data, u8 len)
     ENBITS(UCSR0B,(1<<UDRIE0));
 }
 
+#ifdef DEBUG
 void SerialTransmitStr(char *data)
 {
 	while(*data)
@@ -106,7 +107,7 @@ void SerialTransmitHexVal(u16 val)
 	}
     ENBITS(UCSR0B,(1<<UDRIE0));
 }
-
+#endif
 
 
 u8 SerialRead(u8 *data, u8 len)
