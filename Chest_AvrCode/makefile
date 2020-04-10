@@ -2,7 +2,7 @@
 GCC=avr-gcc
 LD=avr-ld
 OBJDMP=avr-objdump
-CFLAGS= -O3 -mmcu=atmega328p
+CFLAGS= -O2 -mmcu=atmega328p
 
 .PHONY: all prog.hex
 
