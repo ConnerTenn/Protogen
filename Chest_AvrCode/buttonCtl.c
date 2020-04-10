@@ -43,6 +43,44 @@ void InitButtons()
 			}	
 		}
 	}
+
+
+	for (u8 b = 0; b < NUM_BUTTONS; b++)
+	{
+		switch(Buttons[b].ButtonNum)
+		{ //TODO change to sequential numbers to allow Jump-table optimization
+
+#define CFG_BUTTON_PIN(port, bit) \
+		DDR##port = DABITS(DDR##port, 1<<bit); \
+		PORT##port = ENBITS(PORT##port, 1<<bit); //D8
+
+		case 20: CFG_BUTTON_PIN(B, 0) //D8
+		case 21: CFG_BUTTON_PIN(B, 1) //D9
+		case 22: CFG_BUTTON_PIN(B, 2) //D10
+		case 23: CFG_BUTTON_PIN(B, 3) //D11
+		case 24: CFG_BUTTON_PIN(B, 4) //D12
+		case 25: CFG_BUTTON_PIN(B, 5) //D13
+
+		case 30: CFG_BUTTON_PIN(C, 0) //A0
+		case 31: CFG_BUTTON_PIN(C, 1) //A1
+		case 32: CFG_BUTTON_PIN(C, 2) //A2
+		case 33: CFG_BUTTON_PIN(C, 3) //A3
+		case 34: CFG_BUTTON_PIN(C, 4) //A4
+		case 35: CFG_BUTTON_PIN(C, 5) //A5
+
+		case 40: CFG_BUTTON_PIN(D, 0) //D0
+		case 41: CFG_BUTTON_PIN(D, 0) //D1
+		case 42: CFG_BUTTON_PIN(D, 0) //D2
+		case 43: CFG_BUTTON_PIN(D, 0) //D3
+		case 44: CFG_BUTTON_PIN(D, 0) //D4
+		case 45: CFG_BUTTON_PIN(D, 0) //D5
+		case 46: CFG_BUTTON_PIN(D, 0) //D6
+		case 47: CFG_BUTTON_PIN(D, 0) //D7
+
+#undef CFG_BUTTON_PIN
+
+		}
+	}
 }
 
 void TriggerCmd(u8 *cmd, u8 len)
@@ -111,28 +149,35 @@ u8 ReadButton(u8 id)
 	u8 b;
 	switch (id)
 	{ //TODO change to sequential numbers to allow Jump-table optimization
-	case 20: b = PINB & (1<<0); //D8
-	case 21: b = PINB & (1<<1); //D9
-	case 22: b = PINB & (1<<2); //D10
-	case 23: b = PINB & (1<<3); //D11
-	case 24: b = PINB & (1<<4); //D12
-	case 25: b = PINB & (1<<5); //D13
 
-	case 30: b = PINC & (1<<0); //A0
-	case 31: b = PINC & (1<<1); //A1
-	case 32: b = PINC & (1<<2); //A2
-	case 33: b = PINC & (1<<3); //A3
-	case 34: b = PINC & (1<<4); //A4
-	case 35: b = PINC & (1<<5); //A5
+#define GET_INPUT(port, bit) \
+		b = PIN##port & (1<<bit);
 
-	case 40: b = PIND & (1<<0); //D0
-	case 41: b = PIND & (1<<1); //D1
-	case 42: b = PIND & (1<<2); //D2
-	case 43: b = PIND & (1<<3); //D3
-	case 44: b = PIND & (1<<4); //D4
-	case 45: b = PIND & (1<<5); //D5
-	case 46: b = PIND & (1<<6); //D6
-	case 47: b = PIND & (1<<7); //D8
+	case 20: GET_INPUT(B, 0) //D8
+	case 21: GET_INPUT(B, 1) //D9
+	case 22: GET_INPUT(B, 2) //D10
+	case 23: GET_INPUT(B, 3) //D11
+	case 24: GET_INPUT(B, 4) //D12
+	case 25: GET_INPUT(B, 5) //D13
+
+	case 30: GET_INPUT(C, 0) //A0
+	case 31: GET_INPUT(C, 1) //A1
+	case 32: GET_INPUT(C, 2) //A2
+	case 33: GET_INPUT(C, 3) //A3
+	case 34: GET_INPUT(C, 4) //A4
+	case 35: GET_INPUT(C, 5) //A5
+
+	case 40: GET_INPUT(D, 0) //D0
+	case 41: GET_INPUT(D, 0) //D1
+	case 42: GET_INPUT(D, 0) //D2
+	case 43: GET_INPUT(D, 0) //D3
+	case 44: GET_INPUT(D, 0) //D4
+	case 45: GET_INPUT(D, 0) //D5
+	case 46: GET_INPUT(D, 0) //D6
+	case 47: GET_INPUT(D, 0) //D7
+
+#undef GET_INPUT
+
 	}
 	return !!b;
 }

@@ -3,9 +3,9 @@
 
 //http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
 
-#define SETBITS(r,m,v) ((r)=((r) & ~(m)) | ((m) & (v)))
-#define ENBITS(r,m) ((r)=((r) | (m)))
-#define DABITS(r,m) ((r)=((r) & ~(m)))
+#define SETBITS(r,v,m) ( (r)=((r) & ~(m)) | ((m) & (v)) )
+#define ENBITS(r,m) ( (r)=((r) | (m)) )
+#define DABITS(r,m) ( (r)=((r) & ~(m)) )
 
 
 //Page 143
