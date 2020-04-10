@@ -114,11 +114,11 @@ void InitButtons()
 		}
 		else if (id<=11)
 		{
-			CFG_BUTTON_PIN(C, id-5);
+			CFG_BUTTON_PIN(C, id-6);
 		}
 		else if (id<=19)
 		{
-			CFG_BUTTON_PIN(D, id-10);
+			CFG_BUTTON_PIN(D, id-12);
 		}
 	}
 
@@ -128,15 +128,31 @@ void InitButtons()
 
 }
 
+#ifdef DEBUG
+u8 *LastCmd;
+u8 LastCmdLen;
+#endif
+
 void TriggerCmd(u8 *cmd, u8 len)
 {
-	SerialTransmit(cmd, len);
-	SerialTransmit("\n", 1);
+#ifndef DEBUG
+	SerialTransmit(cmd, len)
+#else
+	// SerialTransmitStr("\n\n\n\n");
+	// SerialTransmitStr("\tCommand:");
+	// for (u8 i = 0; i < len; i++)
+	// {
+	// 	SerialTransmitStr("\\x");
+	// 	SerialTransmitHexVal(cmd[i] & 0xFF);
+	// }
+	// SerialTransmitStr("\n\n\n\n");
+	LastCmd = cmd;
+	LastCmdLen = len;
+#endif
 }
 
 void UpdateButtons()
 {
-	/*
 	u8 numActiveButtons = 0;
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
@@ -146,7 +162,7 @@ void UpdateButtons()
 
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
-		Combo *combo = Sequences[s].Combos[Sequences[s].ActiveCombo];
+		Combo *combo = Sequences[s]->Combos[Sequences[s]->ActiveCombo];
 
 		u8 numactive = 0;
 		u8 allPressed = 1;
@@ -159,7 +175,7 @@ void UpdateButtons()
 		{
 			//Reset Sequence
 			combo->Active = 0; 
-			Sequences[s].ActiveCombo = 0;
+			Sequences[s]->ActiveCombo = 0;
 		}
 		else if (allPressed == 1)
 		{
@@ -178,18 +194,17 @@ void UpdateButtons()
 			{
 				//Advance to next stage of sequence
 				combo->Active = 0;
-				Sequences[s].ActiveCombo++;
+				Sequences[s]->ActiveCombo++;
 
-				if (Sequences[s].ActiveCombo == Sequences[s].NumCombos)
+				if (Sequences[s]->ActiveCombo == Sequences[s]->NumCombos)
 				{ 
 					//Sequence Correct!
-					TriggerCmd(Sequences[s].Command, Sequences[s].CommandLen);
+					TriggerCmd(Sequences[s]->Command, Sequences[s]->CommandLen);
 					
 				}
 			}
 		}
 	}
-	*/
 }
 
 u8 ReadButton(u8 id)
@@ -229,11 +244,11 @@ u8 ReadButton(u8 id)
 	}
 	else if (id<=11)
 	{
-		v = GET_INPUT(C, id-5);
+		v = GET_INPUT(C, id-6);
 	}
 	else if (id<=19)
 	{
-		v = GET_INPUT(D, id-10);
+		v = GET_INPUT(D, id-12);
 	}
 	return !v;
 }

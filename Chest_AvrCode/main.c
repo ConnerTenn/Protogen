@@ -22,12 +22,44 @@ ISR(TIMER1_COMPA_vect)
     sei(); //Enable Nested Interrupts
 
 #ifdef DEBUG
-	SerialTransmitStr("\033[1F");
+	static u8 ret = 0;
+	for (u8 i = 0; i < ret; i++) { SerialTransmitStr("\033[1F"); }
+	ret = 0;
+
+	SerialTransmitStr("Buttons:");
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
 		SerialTransmitStr(Buttons[b].Active ? "1 " : "0 ");
 	}
-	SerialTransmitStr("\n");
+	SerialTransmitStr("\n"); ret++;
+	for (u8 s = 0; s < NUM_SEQUENCES; s++)
+	{
+		PRINT_VAL("Sequence:", s); ret++;
+
+		PRINT_VAL("\tActiveCombo:", Sequences[s]->ActiveCombo); ret++;
+		
+		SerialTransmitStr("\tCombo:\n"); ret++;
+		Combo *combo = Sequences[s]->Combos[Sequences[s]->ActiveCombo];
+		PRINT_VAL("\t\tActive:", combo->Active); ret++;
+
+		SerialTransmitStr("\t\tButton:\n"); ret++;
+		for (u8 b = 0; b < combo->NumButtons; b++)
+		{
+			PRINT_VAL("\t\t\tID:", combo->Buttons[b]->ButtonID); ret++;
+			PRINT_VAL("\t\t\tActive:", combo->Buttons[b]->Active); ret++;
+		}
+
+		SerialFlush();
+	}
+
+	SerialTransmitStr("\nLast Command:"); ret++;
+	for (u8 i = 0; i < LastCmdLen; i++)
+	{
+		SerialTransmitStr("\\x");
+		SerialTransmitHexVal(LastCmd[i] & 0xFF);
+	}
+	SerialTransmitStr("\n"); ret++;
+
 	SerialFlush();
 #endif
 
@@ -53,7 +85,7 @@ void InitTimers()
     //Counter 1 (16 bit)
     //Page 89
     //Page 108
-    OCR1A = 6250 - 1; //(16MHz/256)/10Hz=6250
+    OCR1A = 31250 - 1; //(16MHz/256)/2Hz=31250
     TCNT1 = 0;
     TIMSK1 = (1<<OCIE1A); //Enable Interrupt
     //CTC mode & Prescale divide by 256 & start the timer
@@ -110,7 +142,7 @@ int main()
 
 	SerialTransmitStr("Done\n\n\n"); SerialFlush();
 #endif
-    // InitTimers();
+    InitTimers();
 
     while (1)
     {

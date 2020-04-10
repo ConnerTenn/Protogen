@@ -64,6 +64,11 @@ extern Button Buttons[NUM_BUTTONS];
 extern Combo *Combos[NUM_COMBOS];
 extern Sequence *Sequences[NUM_SEQUENCES];
 
+#ifdef DEBUG
+extern u8 *LastCmd;
+extern u8 LastCmdLen;
+#endif
+
 void InitButtons();
 void UpdateButtons();
 u8 ReadButton(u8 id);
