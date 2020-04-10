@@ -10,6 +10,8 @@ Sequence *Sequences[NUM_SEQUENCES];
 
 void InitButtons()
 {
+	//Read offset: Flash data read offset
+	//Write offset: Offset into ButtonStructData for writing structures
 	u16 roff = 0; u8 *woff = ButtonStructData;
 	
 	Timeout = BUTTONDATA_ACC_8(roff); roff+=1;
@@ -36,7 +38,7 @@ void InitButtons()
 		// PRINT_VAL("\tButtonID:", Buttons[b].ButtonID);
 
 		
-		//Setup DDR
+		//Setup Direction and pull-up registers
 #define CFG_BUTTON_PIN(port, bit) p##port |= (1<<bit);
 		u8 id = Buttons[b].ButtonID;
 		if (id<=5)
@@ -53,9 +55,10 @@ void InitButtons()
 		}
 	}
 
-	PORTB|=pB; PORTC|=pC; PORTD|=pD;
-	pB=~pB;    pC=~pC;    pD=~pD;
-	DDRB&=pB;  DDRC&=pC;  DDRD&=pD;
+	//Set bits in registers according to the bits configured
+	PORTB|=pB; PORTC|=pC; PORTD|=pD; //Set PORTx to high for Pull-up
+	pB=~pB;    pC=~pC;    pD=~pD; //flip bits so that the next register bits can be cleared
+	DDRB&=pB;  DDRC&=pC;  DDRD&=pD; //Set DDRx to low for input
 
 	// SerialTransmitStr("Combos:\n");
 	for (u8 c = 0; c < NUM_COMBOS; c++)
@@ -142,25 +145,35 @@ void UpdateButtons()
 	u8 allReleased = 0;
 	u8 triggered = 0;
 
+	//Update the states of all Physical Buttons
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
+		//Get the buttons state
 		Buttons[b].Pressed = ReadButton(Buttons[b].ButtonID);
-		allReleased |= Buttons[b].Pressed;
-		Buttons[b].Active |= Buttons[b].Pressed;
-		if (Buttons[b].Active) { numActiveButtons++; }
+		
+		allReleased |= Buttons[b].Pressed; //Test of if no buttons are pressed
+		Buttons[b].Active |= Buttons[b].Pressed; //Once pressed, it is active until reset
+
+		if (Buttons[b].Active) { numActiveButtons++; } //Count the number of active buttons
 	}
 
+	//Check each sequence
 	for (u8 s = 0; s < NUM_SEQUENCES && !triggered; s++)
 	{
 		Combo *combo = Sequences[s]->Combos[Sequences[s]->ActiveCombo];
 
 		u8 numactive = 0;
 		u8 allComboPressed = 1;
+
+		//Count the number of active buttons
+		//If all the buttons are pressed, then allComboPressed remains true
 		for (u8 b = 0; b < combo->NumButtons; b++)
 		{
 			if (combo->Buttons[b]->Active) { numactive++; }
 			else { allComboPressed = 0; }
 		}
+
+		//Checking for if there are buttons pressed that are not in this sequence
 		if (numActiveButtons != numactive)
 		{
 			//Reset Sequence
@@ -170,16 +183,20 @@ void UpdateButtons()
 		else if (allComboPressed == 1)
 		{
 			//Combo correct!
+			//Set active and wait for all to be released for the command to trigger
 			combo->Active = 1;
 		}
 
-		
+		//If all buttons have been now released and the combination is correct
+		//then can move on to the next stage of the sequence (or trigger)
 		if (allReleased == 0 && combo->Active)
 		{
 			//Advance to next stage of sequence
 			combo->Active = 0;
 			Sequences[s]->ActiveCombo++;
 
+			//If the last stage of the sequence has been passed,
+			//then the entire sequence has been correct
 			if (Sequences[s]->ActiveCombo == Sequences[s]->NumCombos)
 			{ 
 				//Sequence Correct!
@@ -189,6 +206,8 @@ void UpdateButtons()
 		}
 	}
 	
+	//If all buttons have been released, reset their active state
+	//This ensures that buttons aren't 'stick' which can cause false triggers
 	if (allReleased == 0)
 	{
 		for (u8 b = 0; b < NUM_BUTTONS; b++)
@@ -197,6 +216,7 @@ void UpdateButtons()
 		}
 	}
 
+	//If a command has been triggered, reset all the sequences
 	if (triggered)
 	{
 		for (u8 s = 0; s < NUM_SEQUENCES; s++)
@@ -210,6 +230,7 @@ u8 ReadButton(u8 id)
 {
 #define GET_INPUT(port, bit) (PIN##port & (1<<(bit)))
 
+	//See Pin Mapping in buttonCtl.h
 	u8 v = 0;
 	if (id<=5)
 	{
