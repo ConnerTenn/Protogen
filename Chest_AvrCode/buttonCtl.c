@@ -3,15 +3,20 @@
 
 u8 Timeout;
 // u8 NumSequences;
+Button Buttons[NUM_BUTTONS];
 Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons()
 {
 	u8 off = 0;
 	Timeout = BUTTONDATA_ACC_8(off); off+=1;
-
+	for (u8 b = 0; b < NUM_BUTTONS; b++)
+	{
+		Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
+	}
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
+		Sequences[s].ActiveCombo = 0;
 		Sequences[s].Momentary = BUTTONDATA_ACC_8(off); off+=1;
 		Sequences[s].NumCombos = BUTTONDATA_ACC_8(off); off+=1;
 		
@@ -22,12 +27,50 @@ void InitButtons()
 			
 			for (u8 b =0; b < Sequences[s].Combos[c].NumButtons; b++)
 			{
-				Sequences[s].Combos[c].Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
+				// Sequences[s].Combos[c].Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
+				Sequences[s].Combos[c].Buttons[b] = &(Buttons[BUTTONDATA_ACC_8(off)]); off+=1;
 			}	
 		}
 	}
 }
 
+void UpdateButtons()
+{
+	for (u8 b = 0; b < NUM_BUTTONS; b++)
+	{
+		Buttons[b].Active |= ReadButton(Buttons[b].ButtonNum);
+	}
+
+	for (u8 s = 0; s < NUM_SEQUENCES; s++)
+	{
+		Combo *combo = &(Sequences[s].Combos[Sequences[s].ActiveCombo]);
+		
+		u8 allPressed = 1;
+		for (u8 b =0; b < combo->NumButtons; b++)
+		{
+			allPressed = allPressed & combo->Buttons[b]->Active;
+		}
+		if (allPressed == 1)
+		{
+			// Sequences[s].ActiveCombo++;
+			combo->Active = 1;
+		}
+
+		if (combo->Active)
+		{
+			u8 allReleased = 0;
+			for (u8 b =0; b < combo->NumButtons; b++)
+			{
+				allReleased = allReleased | combo->Buttons[b]->Active;
+			}
+			if (allReleased == 0)
+			{
+				combo->Active = 0;
+				Sequences[s].ActiveCombo++;
+			}
+		}
+	}
+}
 
 u8 ReadButton(u8 id)
 {
@@ -58,5 +101,10 @@ u8 ReadButton(u8 id)
 	case 47: b = PIND & (1<<7); //D8
 	}
 	return !!b;
+}
+
+void ReadButtons()
+{
+	
 }
 

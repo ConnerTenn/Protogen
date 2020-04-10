@@ -9,6 +9,7 @@ log
 *.o
 *.a
 *.out
+*.dat
 
 program
 test

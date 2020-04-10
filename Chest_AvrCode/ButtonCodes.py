@@ -67,13 +67,14 @@ for each combo:
 
 '''
 
+print("\nBegin ButtonData Gen")
 
 import os
 
 FButtons="Buttons.txt"
 FFrameManifest="../ExpressionCtl_FeatherM0/FrameManifest.txt"
 FButtonData="ButtonData.bin"
-FNumSequences="NumSequences.val"
+FDefines="Defines.dat"
 
 
 try: f = open(FButtons, 'r')
@@ -88,9 +89,9 @@ try: f = open(FButtonData, 'wb')
 except: print("Error opening file \"{0}\"".format(FButtonData)); exit(-1)
 FButtonData=f
 
-try: f = open(FNumSequences, 'w')
-except: print("Error opening file \"{0}\"".format(FNumSequences)); exit(-1)
-FNumSequences=f
+try: f = open(FDefines, 'w')
+except: print("Error opening file \"{0}\"".format(FDefines)); exit(-1)
+FDefines=f
 
 def ValtoHx(val, length):
 	return val.to_bytes(length, byteorder="little")
@@ -289,7 +290,7 @@ for seq in Sequences:
 Binary Format
 
 u8 Timeout
-# u8 NumSequences
+u8 Buttons[NUM_BUTTONS]
 struct Sequences
 {
 	u8 Momentary
@@ -297,33 +298,41 @@ struct Sequences
 	struct Combos
 	{
 		u8 NumButtons
-		struct Buttons
-		{
-			u8 ButtonNum
-		}
+		u8 ButtonIdx
 	}[NumCombos]
 	u8 CommandLen
 	u8 Command[CommandLen]
-}[NumSequences]
+}[NUM_SEQUENCES]
 
 '''
 
 
 ButtonDataBuffer = b""
 
-ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1)
-# ButtonDataBuffer += ValtoHx(len(Sequences),1)
+ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1) #Timeout
+
+buttonIdx = {}
+bidx=0
+for button in Buttons:
+	b = int(Buttons[button])
+	ButtonDataBuffer += ValtoHx(b,1) #Buttons
+	buttonIdx[b] = bidx 
+	bidx+=1
+
 for sequence in Sequences: #Struct Sequences
 	ButtonDataBuffer += ValtoHx(1 if sequence["Momentary"] else 0,1) #Momentart
 	ButtonDataBuffer += ValtoHx(len(sequence["Sequence"]),1) #NumCombos
 	for combo in sequence["Sequence"]: #Struct Combos
 		ButtonDataBuffer += ValtoHx(len(combo),1) #NumButtons
 		for button in combo: #Struct Buttons
-			ButtonDataBuffer += ValtoHx(button,1) #ButtonNum
+			ButtonDataBuffer += ValtoHx(buttonIdx[button],1) #ButtonIdx
 
 	ButtonDataBuffer += ValtoHx(len(sequence["Command"]),1) #CommandLen
 	ButtonDataBuffer += sequence["Command"] #Command
 
 FButtonData.write(ButtonDataBuffer)
 
-FNumSequences.write(str(len(Sequences)))
+FDefines.write("-D NUM_SEQUENCES=" + str(len(Sequences)) + " ")
+FDefines.write("-D NUM_BUTTONS=" + str(len(Buttons)) + " ")
+
+print("Done ButtonData Gen", end="\n\n")

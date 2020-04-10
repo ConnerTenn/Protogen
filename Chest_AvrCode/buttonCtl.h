@@ -11,9 +11,10 @@ extern PROGMEM const char *const _binary_ButtonData_bin_end;
 
 
 /*
+Binart Data Segment:
 
 u8 Timeout
-// u8 NumSequences
+u8 Buttons[NUM_BUTTONS]
 struct Sequences
 {
 	u8 Momentary
@@ -21,31 +22,30 @@ struct Sequences
 	struct Combos
 	{
 		u8 NumButtons
-		struct Buttons
-		{
-			u8 ButtonNum
-		}
+		u8 ButtonIdx
 	}[NumCombos]
 	u8 CommandLen
 	u8 Command[CommandLen]
-}[NumSequences]
+}[NUM_SEQUENCES]
 
 */
 
 typedef struct
 {
 	u8 ButtonNum;
+	u8 Active;
 } Button;
 
 typedef struct
 {
 	u8 Active;
 	u8 NumButtons;
-	Button Buttons[0];
+	Button *Buttons[0];
 } Combo;
 
 typedef struct
 {
+	u8 ActiveCombo;
 	u8 Momentary;
 	u8 NumCombos;
 	Combo Combos[0]; 
@@ -53,8 +53,11 @@ typedef struct
 
 extern u8 Timeout;
 // const u8 NumSequences = NUM_SEQUENCES;
+extern Button Buttons[NUM_BUTTONS];
 extern Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons();
+void UpdateButtons();
 u8 ReadButton(u8 id);
+void ReadButtons();
 

@@ -7,9 +7,11 @@ CFLAGS= -O3 -mmcu=atmega328p
 
 all: prog.hex
 
+#Get Definitions from Defines.cfg
+# GetDefine = "-D $(1)=$(shell awk -F= '$1==\"$(1)\"{print $2}')"
 
 %.o: %.c
-	$(GCC) $(CFLAGS) -D NUM_SEQUENCES=$(shell cat NumSequences.val) $< -c -o $@
+	$(GCC) $(CFLAGS) $(shell cat Defines.dat) $< -c -o $@
 
 %.o: %.bin
 	# $(LD) -r -b binary $< -o $@
@@ -29,7 +31,7 @@ prog.hex: bin prog.elf
 
 
 clean:
-	rm -f *.elf *.hex *.o NumSequences.val
+	rm -f *.elf *.hex *.o *.dat
 
 upload:
 	avr-size --mcu=atmega328p -A prog.elf
