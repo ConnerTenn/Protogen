@@ -15,6 +15,7 @@ void SerialTransmitByte(u8 data);
 void SerialFlush();
 void SerialTransmit(u8 *data, u8 len);
 void SerialTransmitStr(char *data);
+void SerialTransmitHexVal(u16 val);
 
 u8 SerialRead(u8 *data, u8 len);
 u8 SerialAvail();

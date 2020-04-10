@@ -47,6 +47,11 @@ void IntiUART()
     sei();
 }
 
+void SerialFlush()
+{
+    while (TX_Ongoing==1) {}
+}
+
 void SerialTransmitByte(u8 data)
 {
     //Wait for empty transmit buffer
@@ -54,7 +59,6 @@ void SerialTransmitByte(u8 data)
     //Put data into buffer, sends the data
     UDR0 = data;
 }
-
 
 void SerialTransmit(u8 *data, u8 len)
 {
@@ -66,10 +70,42 @@ void SerialTransmit(u8 *data, u8 len)
     }
     ENBITS(UCSR0B,(1<<UDRIE0));
 }
-void SerialFlush()
+
+void SerialTransmitStr(char *data)
 {
-    while (TX_Ongoing==1) {}
+	while(*data)
+	{
+		TX_Ring[TX_Head] = *data;
+        if (TX_Head+(u8)1 == TX_Tail) { return; }
+        TX_Head++; data++;
+	}
+    ENBITS(UCSR0B,(1<<UDRIE0));
 }
+
+void SerialTransmitHexVal(u16 val)
+{
+	if (val)
+	{
+		while(!(val & 0xF000)) { val=(val<<4)&0xFFFF; }
+		while (val)
+		{
+			u8 hx = ((val&0xF000)>>12);
+			if (hx < 10) { hx += '0'; }
+			else { hx += 'A'-10; }
+			TX_Ring[TX_Head] = hx;
+			if (TX_Head+(u8)1 == TX_Tail) { return; }
+			TX_Head++; val=(val<<4)&0xFFFF;
+		}
+	}
+	else
+	{
+		TX_Ring[TX_Head] = '0';
+		if (TX_Head+(u8)1 == TX_Tail) { return; }
+		TX_Head++;
+	}
+    ENBITS(UCSR0B,(1<<UDRIE0));
+}
+
 
 
 u8 SerialRead(u8 *data, u8 len)
