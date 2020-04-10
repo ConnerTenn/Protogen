@@ -192,16 +192,17 @@ void UpdateButtons()
 					TriggerCmd(Sequences[s]->Command, Sequences[s]->CommandLen);
 					triggered = 1;
 				}
+				
+				for (u8 b = 0; b < NUM_BUTTONS; b++)
+				{
+					Buttons[b].Active = 0;
+				}
 			}
 		}
 	}
 
 	if (triggered)
 	{
-		for (u8 b = 0; b < NUM_BUTTONS; b++)
-		{
-			Buttons[b].Active = 0;
-		}
 		for (u8 s = 0; s < NUM_SEQUENCES; s++)
 		{
 			Sequences[s]->ActiveCombo = 0;

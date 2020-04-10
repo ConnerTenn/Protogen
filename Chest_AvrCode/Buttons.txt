@@ -15,8 +15,8 @@ B2 = 6
 
 
 #Key Combinations
-B1 :    "B1   "
-B2 :    "B2   "
+# B1 :    "B1   "
+B2 > B1 :    "B2>B1"
 B1+B2 : "B1+B2"
 # L1 + R2: CharlieIdle       #Button L1 and L2 at the same time; Set expression to EXPR1
 # L1 > L1: EXPR2             #Button L1 then L2, one after another; Set expression to EXPR2
