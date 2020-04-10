@@ -82,30 +82,30 @@ int main()
 		PRINT_VAL("Sequence:", s);
 
 		SerialTransmitStr("\tMomentary:");
-		SerialTransmitStr(Sequences[s].Momentary ? "Y\n" : "N\n");
+		SerialTransmitStr(Sequences[s]->Momentary ? "Y\n" : "N\n");
 
-		PRINT_VAL("\tCommandLen:", Sequences[s].CommandLen);
-		PRINT_VAL("\tCommandOff:", Sequences[s].Command - CommandData);
+		PRINT_VAL("\tCommandLen:", Sequences[s]->CommandLen);
+		PRINT_VAL("\tCommandOff:", Sequences[s]->Command - CommandData);
 		SerialTransmitStr("\tCommand:");
-		for (u8 i = 0; i < Sequences[s].CommandLen; i++)
+		for (u8 i = 0; i < Sequences[s]->CommandLen; i++)
 		{
 			SerialTransmitStr("\\x");
-			SerialTransmitHexVal(Sequences[s].Command[i] & 0xFF);
+			SerialTransmitHexVal(Sequences[s]->Command[i] & 0xFF);
 		}
 		SerialTransmitStr("\n");
 
-		PRINT_VAL("\tNumCombos:", Sequences[s].NumCombos);
-		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
+		PRINT_VAL("\tNumCombos:", Sequences[s]->NumCombos);
+		for (u8 c = 0; c < Sequences[s]->NumCombos; c++)
 		{
-			PRINT_VAL("\t\tNumButtons:", Sequences[s].Combos[c]->NumButtons);
-			for (u8 b = 0; b < Sequences[s].Combos[c]->NumButtons; b++)
+			PRINT_VAL("\t\tNumButtons:", Sequences[s]->Combos[c]->NumButtons);
+			for (u8 b = 0; b < Sequences[s]->Combos[c]->NumButtons; b++)
 			{
-				PRINT_VAL("\t\t\tButtonsId:", Sequences[s].Combos[c]->Buttons[b]->ButtonID);
+				PRINT_VAL("\t\t\tButtonsId:", Sequences[s]->Combos[c]->Buttons[b]->ButtonID);
 			}
 		}
 	}
 
-	SerialTransmitStr("\n\n\n"); SerialFlush();
+	SerialTransmitStr("Done\n\n\n"); SerialFlush();
 
     // InitTimers();
 

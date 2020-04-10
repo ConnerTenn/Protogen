@@ -1,23 +1,24 @@
 
 #include "buttonCtl.h"
 
+u8 ButtonStructData[BUTTON_STRUCT_SIZE];
 u8 Timeout;
 u8 CommandData[COMMAND_DATA_LEN];
 Button Buttons[NUM_BUTTONS];
-Combo Combos[NUM_COMBOS];
-Sequence Sequences[NUM_SEQUENCES];
+Combo *Combos[NUM_COMBOS];
+Sequence *Sequences[NUM_SEQUENCES];
 
 void InitButtons()
 {
-	u16 off = 0;
+	u16 roff = 0; u8 *woff = ButtonStructData;
 	
-	Timeout = BUTTONDATA_ACC_8(off); off+=1;
+	Timeout = BUTTONDATA_ACC_8(roff); roff+=1;
 	PRINT_VAL("Timeout:", Timeout);
 
 	SerialTransmitStr("CommandData:");
 	for (u16 i = 0; i < COMMAND_DATA_LEN; i++)
 	{
-		CommandData[i] = BUTTONDATA_ACC_8(off); off+=1;
+		CommandData[i] = BUTTONDATA_ACC_8(roff); roff+=1;
 
 		SerialTransmitStr("\\x");
 		SerialTransmitHexVal(CommandData[i] & 0xFF);
@@ -27,7 +28,7 @@ void InitButtons()
 	SerialTransmitStr("Buttons:\n");
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
-		Buttons[b].ButtonID = BUTTONDATA_ACC_8(off); off+=1;
+		Buttons[b].ButtonID = BUTTONDATA_ACC_8(roff); roff+=1;
 		Buttons[b].Active = 0;
 	
 		PRINT_VAL("\tButtonID:", Buttons[b].ButtonID);
@@ -36,14 +37,17 @@ void InitButtons()
 	SerialTransmitStr("Combos:\n");
 	for (u8 c = 0; c < NUM_COMBOS; c++)
 	{
-		Combos[c].Active = 0;
-		Combos[c].NumButtons = BUTTONDATA_ACC_8(off); off+=1;
-		PRINT_VAL("\tNumButtons:", Combos[c].NumButtons);
+		Combos[c] = (Combo *)woff;
 
-		for (u8 b = 0; b < Combos[c].NumButtons; b++)
+		Combos[c]->Active = 0; woff+=1;
+		Combos[c]->NumButtons = BUTTONDATA_ACC_8(roff); roff+=1; woff+=1;
+		PRINT_VAL("\tNumButtons:", Combos[c]->NumButtons);
+
+		for (u8 b = 0; b < Combos[c]->NumButtons; b++)
 		{
-			Combos[c].Buttons[b] = Buttons + BUTTONDATA_ACC_8(off) * sizeof(Button); off+=1;
-			PRINT_VAL("\t\tButtonIdx:", Combos[c].Buttons[b] - Buttons);
+			u8 buttonidx = BUTTONDATA_ACC_8(roff); roff+=1;
+			Combos[c]->Buttons[b] = &(Buttons[buttonidx]); woff+=2;
+			PRINT_VAL("\t\tButtonIdx:", buttonidx);
 		}
 
 	}
@@ -52,21 +56,25 @@ void InitButtons()
 	SerialTransmitStr("Sequences:\n");
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
-		Sequences[s].ActiveCombo = 0;
-		Sequences[s].Momentary = BUTTONDATA_ACC_8(off); off+=1;
-		SerialTransmitStr("\tMomentary:"); SerialTransmitStr(Sequences[s].Momentary ? "Y\n" : "N\n");
+		Sequences[s] = (Sequence *)woff;
 
-		Sequences[s].CommandLen = BUTTONDATA_ACC_8(off); off+=1;
-		Sequences[s].Command = CommandData + BUTTONDATA_ACC_16(off); off+=2;
-		PRINT_VAL("\tCommandLen:", Sequences[s].CommandLen);
-		PRINT_VAL("\tCommandOff:", Sequences[s].Command - CommandData);
+		Sequences[s]->ActiveCombo = 0; woff+=1;
+		Sequences[s]->Momentary = BUTTONDATA_ACC_8(roff); roff+=1; woff+=1;
+		SerialTransmitStr("\tMomentary:"); SerialTransmitStr(Sequences[s]->Momentary ? "Y\n" : "N\n");
 
-		Sequences[s].NumCombos = BUTTONDATA_ACC_8(off); off+=1;
-		PRINT_VAL("\tNumCombos:", Sequences[s].NumCombos);
-		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
+		Sequences[s]->CommandLen = BUTTONDATA_ACC_8(roff); roff+=1; woff+=1;
+		u16 cmdoff = BUTTONDATA_ACC_16(roff); roff+=2;
+		Sequences[s]->Command = CommandData + cmdoff; woff+=2;
+		PRINT_VAL("\tCommandLen:", Sequences[s]->CommandLen);
+		PRINT_VAL("\tCommandOff:", cmdoff);
+
+		Sequences[s]->NumCombos = BUTTONDATA_ACC_8(roff); roff+=1; woff+=1;
+		PRINT_VAL("\tNumCombos:", Sequences[s]->NumCombos);
+		for (u8 c = 0; c < Sequences[s]->NumCombos; c++)
 		{
-			Sequences[s].Combos[c] = Combos + BUTTONDATA_ACC_8(off) * sizeof(Combo); off+=1;
-			PRINT_VAL("\t\tComboIdx:", Sequences[s].Combos[c] - Combos);
+			u8 comboidx = BUTTONDATA_ACC_8(roff); roff+=1;
+			Sequences[s]->Combos[c] = Combos[comboidx]; woff+=2;
+			PRINT_VAL("\t\tComboIdx:", comboidx);
 		}
 	}
 
@@ -118,6 +126,7 @@ void TriggerCmd(u8 *cmd, u8 len)
 
 void UpdateButtons()
 {
+	/*
 	u8 numActiveButtons = 0;
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
@@ -170,6 +179,7 @@ void UpdateButtons()
 			}
 		}
 	}
+	*/
 }
 
 u8 ReadButton(u8 id)

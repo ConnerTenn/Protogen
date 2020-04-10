@@ -337,12 +337,18 @@ print()
 
 ButtonDataBuffer = b""
 
+StructSize=0
+u8=1
+u16=2
+ptr=2
+
 ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1) #Timeout
 
 CommandData=b""
 for sequence in Sequences:
 	CommandData += sequence["Command"] #CommandData
 ButtonDataBuffer += CommandData
+# StructSize+=len(CommandData)
 print("CommandData:", CommandData)
 
 print("Buttons:")
@@ -351,15 +357,23 @@ for button in Buttons:
 	ButtonDataBuffer += ValtoHx(b,1) #Buttons
 	print("\tID:", str(b))
 
+	# StructSize+=u8+u8
 
-print("Combos:")
+
+c=0
 for combo in Combos:
+	print("Combo:" + str(c))
 	ButtonDataBuffer += ValtoHx(len(combo["ButtonIdxs"]),1) #NumButtons
 	print("\tNumButtons:" + str(len(combo["ButtonIdxs"])))
 
+	StructSize+=u8+u8
+
 	for idx in combo["ButtonIdxs"]:
 		ButtonDataBuffer += ValtoHx(idx,1) #ButtonsIdx
+		StructSize+=ptr
 		print("\t\tButtonIdx:" + str(idx))
+
+	c+=1
 
 
 cmdoff = 0
@@ -380,14 +394,19 @@ for sequence in Sequences: #Struct Sequences
 	ButtonDataBuffer += ValtoHx(len(sequence["ComboIdxs"]),1) #NumCombos
 	print("\tNumCombos:", len(sequence["ComboIdxs"]))
 
+	StructSize+=u8+u8+u8+ptr+u8
+
 	for comboidx in sequence["ComboIdxs"]: 
 		ButtonDataBuffer += ValtoHx(comboidx,1) #ComboIdx
 		print("\t\tComboIdx:", comboidx)
+
+		StructSize+=ptr
 
 	s+=1
 
 FButtonData.write(ButtonDataBuffer)
 
+FDefines.write("-D BUTTON_STRUCT_SIZE=" + str(StructSize) + " ")
 FDefines.write("-D COMMAND_DATA_LEN=" + str(len(CommandData)) + " ")
 FDefines.write("-D NUM_BUTTONS=" + str(len(Buttons)) + " ")
 FDefines.write("-D NUM_COMBOS=" + str(len(Combos)) + " ")

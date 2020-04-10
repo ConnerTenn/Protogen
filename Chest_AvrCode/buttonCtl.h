@@ -36,8 +36,8 @@ struct Sequences
 
 typedef struct
 {
-	u8 ButtonID;
 	u8 Active;
+	u8 ButtonID;
 } Button;
 
 typedef struct
@@ -57,11 +57,14 @@ typedef struct
 	Combo *Combos[0];
 } Sequence;
 
+extern u8 ButtonStructData[BUTTON_STRUCT_SIZE];
 extern u8 Timeout;
 extern u8 CommandData[COMMAND_DATA_LEN];
 extern Button Buttons[NUM_BUTTONS];
-extern Combo Combos[NUM_COMBOS];
-extern Sequence Sequences[NUM_SEQUENCES];
+extern Combo *Combos[NUM_COMBOS];
+extern Sequence *Sequences[NUM_SEQUENCES];
+
+#define BSDA(off, type) (*((type *)(ButtonStructData+off)))
 
 void InitButtons();
 void UpdateButtons();
