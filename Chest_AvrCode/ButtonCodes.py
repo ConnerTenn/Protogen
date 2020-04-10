@@ -290,18 +290,19 @@ for seq in Sequences:
 Binary Format
 
 u8 Timeout
+u8 CommandData[COMMAND_DATA_LEN]
 u8 Buttons[NUM_BUTTONS]
 struct Sequences
 {
 	u8 Momentary
+	u8 CommandLen
+	u16 CommandOffset
 	u8 NumCombos
 	struct Combos
 	{
 		u8 NumButtons
 		u8 ButtonIdx
 	}[NumCombos]
-	u8 CommandLen
-	u8 Command[CommandLen]
 }[NUM_SEQUENCES]
 
 '''
@@ -311,6 +312,14 @@ ButtonDataBuffer = b""
 
 ButtonDataBuffer += ValtoHx(int(Variables["Timeout"]),1) #Timeout
 
+CommandData=b""
+for sequence in Sequences:
+	CommandData += sequence["Command"] #CommandData
+
+print("CommandData:", CommandData)
+
+ButtonDataBuffer += CommandData
+
 buttonIdx = {}
 bidx=0
 for button in Buttons:
@@ -319,20 +328,22 @@ for button in Buttons:
 	buttonIdx[b] = bidx 
 	bidx+=1
 
+cmdoff = 0
 for sequence in Sequences: #Struct Sequences
-	ButtonDataBuffer += ValtoHx(1 if sequence["Momentary"] else 0,1) #Momentart
+	ButtonDataBuffer += ValtoHx(1 if sequence["Momentary"] else 0,1) #Momentary
+	ButtonDataBuffer += ValtoHx(len(sequence["Command"]),1) #CommandLen
+	ButtonDataBuffer += ValtoHx(cmdoff,2) #CommandOffset
+	cmdoff += len(sequence["Command"])
 	ButtonDataBuffer += ValtoHx(len(sequence["Sequence"]),1) #NumCombos
 	for combo in sequence["Sequence"]: #Struct Combos
 		ButtonDataBuffer += ValtoHx(len(combo),1) #NumButtons
 		for button in combo: #Struct Buttons
 			ButtonDataBuffer += ValtoHx(buttonIdx[button],1) #ButtonIdx
 
-	ButtonDataBuffer += ValtoHx(len(sequence["Command"]),1) #CommandLen
-	ButtonDataBuffer += sequence["Command"] #Command
-
 FButtonData.write(ButtonDataBuffer)
 
-FDefines.write("-D NUM_SEQUENCES=" + str(len(Sequences)) + " ")
+FDefines.write("-D COMMAND_DATA_LEN=" + str(len(CommandData)) + " ")
 FDefines.write("-D NUM_BUTTONS=" + str(len(Buttons)) + " ")
+FDefines.write("-D NUM_SEQUENCES=" + str(len(Sequences)) + " ")
 
 print("Done ButtonData Gen", end="\n\n")

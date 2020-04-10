@@ -2,24 +2,35 @@
 #include "buttonCtl.h"
 
 u8 Timeout;
-// u8 NumSequences;
+u8 CommandData[COMMAND_DATA_LEN];
 Button Buttons[NUM_BUTTONS];
 Sequence Sequences[NUM_SEQUENCES];
 
 void InitButtons()
 {
 	u8 off = 0;
+	
 	Timeout = BUTTONDATA_ACC_8(off); off+=1;
+
+	for (u16 i = 0; i < COMMAND_DATA_LEN; i++)
+	{
+		CommandData[i] = BUTTONDATA_ACC_8(off); off+=1;
+	}
+
 	for (u8 b = 0; b < NUM_BUTTONS; b++)
 	{
 		Buttons[b].ButtonNum = BUTTONDATA_ACC_8(off); off+=1;
 	}
+
 	for (u8 s = 0; s < NUM_SEQUENCES; s++)
 	{
 		Sequences[s].ActiveCombo = 0;
 		Sequences[s].Momentary = BUTTONDATA_ACC_8(off); off+=1;
+
+		Sequences[s].CommandLen = BUTTONDATA_ACC_8(off); off+=1;
+		Sequences[s].Command = CommandData + BUTTONDATA_ACC_16(off); off+=1;
+
 		Sequences[s].NumCombos = BUTTONDATA_ACC_8(off); off+=1;
-		
 		for (u8 c = 0; c < Sequences[s].NumCombos; c++)
 		{
 			Sequences[s].Combos[c].Active = 0;
@@ -32,6 +43,11 @@ void InitButtons()
 			}	
 		}
 	}
+}
+
+void TriggerCmd(u8 *cmd, u8 len)
+{
+
 }
 
 void UpdateButtons()
@@ -82,7 +98,7 @@ void UpdateButtons()
 				if (Sequences[s].ActiveCombo == Sequences[s].NumCombos)
 				{ 
 					//Sequence Correct!
-
+					TriggerCmd(Sequences[s].Command, Sequences[s].CommandLen);
 					
 				}
 			}
