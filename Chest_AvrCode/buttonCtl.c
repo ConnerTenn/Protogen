@@ -12,7 +12,7 @@ void InitButtons()
 {
 	//Read offset: Flash data read offset
 	//Write offset: Offset into ButtonStructData for writing structures
-	u16 roff = 0; u8 *woff = ButtonStructData;
+	u8 *roff = (u8 *)BIN_BUTTONDATA_START; u8 *woff = ButtonStructData;
 	
 	Timeout = BUTTONDATA_ACC_8(roff); roff+=1;
 	// PRINT_VAL("Timeout:", Timeout);

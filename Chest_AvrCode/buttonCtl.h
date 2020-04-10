@@ -6,8 +6,8 @@ extern PROGMEM const char *const _binary_ButtonData_bin_start;
 extern PROGMEM const char *const _binary_ButtonData_bin_end;
 #define BIN_BUTTONDATA_START ((const PROGMEM u8 *const)(&_binary_ButtonData_bin_start))
 
-#define BUTTONDATA_ACC_8(off) ( (u8)(pgm_read_byte_near(BIN_BUTTONDATA_START+(off))) )
-#define BUTTONDATA_ACC_16(off) ( (u16)(pgm_read_word_near(BIN_BUTTONDATA_START+(off))) )
+#define BUTTONDATA_ACC_8(off) ( (u8)(pgm_read_byte_near(off)) )
+#define BUTTONDATA_ACC_16(off) ( (u16)(pgm_read_word_near(off)) )
 
 
 #define PRINT_VAL(txt, val) SerialTransmitStr(txt); SerialTransmitHexVal(val); SerialTransmitStr("\n"); SerialFlush();
