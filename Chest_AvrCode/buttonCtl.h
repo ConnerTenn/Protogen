@@ -98,7 +98,7 @@ extern u8 *LastCmd;
 extern u8 LastCmdLen;
 #endif
 
+// u8 ReadButton(u8 id);
 void InitButtons();
 void UpdateButtons();
-u8 ReadButton(u8 id);
 

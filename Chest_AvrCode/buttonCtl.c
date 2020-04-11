@@ -8,6 +8,8 @@ Button Buttons[NUM_BUTTONS];
 Combo *Combos[NUM_COMBOS];
 Sequence *Sequences[NUM_SEQUENCES];
 
+
+
 void InitButtons()
 {
 	//Read offset: Flash data read offset
@@ -114,6 +116,27 @@ void InitButtons()
 	}
 
 
+}
+
+inline u8 ReadButton(u8 id)
+{
+#define GET_INPUT(port, bit) (PIN##port & (1<<(bit)))
+
+	//See Pin Mapping in buttonCtl.h
+	u8 v = 0;
+	if (id<=5)
+	{
+		v = GET_INPUT(B, id);
+	}
+	else if (id<=11)
+	{
+		v = GET_INPUT(C, id-6);
+	}
+	else if (id<=19)
+	{
+		v = GET_INPUT(D, id-12);
+	}
+	return !v;
 }
 
 #ifdef DEBUG
@@ -226,23 +249,4 @@ void UpdateButtons()
 	}
 }
 
-u8 ReadButton(u8 id)
-{
-#define GET_INPUT(port, bit) (PIN##port & (1<<(bit)))
 
-	//See Pin Mapping in buttonCtl.h
-	u8 v = 0;
-	if (id<=5)
-	{
-		v = GET_INPUT(B, id);
-	}
-	else if (id<=11)
-	{
-		v = GET_INPUT(C, id-6);
-	}
-	else if (id<=19)
-	{
-		v = GET_INPUT(D, id-12);
-	}
-	return !v;
-}
