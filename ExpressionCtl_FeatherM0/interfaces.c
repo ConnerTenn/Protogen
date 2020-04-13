@@ -77,6 +77,7 @@ void IntiSPI()
 
 
 
+#ifdef CHARLIE
 	// == SERCOM1 ==
 
 	//Enable SERCOM1 in Power Manager
@@ -141,20 +142,17 @@ void IntiSPI()
 	//Enable SPI
 	SERCOM1->SPI.CTRLA.bit.ENABLE = 1;
 	while (SERCOM1->SPI.SYNCBUSY.bit.ENABLE) {}
+#endif
+
 }
 
+#ifdef CHARLIE
 void SPITransmitCOM1(const u8 data)
 {
 	// while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
 	SERCOM1->SPI.DATA.reg = data; //Data Out
 	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 }
-void SPITransmitCOM4(const u8 data)
-{
-	SERCOM4->SPI.DATA.reg = data; //Data Out
-	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
-}
-
 void SPITransmit16COM1(const u16 data)
 {
 	SERCOM1->SPI.DATA.reg = (data>>8); //Data Out
@@ -163,6 +161,13 @@ void SPITransmit16COM1(const u16 data)
 	while (!SERCOM1->SPI.INTFLAG.bit.DRE) {} //Wait for buffer empty
 	SERCOM1->SPI.DATA.reg = (data&0xFF); //Data Out
 	while (!SERCOM1->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+}
+#endif
+
+void SPITransmitCOM4(const u8 data)
+{
+	SERCOM4->SPI.DATA.reg = data; //Data Out
+	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
 }
 void SPITransmit16COM4(const u16 data)
 {
@@ -341,6 +346,7 @@ u8 SerialAvail()
 // #define DISPSEL(cs) ENBITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (1<<2))
 // #define DISPDESEL(cs) DABITS(PORTC, 1<<(cs)) //(PORTB=(PORTB&(~(1<<2))) | (0<<2))
 
+#ifdef CHARLIE
 void Max7219InitCOM1(u8 numSegments)
 {
 	Max7219SendCmdCOM1(0x0C00, numSegments); //Disable
@@ -357,23 +363,6 @@ void Max7219InitCOM1(u8 numSegments)
 
 	Max7219SendCmdCOM1(0x0C01, numSegments);  //Enable
 }
-void Max7219InitCOM4(u8 numSegments)
-{
-	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
-	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
-	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
-	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
-	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
-
-	//Blank Display
-	for (u16 l=1; l<=8; l++)
-	{
-		Max7219SendCmdCOM4(l<<8, numSegments); 
-	}
-
-	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
-}
-
 void Max7219RefreshCOM1(u8 numSegments)
 {
 	Max7219SendCmdCOM1(0x0F00, numSegments); //Test off
@@ -383,16 +372,6 @@ void Max7219RefreshCOM1(u8 numSegments)
 
 	Max7219SendCmdCOM1(0x0C01, numSegments);  //Enable
 }
-void Max7219RefreshCOM4(u8 numSegments)
-{
-	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
-	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
-	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
-	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
-
-	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
-}
-
 void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
 {
 	PORT->Group[0].OUTCLR.reg = PORT_PA07;
@@ -402,17 +381,6 @@ void Max7219SendCmdCOM1(u16 cmd, u8 numSegments)
 	}
 	PORT->Group[0].OUTSET.reg = PORT_PA07;
 }
-void Max7219SendCmdCOM4(u16 cmd, u8 numSegments)
-{
-	PORT->Group[1].OUTCLR.reg = PORT_PB02;
-	for (u8 d=0; d<numSegments; d++) 
-	{ 
-		SPITransmit16COM4(cmd);
-	}
-	PORT->Group[1].OUTSET.reg = PORT_PB02;
-}
-
-
 void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 {
 	u16 i[numDisplays]; //Index into data. Will increment independently for every display
@@ -435,7 +403,42 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 		PORT->Group[0].OUTSET.reg = PORT_PA07;
 	}
 }
+#endif
 
+void Max7219InitCOM4(u8 numSegments)
+{
+	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
+	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
+
+	//Blank Display
+	for (u16 l=1; l<=8; l++)
+	{
+		Max7219SendCmdCOM4(l<<8, numSegments); 
+	}
+
+	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+}
+void Max7219RefreshCOM4(u8 numSegments)
+{
+	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
+
+	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+}
+void Max7219SendCmdCOM4(u16 cmd, u8 numSegments)
+{
+	PORT->Group[1].OUTCLR.reg = PORT_PB02;
+	for (u8 d=0; d<numSegments; d++) 
+	{ 
+		SPITransmit16COM4(cmd);
+	}
+	PORT->Group[1].OUTSET.reg = PORT_PB02;
+}
 void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays)
 {
 	u16 i[numDisplays]; //Index into data. Will increment independently for every display

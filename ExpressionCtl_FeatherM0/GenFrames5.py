@@ -3,19 +3,36 @@
 import os
 from PIL import Image
 
+CHARLIE=0
+JESS=1
+
 F=None
 FFrames="Frames"
 FFrameData="FrameData.bin"
 FFrameManifest="FrameManifest.txt"
-Displays=[
-	#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
-	{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"YX"},
-	{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":""},
-	{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":"XY"},
-	{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
-	{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"X"},
-	{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":""},
-]
+Displays=[]
+if CHARLIE:
+	Displays=[
+		#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
+		{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"YX"},
+		{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":""},
+		{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":"XY"},
+		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
+		{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"X"},
+		{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":""},
+	]
+if JESS:
+	Displays=[
+		#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
+		{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"X"},
+		{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":"XY"},
+		{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":""},
+		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
+		{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"XY"},
+		{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":"X"},
+		{"Name":"Diamond", "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":""},
+		{"Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"},
+	]
 
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
@@ -165,6 +182,10 @@ def Parse():
 	global ManifestStr
 
 	Expressions = os.listdir(FFrames)
+	
+	#Filter out folders with _rem
+	Expressions = [ expr for expr in Expressions if (not ("_rem" in expr)) and (not (".keep" in expr)) ]
+
 	for expr in Expressions:
 		start = os.listdir(FFrames + "/" + expr + "/start")
 		loop = os.listdir(FFrames + "/" + expr + "/loop")
@@ -225,15 +246,15 @@ def Parse():
 			ManifestStr += Displays[i]["Name"] + "={:<5d}".format(endFrameData[i]["Index"]) + " "
 		ManifestStr += "\n\n"
 
-		#Print data
-		i=0
-		for f in FrameData:
-			print(str(i) + "(" + str(f["Index"]) + ") " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> [" + str(f["NextIdx"]) + "] ", end="")
-			print(FrameData[f["NextIdx"]]["Name"] )
-			i+=1
-
 
 Parse()
+
+#Print data
+i=0
+for f in FrameData:
+	print(str(i) + "(" + str(f["Index"]) + ") " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> [" + str(f["NextIdx"]) + "] ", end="")
+	print(FrameData[f["NextIdx"]]["Name"] )
+	i+=1
 
 print()
 print("Number of Frames: " +str(len(Frames)))
@@ -269,6 +290,7 @@ for imgdat in Frames:
 
 print("Header: " + str(len(HeaderStr)) + "B")
 print("Frames: " + str(len(FrameStr)) + "B")
+print("Total: " + str(len(HeaderStr) + len(FrameStr)) + "B")
 
 print("Writing Output Files")
 FFrameData.write(HeaderStr+FrameStr)

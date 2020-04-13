@@ -8,9 +8,11 @@
 
 //Page 135
 void IntiSPI();
+#ifdef CHARLIE
 void SPITransmitCOM1(const u8 data);
-void SPITransmitCOM4(const u8 data);
 void SPITransmit16COM1(const u16 data);
+#endif
+void SPITransmitCOM4(const u8 data);
 void SPITransmit16COM4(const u16 data);
 
 // #define SPI_TRANSMIT(data) 
@@ -40,18 +42,18 @@ typedef struct
 	u16 QueuedIndex;
 } Max7219;
 
+#ifdef CHARLIE
 void Max7219InitCOM1(u8 numSegments);
-void Max7219InitCOM4(u8 numSegments);
-
 void Max7219RefreshCOM1(u8 numSegments);
-void Max7219RefreshCOM4(u8 numSegments);
-
 void Max7219SendCmdCOM1(u16 cmd, u8 numSegments);
-void Max7219SendCmdCOM4(u16 cmd, u8 numSegments);
-
 void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays);
+#endif
+
+void Max7219InitCOM4(u8 numSegments);
+void Max7219RefreshCOM4(u8 numSegments);
+void Max7219SendCmdCOM4(u16 cmd, u8 numSegments);
 void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays);
 
-void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displaysCom4, u8 numDisplaysCom4);
+// void Max7219SendFrames(Max7219 *displaysCom1, u8 numDisplaysCom1, Max7219 *displaysCom4, u8 numDisplaysCom4);
 
 #endif

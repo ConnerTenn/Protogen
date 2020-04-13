@@ -93,6 +93,7 @@ VBUS     _          _         _              _          _          _           _
 //MISO: DDRA12 SERCOM4 PAD[0]
 //SCK:  DDRB11 SERCOM4 PAD[3]
 
+#ifdef CHARLIE
 Max7219 DisplayListCOM1[] = 
 	{//Must be listed in the order of connection
 		{.NumSegments=2, .FrameIndex=11, .FrameDelay=-1, .QueuedIndex=-1}, //Eye
@@ -107,14 +108,29 @@ Max7219 DisplayListCOM4[] =
 		{.NumSegments=4, .FrameIndex=7, .FrameDelay=-1}, //Mouth
 	};
 
+#endif
+#ifdef JESS
+Max7219 DisplayListCOM4[] = 
+	{//Must be listed in the order of connection
+		{.NumSegments=4, .FrameIndex=9,  .FrameDelay=-1}, //Right Mouth
+		{.NumSegments=2, .FrameIndex=15, .FrameDelay=-1}, //Center Mouth
+		{.NumSegments=4, .FrameIndex=12, .FrameDelay=-1}, //Left Mouth
+		{.NumSegments=2, .FrameIndex=13, .FrameDelay=-1}, //Left Eye
+		{.NumSegments=1, .FrameIndex=11, .FrameDelay=-1}, //Left Nose
+		{.NumSegments=1, .FrameIndex=10, .FrameDelay=-1}, //Right Nose
+		{.NumSegments=2, .FrameIndex=8, .FrameDelay=-1}, //Right Eye
+		{.NumSegments=2, .FrameIndex=14, .FrameDelay=-1}, //Diamond
+	};
+#endif
 // Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
 	
 
+#ifdef CHARLIE
 const u8 NumDisplaysCOM1 = sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]);
+u8 TotalSegmentsCOM1;
+#endif
 const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
-
-
-u8 TotalSegmentsCOM1, TotalSegmentsCOM4;
+u8 TotalSegmentsCOM4;
 
 u16 RefreshTimer;
 
@@ -181,13 +197,17 @@ void TC3_Handler()
 
 		if (RefreshTimer == 0)
 		{
+#ifdef CHARLIE
 			Max7219RefreshCOM1(TotalSegmentsCOM1);
+#endif
 			Max7219RefreshCOM4(TotalSegmentsCOM4);
 			RefreshTimer = REFRESH_INTERVAL;
 		}
 		else { RefreshTimer--; }
 
+#ifdef CHARLIE
 		Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
+#endif
 		Max7219SendFramesCOM4(DisplayListCOM4, NumDisplaysCOM4);
 		// Max7219SendFrames(DisplayListCOM1, NumDisplaysCOM1, DisplayListCOM1, NumDisplaysCOM1);
 
@@ -196,6 +216,7 @@ void TC3_Handler()
 	}
 	if (TC3->COUNT16.INTFLAG.bit.MC1) //1kHz Timer @50% Phase offset
 	{
+#ifdef CHARLIE
 		for (u8 i=0; i<NumDisplaysCOM1; i++)
 		{
 			if (DisplayListCOM1[i].FrameDelay!=-1)
@@ -208,6 +229,7 @@ void TC3_Handler()
 				DisplayListCOM1[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameNext;
 			}
 		}
+#endif
 		for (u8 i=0; i<NumDisplaysCOM4; i++)
 		{
 			if (DisplayListCOM4[i].FrameDelay!=-1)
@@ -267,13 +289,14 @@ int main()
 {
 	PORT->Group[0].DIRSET.reg = PORT_PA02; //Out
 
-
+#ifdef CHARLIE
 	TotalSegmentsCOM1=0;
 	for (u8 i=0; i<NumDisplaysCOM1; i++)
 	{
 		TotalSegmentsCOM1 += DisplayListCOM1[i].NumSegments;
 		DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
 	}
+#endif
 	TotalSegmentsCOM4=0;
 	for (u8 i=0; i<NumDisplaysCOM4; i++)
 	{
