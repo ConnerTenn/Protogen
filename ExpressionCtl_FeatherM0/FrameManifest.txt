@@ -1,5 +1,0 @@
-Idle2
-  Start: RightEye=8     RightMouth=9     RightNose=10    LeftNose=11    LeftMouth=12    LeftEye=13    Diamond=14    CenterMouth=15    
-  Loop:  RightEye=104   RightMouth=105   RightNose=106   LeftNose=107   LeftMouth=108   LeftEye=109   Diamond=110   CenterMouth=111   
-  End:   RightEye=205   RightMouth=206   RightNose=207   LeftNose=208   LeftMouth=209   LeftEye=210   Diamond=211   CenterMouth=212   
-

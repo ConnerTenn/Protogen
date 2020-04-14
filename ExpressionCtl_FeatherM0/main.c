@@ -238,8 +238,8 @@ void TC3_Handler()
 			}
 			if (DisplayListCOM4[i].FrameDelay==0)
 			{
-				DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
 				DisplayListCOM4[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameNext;
+				DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
 			}
 		}
 

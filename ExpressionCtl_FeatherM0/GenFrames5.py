@@ -30,7 +30,7 @@ if JESS:
 		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
 		{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"XY"},
 		{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":"X"},
-		{"Name":"Diamond", "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":""},
+		{"Name":"Diamond", "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":"XY"},
 		{"Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"},
 	]
 
