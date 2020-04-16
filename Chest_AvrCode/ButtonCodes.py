@@ -391,6 +391,8 @@ for sequence in Sequences: #Struct Sequences
 	print("\tCommandOff:", cmdoff)
 	cmdoff += len(sequence["Command"])
 
+	print("\t[ Command:", sequence["Command"], "]")
+
 	ButtonDataBuffer += ValtoHx(len(sequence["ComboIdxs"]),1) #NumCombos
 	print("\tNumCombos:", len(sequence["ComboIdxs"]))
 
