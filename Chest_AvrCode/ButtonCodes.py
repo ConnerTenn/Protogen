@@ -158,19 +158,30 @@ for expr in Expressions:
 
 
 # u8 Display, u16 Index, u8 checksum
-def GenDisplayUpdateCmd(display, index):
-	checksum = ChecksumInt_u8(display, 1) ^ ChecksumInt_u8(index, 2)
-	return ValtoHx(display, 1) + ValtoHx(index, 2) + ValtoHx(checksum, 1)
+# def GenDisplayUpdateCmd(display, index):
+# 	checksum = ChecksumInt_u8(display, 1) ^ ChecksumInt_u8(index, 2)
+# 	return ValtoHx(display, 1) + ValtoHx(index, 2) + ValtoHx(checksum, 1)
+
+# u8 Display, u16 Index, u8 checksum
+def GenUpdateDisplaysCmd(exprname):
+	cmd = b''
+	d = 0
+	for disp in Expressions[exprname]["Start"]:
+		checksum = ChecksumInt_u8(disp, 1) ^ ChecksumInt_u8(d, 2)
+		cmd += ValtoHx(disp, 1) + ValtoHx(d, 2) + ValtoHx(checksum, 1)
+		d+=1
+	return cmd
 
 #Convert Expression name to hex command data
 def GetCmdFromExpr(exprname):
 	cmd = b""
 
 	if exprname in Expressions:
-		d = 0
-		for disp in Expressions[exprname]["Start"]:
-			cmd += GenDisplayUpdateCmd(disp, d)
-			d+=1
+		cmd += GenUpdateDisplaysCmd(exprname)
+		# d = 0
+		# for disp in Expressions[exprname]["Start"]:
+		# 	cmd += GenDisplayUpdateCmd(disp, d)
+		# 	d+=1
 	else:
 		return StrtoHx("["+exprname+"]")
 
