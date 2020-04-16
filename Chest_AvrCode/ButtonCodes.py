@@ -158,19 +158,34 @@ for expr in Expressions:
 
 
 # u8 Display, u16 Index, u8 checksum
-def GenDisplayUpdateCmd(display, index):
-	checksum = ChecksumInt_u8(display, 1) ^ ChecksumInt_u8(index, 2)
-	return ValtoHx(display, 1) + ValtoHx(index, 2) + ValtoHx(checksum, 1)
+def GenCmd(cmdtype):
+	return ValtoHx(cmdtype | 0x80, 1)
+
+def GenDisplayCmd(cmdtype, display, index, endindex):
+	return GenCmd(cmdtype) + ValtoHx(display, 1) + ValtoHx(index, 2) + ValtoHx(endindex, 2)
+
+def GenDisplaySetImmediateCmd(display, index, endindex):
+	return GenDisplayCmd(0x1, display, index, endindex)
+
+def GenDisplayQueueCmd(display, index, endindex):
+	return GenDisplayCmd(0x1, display, index, endindex)
+
+def GenDisplayLoadQueuedImmediateCmd():
+	return GenCmd(0x2)
+
+def GenTransitionToQueuedCmd():
+	return GenCmd(0x3)
 
 #Convert Expression name to hex command data
 def GetCmdFromExpr(exprname):
 	cmd = b""
 
 	if exprname in Expressions:
-		d = 0
-		for disp in Expressions[exprname]["Start"]:
-			cmd += GenDisplayUpdateCmd(disp, d)
-			d+=1
+		for d in range(0, len(Expressions[exprname]["Start"])):
+		 	cmd += GenDisplayQueueCmd(d, Expressions[exprname]["Start"][d], Expressions[exprname]["End"][d])
+
+		cmd += GenTransitionToQueuedCmd()
+
 	else:
 		return StrtoHx("["+exprname+"]")
 
