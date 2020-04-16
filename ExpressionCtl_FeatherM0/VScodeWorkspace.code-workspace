@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"random": "c",
+			"sam.h": "c",
+			"variant.h": "c",
+			"samd21.h": "c",
+			"samd21g18a.h": "c",
+			"samd.h": "c"
+		}
+	}
+}

@@ -1,0 +1,8 @@
+{
+	"files.associations": {
+		"interrupt.h": "c",
+		"delay.h": "c",
+		"interfaces.h": "c",
+		"globals.h": "c"
+	}
+}

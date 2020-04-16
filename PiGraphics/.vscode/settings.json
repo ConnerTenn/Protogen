@@ -1,0 +1,8 @@
+{
+	"files.associations": {
+		"types.h": "c",
+		"videodev2.h": "c",
+		"libv4l2.h": "c",
+		"math.h": "c"
+	}
+}
