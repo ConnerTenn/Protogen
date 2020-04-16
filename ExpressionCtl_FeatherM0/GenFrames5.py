@@ -44,6 +44,8 @@ FFrameManifest=f
 
 
 def Hx(val, length):
+	if val < 0:
+		val = (2**(8*length) + val)
 	return val.to_bytes(length, byteorder="little")
 
 def StrtoHx(string):
@@ -227,7 +229,7 @@ def Parse():
 			lastofstart[fi]["NextIdx"] = loopFrameData[fi]["Index"]
 			lastofloop[fi]["NextIdx"] = loopFrameData[fi]["Index"]
 			# print(loopFrameData[fi]["Index"])
-			lastofend[fi]["NextIdx"] = fi
+			lastofend[fi]["NextIdx"] = -1 #Set to invalid Index  #fi
 		
 
 		FrameData += startFrameData
