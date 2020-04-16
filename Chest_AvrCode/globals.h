@@ -5,7 +5,7 @@
 #include <avr/io.h>
 #include <string.h>
 
-#define DEBUG
+// #define DEBUG
 
 #define CEILDIV(n,d) ( ((int)(n)) / ((int)(d)) + ( ((int)(n))%((int)(d)) ? 1 : 0 ) )
 
