@@ -38,8 +38,10 @@ typedef struct
 {
 	u8 NumSegments;
 	u16 FrameIndex;
+	u16 EndIndex;
 	u16 FrameDelay;
 	u16 QueuedIndex;
+	u16 QueuedEndIndex;
 } Max7219;
 
 #ifdef CHARLIE
