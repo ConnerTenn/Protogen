@@ -152,9 +152,9 @@ typedef struct
 u8 CmdBuffer[MAX_CMD_LEN];
 u8 CmdFill=0;
 
-void ParseCmd(u8 numChars)
+void ParseCmd()
 {
-	for (u8 i=0; i<numChars; i++)
+	while (SerialAvail())
 	{
 		static u8 cmdinprogress = 0;
 		u8 ch = SerialGetCh();
@@ -169,6 +169,11 @@ void ParseCmd(u8 numChars)
 		{ //Command in progress
 			CmdBuffer[CmdFill++] = ch;
 		}
+		if (CmdFill > MAX_CMD_LEN) 
+		{
+			cmdinprogress = 0;
+			CmdFill=0;
+		}
 
 		switch (((Command *)CmdBuffer)->Type)
 		{
@@ -181,6 +186,7 @@ void ParseCmd(u8 numChars)
 				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
 			}
 			cmdinprogress = 0;
+			CmdFill=0;
 			break;
 		case 0x1: //Display Queue
 			if (CmdFill == sizeof(DisplaySet))
@@ -190,6 +196,7 @@ void ParseCmd(u8 numChars)
 				DisplayListCOM4[d].QueuedEndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
 			}
 			cmdinprogress = 0;
+			CmdFill=0;
 			break;
 		case 0x2: //Display Load Queued Immediate
 			for (u8 d = 0; d < NumDisplaysCOM4; d++)
@@ -199,6 +206,7 @@ void ParseCmd(u8 numChars)
 				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
 			}
 			cmdinprogress = 0;
+			CmdFill=0;
 			break;
 		case 0x3: //Display Transition to Queued
 			for (u8 d = 0; d < NumDisplaysCOM4; d++)
@@ -207,12 +215,12 @@ void ParseCmd(u8 numChars)
 				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
 			}
 			cmdinprogress = 0;
+			CmdFill=0;
 			break;
 		default:
 			break;
 		}
 
-		CmdFill=0;
 	}
 }
 
@@ -220,12 +228,9 @@ void TC3_Handler()
 {
 	if (TC3->COUNT16.INTFLAG.bit.MC0) //1kHz Timer
 	{
-		PORT->Group[0].OUTTGL.reg = PORT_PA02;
-
-		u8 numChars;
-		if ((numChars = SerialAvail()))
+		if (SerialAvail())
 		{
-			ParseCmd(numChars);
+			ParseCmd();
 		}
 
 		if (RefreshTimer == 0)
@@ -324,6 +329,7 @@ void InitTimers()
 
 	//Enable TC3 interrupts
 	NVIC_EnableIRQ(TC3_IRQn);
+	NVIC_SetPriority(TC3_IRQn, 1);
 
 	//Enable Intterupts
 	TC3->COUNT16.INTENSET.bit.MC0 = 1;

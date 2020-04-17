@@ -289,8 +289,10 @@ void IntiUART()
 
 	//Enable SERCOM0 interrupts
 	NVIC_EnableIRQ(SERCOM0_IRQn);
+	NVIC_SetPriority(SERCOM0_IRQn, 0);
 
 	//Enable interrupts
+	SERCOM0->USART.INTENCLR.reg = 0xFF;
 	SERCOM0->USART.INTENSET.reg = SERCOM_USART_INTENSET_RXC; //Receive complete 
 }
 
