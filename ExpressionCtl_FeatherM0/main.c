@@ -112,14 +112,14 @@ Max7219 DisplayListCOM4[] =
 #ifdef JESS
 Max7219 DisplayListCOM4[] = 
 	{//Must be listed in the order of connection
-		{.NumSegments=4, .FrameIndex=9,  .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Mouth
-		{.NumSegments=2, .FrameIndex=15, .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Center Mouth
-		{.NumSegments=4, .FrameIndex=12, .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Mouth
-		{.NumSegments=2, .FrameIndex=13, .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Eye
-		{.NumSegments=1, .FrameIndex=11, .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Nose
-		{.NumSegments=1, .FrameIndex=10, .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Nose
-		{.NumSegments=2, .FrameIndex=8,  .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Eye
-		{.NumSegments=2, .FrameIndex=14, .EndIndex=-1, .FrameDelay=-1, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Diamond
+		{.NumSegments=4, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Mouth
+		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Center Mouth
+		{.NumSegments=4, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Mouth
+		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Eye
+		{.NumSegments=1, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Nose
+		{.NumSegments=1, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Nose
+		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Eye
+		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Diamond
 	};
 #endif
 // Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
@@ -158,47 +158,58 @@ void ParseCmd()
 	{
 		static u8 cmdinprogress = 0;
 		u8 ch = SerialGetCh();
+		// SerialTransmitByte(ch);
+
 		if (!cmdinprogress)
 		{
 			if (ch & 0x80)
 			{
 				cmdinprogress = 1;
+				// CmdFill=0;
+				SerialTransmit((u8 *)"prg", 3);
 			}
 		}
 		if (cmdinprogress)
 		{ //Command in progress
 			CmdBuffer[CmdFill++] = ch;
+				SerialTransmit((u8 *)"fil", 3);
 		}
 		if (CmdFill > MAX_CMD_LEN) 
 		{
 			cmdinprogress = 0;
 			CmdFill=0;
+			SerialTransmit((u8 *)"ovf", 3);
 		}
 
-		switch (((Command *)CmdBuffer)->Type)
+		switch (((Command *)CmdBuffer)->Type & 0x7F)
 		{
 		case 0x0: //Display Set Immediate
+			// SerialTransmit((u8 *)"cm0", 3);
 			if (CmdFill == sizeof(DisplaySet))
 			{
 				u8 d = ((DisplaySet *)CmdBuffer)->Display;
 				DisplayListCOM4[d].FrameIndex = ((DisplaySet *)CmdBuffer)->Index;
 				DisplayListCOM4[d].EndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
 				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+				cmdinprogress = 0;
+				CmdFill=0;
 			}
-			cmdinprogress = 0;
-			CmdFill=0;
 			break;
 		case 0x1: //Display Queue
+			SerialTransmit((u8 *)"c1:", 3);
+			// SerialTransmit(&CmdFill, 1);
 			if (CmdFill == sizeof(DisplaySet))
 			{
+				SerialTransmit((u8 *)"rc1", 3);
 				u8 d = ((DisplaySet *)CmdBuffer)->Display;
 				DisplayListCOM4[d].QueuedIndex = ((DisplaySet *)CmdBuffer)->Index;
 				DisplayListCOM4[d].QueuedEndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
+				cmdinprogress = 0;
+				CmdFill=0;
 			}
-			cmdinprogress = 0;
-			CmdFill=0;
 			break;
 		case 0x2: //Display Load Queued Immediate
+			// SerialTransmit((u8 *)"cm2", 3);
 			for (u8 d = 0; d < NumDisplaysCOM4; d++)
 			{
 				DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
@@ -209,10 +220,18 @@ void ParseCmd()
 			CmdFill=0;
 			break;
 		case 0x3: //Display Transition to Queued
+			// SerialTransmit((u8 *)"cm3", 3);
 			for (u8 d = 0; d < NumDisplaysCOM4; d++)
 			{
 				DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].EndIndex;
-				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+				if (DisplayListCOM4[d].FrameIndex != (u16)-1)
+				{
+					DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+				}
+				else
+				{
+					DisplayListCOM4[d].FrameDelay = 0;
+				}
 			}
 			cmdinprogress = 0;
 			CmdFill=0;
@@ -270,21 +289,24 @@ void TC3_Handler()
 #endif
 		for (u8 i=0; i<NumDisplaysCOM4; i++)
 		{
-			if (DisplayListCOM4[i].FrameDelay!=-1)
+			if (DisplayListCOM4[i].FrameDelay && DisplayListCOM4[i].FrameDelay!=-1)
 			{
 				DisplayListCOM4[i].FrameDelay--;
 			}
 			if (DisplayListCOM4[i].FrameDelay==0)
 			{
-				DisplayListCOM4[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameNext;
-
 				//If the frame is valid
+				if (DisplayListCOM4[i].FrameIndex != (u16)-1)
+				{
+					DisplayListCOM4[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameNext;
+				}
 				if (DisplayListCOM4[i].FrameIndex != (u16)-1)
 				{
 					DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
 				}
 				else
 				{
+					// SerialTransmit((u8 *)"NEXT", 4);
 					//If the fram is not valid, load the queued index
 					DisplayListCOM4[i].FrameIndex = DisplayListCOM4[i].QueuedIndex;
 					DisplayListCOM4[i].EndIndex = DisplayListCOM4[i].QueuedEndIndex;
@@ -374,7 +396,7 @@ int main()
 	u8 i=0; (void)i;
 	while (1)
 	{
-		PORT->Group[0].OUTTGL.reg = PORT_PA02;
+		// PORT->Group[0].OUTTGL.reg = PORT_PA02;
 	}
 
 	return 0;

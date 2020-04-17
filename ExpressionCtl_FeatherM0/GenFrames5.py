@@ -24,14 +24,14 @@ if CHARLIE:
 if JESS:
 	Displays=[
 		#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
-		{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"X"},
 		{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":"XY"},
-		{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":""},
-		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
+		{"Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"},
 		{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"XY"},
 		{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":"X"},
+		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
+		{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":""},
+		{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"X"},
 		{"Name":"Diamond", "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":"XY"},
-		{"Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"},
 	]
 
 try: f = open(FFrameData, 'wb')
@@ -255,7 +255,8 @@ Parse()
 i=0
 for f in FrameData:
 	print(str(i) + "(" + str(f["Index"]) + ") " + f["Name"] + " [" + str(f["FrameIdx"]) + "] " + str(f["Delay"]) + "ms -> [" + str(f["NextIdx"]) + "] ", end="")
-	print(FrameData[f["NextIdx"]]["Name"] )
+	if f["NextIdx"]!=-1: print(FrameData[f["NextIdx"]]["Name"] )
+	else: print()
 	i+=1
 
 print()
