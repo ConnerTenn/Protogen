@@ -211,7 +211,7 @@ volatile u8 RX_Head=0, RX_Tail=0;
 
 void SERCOM0_Handler()
 {
-	PORT->Group[0].OUTTGL.reg = PORT_PA02;
+	// PORT->Group[0].OUTTGL.reg = PORT_PA02;
 	if (SERCOM0->USART.INTFLAG.bit.RXC) //Receive Complete
 	{
 		RX_Ring[RX_Head] = SERCOM0->USART.DATA.reg;

@@ -165,29 +165,25 @@ void ParseCmd()
 			if (ch & 0x80)
 			{
 				cmdinprogress = 1;
-				// CmdFill=0;
-				SerialTransmit((u8 *)"prg", 3);
 			}
 		}
 		if (cmdinprogress)
 		{ //Command in progress
-			CmdBuffer[CmdFill++] = ch;
-				SerialTransmit((u8 *)"fil", 3);
+			CmdBuffer[CmdFill++] = ch; //Fill command buffer
 		}
-		if (CmdFill > MAX_CMD_LEN) 
+		if (CmdFill > MAX_CMD_LEN) //Should never occur
 		{
 			cmdinprogress = 0;
 			CmdFill=0;
-			SerialTransmit((u8 *)"ovf", 3);
 		}
 
 		switch (((Command *)CmdBuffer)->Type & 0x7F)
 		{
 		case 0x0: //Display Set Immediate
-			// SerialTransmit((u8 *)"cm0", 3);
 			if (CmdFill == sizeof(DisplaySet))
 			{
 				u8 d = ((DisplaySet *)CmdBuffer)->Display;
+				//Assign the desplays immediately
 				DisplayListCOM4[d].FrameIndex = ((DisplaySet *)CmdBuffer)->Index;
 				DisplayListCOM4[d].EndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
 				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
@@ -196,12 +192,10 @@ void ParseCmd()
 			}
 			break;
 		case 0x1: //Display Queue
-			SerialTransmit((u8 *)"c1:", 3);
-			// SerialTransmit(&CmdFill, 1);
 			if (CmdFill == sizeof(DisplaySet))
 			{
-				SerialTransmit((u8 *)"rc1", 3);
 				u8 d = ((DisplaySet *)CmdBuffer)->Display;
+				//Queue the next displays
 				DisplayListCOM4[d].QueuedIndex = ((DisplaySet *)CmdBuffer)->Index;
 				DisplayListCOM4[d].QueuedEndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
 				cmdinprogress = 0;
@@ -209,9 +203,9 @@ void ParseCmd()
 			}
 			break;
 		case 0x2: //Display Load Queued Immediate
-			// SerialTransmit((u8 *)"cm2", 3);
 			for (u8 d = 0; d < NumDisplaysCOM4; d++)
 			{
+				//Load all of the queued displays now (no transition)
 				DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
 				DisplayListCOM4[d].EndIndex = DisplayListCOM4[d].QueuedEndIndex;
 				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
@@ -220,16 +214,17 @@ void ParseCmd()
 			CmdFill=0;
 			break;
 		case 0x3: //Display Transition to Queued
-			// SerialTransmit((u8 *)"cm3", 3);
 			for (u8 d = 0; d < NumDisplaysCOM4; d++)
 			{
+				//Set each display to transition to the end animation
 				DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].EndIndex;
-				if (DisplayListCOM4[d].FrameIndex != (u16)-1)
+				if (DisplayListCOM4[d].FrameIndex != (u16)-1) //If the frame is valid. set the delay
 				{
 					DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
 				}
 				else
 				{
+					//Set no delay so that the next frame can be reached immediately
 					DisplayListCOM4[d].FrameDelay = 0;
 				}
 			}
@@ -295,18 +290,19 @@ void TC3_Handler()
 			}
 			if (DisplayListCOM4[i].FrameDelay==0)
 			{
-				//If the frame is valid
+				//If the frame is valid, move to the next frame
 				if (DisplayListCOM4[i].FrameIndex != (u16)-1)
 				{
 					DisplayListCOM4[i].FrameIndex=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameNext;
 				}
+				//If the next frame is valid
 				if (DisplayListCOM4[i].FrameIndex != (u16)-1)
 				{
+					//Set the delay
 					DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
 				}
 				else
 				{
-					// SerialTransmit((u8 *)"NEXT", 4);
 					//If the fram is not valid, load the queued index
 					DisplayListCOM4[i].FrameIndex = DisplayListCOM4[i].QueuedIndex;
 					DisplayListCOM4[i].EndIndex = DisplayListCOM4[i].QueuedEndIndex;
