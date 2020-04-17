@@ -211,23 +211,24 @@ volatile u8 RX_Head=0, RX_Tail=0;
 
 void SERCOM0_Handler()
 {
-	// PORT->Group[0].OUTTGL.reg = PORT_PA02;
+	PORT->Group[0].OUTTGL.reg = PORT_PA02;
 	if (SERCOM0->USART.INTFLAG.bit.RXC) //Receive Complete
 	{
 		RX_Ring[RX_Head] = SERCOM0->USART.DATA.reg;
 		if (RX_Head+(u8)1 == RX_Tail) { RX_Tail++; }
 		RX_Head++;
 	}
-	if (SERCOM0->USART.INTFLAG.bit.TXC) //Transmit Complete
-	{
-		TX_Ongoing = 0;
-		SERCOM0->USART.INTFLAG.reg |= SERCOM_USART_INTFLAG_TXC; //Clear Transmit complete flag
-		SERCOM0->USART.INTENCLR.bit.TXC = 1;
-	}
-	if (SERCOM0->USART.INTFLAG.bit.DRE) //Data Register Empty
+	// else if (SERCOM0->USART.INTFLAG.bit.TXC) //Transmit Complete
+	// {
+	// 	TX_Ongoing = 0;
+	// 	SERCOM0->USART.INTFLAG.reg |= SERCOM_USART_INTFLAG_TXC; //Clear Transmit complete flag
+	// 	// SERCOM0->USART.INTENCLR.bit.TXC = 1;
+	// 	SERCOM0->USART.INTENCLR.bit.DRE = 1;
+	// }
+	else if (SERCOM0->USART.INTFLAG.bit.DRE) //Data Register Empty
 	{
 		if (TX_Tail != TX_Head) { SERCOM0->USART.DATA.reg = TX_Ring[TX_Tail++]; }
-		else { SERCOM0->USART.INTENCLR.bit.DRE = 1; SERCOM0->USART.INTENSET.bit.TXC = 1;  }
+		else { SERCOM0->USART.INTENCLR.reg = SERCOM_USART_INTENCLR_DRE; TX_Ongoing = 0; /*SERCOM0->USART.INTENSET.bit.TXC = 1;*/ }
 	}
 }
 
@@ -292,8 +293,8 @@ void IntiUART()
 	NVIC_SetPriority(SERCOM0_IRQn, 0);
 
 	//Enable interrupts
-	SERCOM0->USART.INTENCLR.reg = 0xFF;
-	SERCOM0->USART.INTENSET.reg = SERCOM_USART_INTENSET_RXC; //Receive complete 
+	// SERCOM0->USART.INTENCLR.reg = 0xFF;
+	SERCOM0->USART.INTENSET.reg = SERCOM_USART_INTENSET_RXC; //Receive complete
 }
 
 void SerialTransmitByte(u8 data)
@@ -313,7 +314,7 @@ void SerialTransmit(u8 *data, u8 len)
 		TX_Head++;
 	}
 	TX_Ongoing = 1;
-	SERCOM0->USART.INTENSET.bit.DRE = 1;
+	SERCOM0->USART.INTENSET.reg = SERCOM_USART_INTENSET_DRE;
 }
 void SerialFlush()
 {
@@ -341,7 +342,7 @@ u8 SerialGetCh()
 
 u8 SerialAvail()
 {
-	return RX_Head-RX_Tail+(RX_Tail>RX_Head?1:0);
+	return RX_Head!=RX_Tail;//+(RX_Tail>RX_Head?1<:0);
 }
 
 
