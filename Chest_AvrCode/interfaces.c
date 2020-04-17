@@ -30,12 +30,15 @@ ISR(USART_UDRE_vect)
     else { DABITS(UCSR0B,(1<<UDRIE0)); TX_Ongoing=0; }
 }
 
-#define BAUD 9600
-#define UBRR (F_CPU/16/BAUD-1)
+// #define BAUD 115200
+// #define UBRR (F_CPU/16/BAUD-1)
+#define UBRR 8 //BAUD=115200
 
 void IntiUART()
 {
     cli();
+
+    //Baud Rate
     UBRR0H = (u8)(UBRR>>8);
     UBRR0L = (u8)(UBRR);
 

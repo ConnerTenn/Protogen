@@ -44,7 +44,7 @@ upload:
 com:
 	stty -F $(shell ls /dev/ttyUSB* | head -n 1) 9600 -crtscts
 	#cat $(shell ls /dev/ttyUSB* | head -n 1) 
-	picocom -b 9600 -p 2 --imap lfcrlf --noreset $(shell ls /dev/ttyUSB* | head -n 1)
+	picocom -b 115200 -p 2 --imap lfcrlf --noreset $(shell ls /dev/ttyUSB* | head -n 1)
 
 comconfig:
 	stty -F $(shell ls /dev/ttyUSB* | head -n 1) 9600 \
