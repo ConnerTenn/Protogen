@@ -162,7 +162,8 @@ void ParseCmd()
 
 		if (!cmdinprogress)
 		{
-			if (ch & 0x80)
+			//Bits [15:14] must be 0b10
+			if ((ch & 0xC0) == 0x80)
 			{
 				cmdinprogress = 1;
 			}
@@ -177,62 +178,65 @@ void ParseCmd()
 			CmdFill=0;
 		}
 
-		switch (((Command *)CmdBuffer)->Type & 0x7F)
+		if (cmdinprogress)
 		{
-		case 0x0: //Display Set Immediate
-			if (CmdFill == sizeof(DisplaySet))
+			switch (((Command *)CmdBuffer)->Type & 0x3F)
 			{
-				u8 d = ((DisplaySet *)CmdBuffer)->Display;
-				//Assign the desplays immediately
-				DisplayListCOM4[d].FrameIndex = ((DisplaySet *)CmdBuffer)->Index;
-				DisplayListCOM4[d].EndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
-				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
-				cmdinprogress = 0;
-				CmdFill=0;
-			}
-			break;
-		case 0x1: //Display Queue
-			if (CmdFill == sizeof(DisplaySet))
-			{
-				u8 d = ((DisplaySet *)CmdBuffer)->Display;
-				//Queue the next displays
-				DisplayListCOM4[d].QueuedIndex = ((DisplaySet *)CmdBuffer)->Index;
-				DisplayListCOM4[d].QueuedEndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
-				cmdinprogress = 0;
-				CmdFill=0;
-			}
-			break;
-		case 0x2: //Display Load Queued Immediate
-			for (u8 d = 0; d < NumDisplaysCOM4; d++)
-			{
-				//Load all of the queued displays now (no transition)
-				DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
-				DisplayListCOM4[d].EndIndex = DisplayListCOM4[d].QueuedEndIndex;
-				DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
-			}
-			cmdinprogress = 0;
-			CmdFill=0;
-			break;
-		case 0x3: //Display Transition to Queued
-			for (u8 d = 0; d < NumDisplaysCOM4; d++)
-			{
-				//Set each display to transition to the end animation
-				DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].EndIndex;
-				if (DisplayListCOM4[d].FrameIndex != (u16)-1) //If the frame is valid. set the delay
+			case 0x0: //Display Set Immediate
+				if (CmdFill == sizeof(DisplaySet))
 				{
+					u8 d = ((DisplaySet *)CmdBuffer)->Display;
+					//Assign the desplays immediately
+					DisplayListCOM4[d].FrameIndex = ((DisplaySet *)CmdBuffer)->Index;
+					DisplayListCOM4[d].EndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
+					DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+					cmdinprogress = 0;
+					CmdFill=0;
+				}
+				break;
+			case 0x1: //Display Queue
+				if (CmdFill == sizeof(DisplaySet))
+				{
+					u8 d = ((DisplaySet *)CmdBuffer)->Display;
+					//Queue the next displays
+					DisplayListCOM4[d].QueuedIndex = ((DisplaySet *)CmdBuffer)->Index;
+					DisplayListCOM4[d].QueuedEndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
+					cmdinprogress = 0;
+					CmdFill=0;
+				}
+				break;
+			case 0x2: //Display Load Queued Immediate
+				for (u8 d = 0; d < NumDisplaysCOM4; d++)
+				{
+					//Load all of the queued displays now (no transition)
+					DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
+					DisplayListCOM4[d].EndIndex = DisplayListCOM4[d].QueuedEndIndex;
 					DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
 				}
-				else
+				cmdinprogress = 0;
+				CmdFill=0;
+				break;
+			case 0x3: //Display Transition to Queued
+				for (u8 d = 0; d < NumDisplaysCOM4; d++)
 				{
-					//Set no delay so that the next frame can be reached immediately
-					DisplayListCOM4[d].FrameDelay = 0;
+					//Set each display to transition to the end animation
+					DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].EndIndex;
+					if (DisplayListCOM4[d].FrameIndex != (u16)-1) //If the frame is valid. set the delay
+					{
+						DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+					}
+					else
+					{
+						//Set no delay so that the next frame can be reached immediately
+						DisplayListCOM4[d].FrameDelay = 0;
+					}
 				}
+				cmdinprogress = 0;
+				CmdFill=0;
+				break;
+			default:
+				break;
 			}
-			cmdinprogress = 0;
-			CmdFill=0;
-			break;
-		default:
-			break;
 		}
 
 	}

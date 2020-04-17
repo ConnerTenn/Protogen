@@ -159,7 +159,7 @@ for expr in Expressions:
 
 # u8 Display, u16 Index, u8 checksum
 def GenCmd(cmdtype):
-	return ValtoHx(cmdtype | 0x80, 1)
+	return ValtoHx((cmdtype&0x3F) | 0x80, 1)
 
 def GenDisplayCmd(cmdtype, display, index, endindex):
 	return GenCmd(cmdtype) + ValtoHx(display, 1) + ValtoHx(index, 2) + ValtoHx(endindex, 2)
