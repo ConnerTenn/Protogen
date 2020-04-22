@@ -10,6 +10,8 @@ F=None
 FFrames="Frames"
 FFrameData="FrameData.bin"
 FFrameManifest="FrameManifest.txt"
+FDefines="Defines.dat"
+
 Displays=[]
 if CHARLIE:
 	Displays=[
@@ -41,6 +43,11 @@ FFrameData=f
 try: f = open(FFrameManifest, 'w')
 except: print("Error opening file \"{0}\"".format(FFrameManifest)); exit(-1)
 FFrameManifest=f
+
+try: f = open(FDefines, 'w')
+except: print("Error opening file \"{0}\"".format(FDefines)); exit(-1)
+FDefines=f
+
 
 
 def Hx(val, length):
@@ -301,6 +308,11 @@ FFrameData.close()
 
 FFrameManifest.write(ManifestStr)
 FFrameManifest.close()
+
+
+
+FDefines.write("-D NUM_DISPLAYS_COM4=" + str(len(Displays)) + " ")
+
 
 
 """

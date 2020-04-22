@@ -110,7 +110,7 @@ Max7219 DisplayListCOM4[] =
 
 #endif
 #ifdef JESS
-Max7219 DisplayListCOM4[] = 
+Max7219 DisplayListCOM4[NUM_DISPLAYS_COM4] = 
 	{//Must be listed in the order of connection
 		{.NumSegments=4, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Mouth
 		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Center Mouth
@@ -129,7 +129,7 @@ Max7219 DisplayListCOM4[] =
 const u8 NumDisplaysCOM1 = sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]);
 u8 TotalSegmentsCOM1;
 #endif
-const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
+// const u8 NumDisplaysCOM4 = sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0]);
 u8 TotalSegmentsCOM4;
 
 u16 RefreshTimer;
@@ -206,7 +206,7 @@ void ParseCmd()
 				}
 				break;
 			case 0x2: //Display Load Queued Immediate
-				for (u8 d = 0; d < NumDisplaysCOM4; d++)
+				for (u8 d = 0; d < NUM_DISPLAYS_COM4; d++)
 				{
 					//Load all of the queued displays now (no transition)
 					DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
@@ -217,7 +217,7 @@ void ParseCmd()
 				CmdFill=0;
 				break;
 			case 0x3: //Display Transition to Queued
-				for (u8 d = 0; d < NumDisplaysCOM4; d++)
+				for (u8 d = 0; d < NUM_DISPLAYS_COM4; d++)
 				{
 					//Set each display to transition to the end animation
 					DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].EndIndex;
@@ -264,7 +264,7 @@ void TC3_Handler()
 #ifdef CHARLIE
 		Max7219SendFramesCOM1(DisplayListCOM1, NumDisplaysCOM1);
 #endif
-		Max7219SendFramesCOM4(DisplayListCOM4, NumDisplaysCOM4);
+		Max7219SendFramesCOM4(DisplayListCOM4, NUM_DISPLAYS_COM4);
 		// Max7219SendFrames(DisplayListCOM1, NumDisplaysCOM1, DisplayListCOM1, NumDisplaysCOM1);
 
 
@@ -286,7 +286,7 @@ void TC3_Handler()
 			}
 		}
 #endif
-		for (u8 i=0; i<NumDisplaysCOM4; i++)
+		for (u8 i=0; i<NUM_DISPLAYS_COM4; i++)
 		{
 			if (DisplayListCOM4[i].FrameDelay && DisplayListCOM4[i].FrameDelay!=-1)
 			{
@@ -371,7 +371,7 @@ int main()
 	}
 #endif
 	TotalSegmentsCOM4=0;
-	for (u8 i=0; i<NumDisplaysCOM4; i++)
+	for (u8 i=0; i<NUM_DISPLAYS_COM4; i++)
 	{
 		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
 		DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
@@ -391,6 +391,10 @@ int main()
 	
 	SerialFlush();
 
+#ifdef CHARLIE
+	Max7219RefreshCOM1(TotalSegmentsCOM1);
+#endif
+	Max7219RefreshCOM4(TotalSegmentsCOM4);
 
 
 	u8 i=0; (void)i;

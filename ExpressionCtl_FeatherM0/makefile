@@ -26,20 +26,20 @@ DEFINES= \
 
 CFLAGS= -O3 -mcpu=cortex-m0plus -mthumb -Wall -Werror #-nostdlib -nostartfiles -ffreestanding
 
-.PHONY: all start prog.bin clean core
+.PHONY: all bin start prog.bin clean core
 
-all: start prog.bin finishinfo
+all: bin start prog.bin finishinfo
 
 start:
 	@echo -e "\nCompiling...\n"
 
 %.o: %.c
 	@echo $<
-	@$(GCC) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
+	@$(GCC) $(CFLAGS) $(DEFINES) $(shell cat Defines.dat) $(INCLUDES) $< -c -o $@
 
 %.o: %.cpp
 	@echo $<
-	@$(GPP) $(CFLAGS) $(DEFINES) $(INCLUDES) $< -c -o $@
+	@$(GPP) $(CFLAGS) $(DEFINES) $(shell cat Defines.dat) $(INCLUDES) $< -c -o $@
 
 %.o: %.bin
 	$(LD) -r -b binary $< -o $@
