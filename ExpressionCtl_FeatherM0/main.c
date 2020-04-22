@@ -403,10 +403,10 @@ int main()
 	// SerialTransmit((u8 *)"Hello!", 6);
 	// SerialTransmit(FRAME_DATA, FRAME_LEN);
 	
-	SerialFlush();
+	// SerialFlush();
 
 
-	u8 i=0; (void)i;
+	// u8 i=0; (void)i;
 	while (1)
 	{
 		// PORT->Group[0].OUTTGL.reg = PORT_PA02;

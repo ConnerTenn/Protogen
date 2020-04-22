@@ -17,24 +17,24 @@ Displays=[]
 if CHARLIE:
 	Displays=[
 		#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
-		{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"YX"},
-		{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":""},
-		{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":"XY"},
-		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
-		{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"X"},
-		{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":""},
+		{ "Name":"RightEye",   "Rect":{"x1":0,  "y1":0, "x2":15,  "y2":7}, "Mirror":"YX" },
+		{ "Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47,  "y2":7}, "Mirror":""   },
+		{ "Name":"RightNose",  "Rect":{"x1":48, "y1":0, "x2":55,  "y2":7}, "Mirror":"XY" },
+		{ "Name":"LeftNose",   "Rect":{"x1":56, "y1":0, "x2":63,  "y2":7}, "Mirror":""   },
+		{ "Name":"LeftMouth",  "Rect":{"x1":64, "y1":0, "x2":95,  "y2":7}, "Mirror":"X"  },
+		{ "Name":"LeftEye",    "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":""   },
 	]
 if JESS:
 	Displays=[
 		#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
-		{"Name":"RightMouth", "Rect":{"x1":16, "y1":0, "x2":47, "y2":7}, "Mirror":"XY"},
-		{"Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"},
-		{"Name":"LeftMouth", "Rect":{"x1":64, "y1":0, "x2":95, "y2":7}, "Mirror":"XY"},
-		{"Name":"LeftEye", "Rect":{"x1":96, "y1":0, "x2":111, "y2":7}, "Mirror":"X"},
-		{"Name":"LeftNose", "Rect":{"x1":56, "y1":0, "x2":63, "y2":7}, "Mirror":""},
-		{"Name":"RightNose", "Rect":{"x1":48, "y1":0, "x2":55, "y2":7}, "Mirror":""},
-		{"Name":"RightEye", "Rect":{"x1":0, "y1":0, "x2":15, "y2":7}, "Mirror":"X"},
-		{"Name":"Diamond", "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":"XY"},
+		{ "Name":"RightMouth",  "Rect":{"x1":16,  "y1":0, "x2":47,  "y2":7}, "Mirror":"XY" },
+		{ "Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"  },
+		{ "Name":"LeftMouth",   "Rect":{"x1":64,  "y1":0, "x2":95,  "y2":7}, "Mirror":"XY" },
+		{ "Name":"LeftEye",     "Rect":{"x1":96,  "y1":0, "x2":111, "y2":7}, "Mirror":"X"  },
+		{ "Name":"LeftNose",    "Rect":{"x1":56,  "y1":0, "x2":63,  "y2":7}, "Mirror":""   },
+		{ "Name":"RightNose",   "Rect":{"x1":48,  "y1":0, "x2":55,  "y2":7}, "Mirror":""   },
+		{ "Name":"RightEye",    "Rect":{"x1":0,   "y1":0, "x2":15,  "y2":7}, "Mirror":"X"  },
+		{ "Name":"Diamond",     "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":"XY" },
 	]
 
 DisplaysInit = [ {"FrameIndex":0, "EndIndex":0} for i in range(len(Displays)) ]
@@ -300,9 +300,9 @@ for frame in FrameData:
 		print("Error: Delay time exceeds maximum allowed value")
 		print("Please Implement fix")
 		exit(-1)
-	HeaderStr+=Hx(FrameOffset, 2) #2 bytes  16 bits
-	HeaderStr+=Hx(frameNext, 2) #2 bytes  16 bits
-	HeaderStr+=Hx(frameDelay, 2) #2 byte  16 bits
+	HeaderStr += Hx(FrameOffset, 2) #2 bytes  16 bits
+	HeaderStr += Hx(frameNext, 2) #2 bytes  16 bits
+	HeaderStr += Hx(frameDelay, 2) #2 byte  16 bits
 	#HeaderStr+=Hx(0, 1) #padding to 4-byte boundary  =4-(2+1) =1
 	
 #Add in all the frames
