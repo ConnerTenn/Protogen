@@ -21,6 +21,20 @@ typedef struct
 #define FRAME_DATA_ACC(i) ((u8 *)(FRAME_DATA + (u32)(FRAME_HEADER_ACC(i)->FrameOffset)))
 
 
+extern const u8 _binary_DisplayData_bin_start;
+extern const u8 _binary_DisplayData_bin_end;
+#define DISPLAY_DATA ( (u8 *)&_binary_DisplayData_bin_start )
+
+typedef struct 
+{
+	u16 FrameIndex;
+	u16 EndIndex;
+} DisplayDat;
+
+#define DISPLAY_HEADER_ACC(i) ((DisplayDat *)(DISPLAY_DATA+(i)*sizeof(DisplayDat)))
+
+//DisplayDat
+
 // #define FRAME_OFF_ACC_16(idx) ( (u16)(pgm_read_word_near(BIN_FRAME_DATA_START+idx*sizeof(Frame)+0)) )
 // #define FRAME_NXT_ACC_16(idx) ( (u16)(pgm_read_word_near(BIN_FRAME_DATA_START+idx*sizeof(Frame)+2)) )
 // #define FRAME_DLY_ACC_16(idx) ( (u16)(pgm_read_word_near(BIN_FRAME_DATA_START+idx*sizeof(Frame)+4)) )

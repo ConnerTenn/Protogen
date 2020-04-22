@@ -46,6 +46,7 @@ start:
 	$(OBJCPY) -I binary -O elf32-littlearm -B arm --rename-section .data=.text,readonly,rom,noload,contents $< $@
 
 FrameData.bin: bin
+DisplayData.bin: bin
 
 bin:
 	# echo -en "Testing Data" > FrameData.bin
@@ -54,7 +55,7 @@ bin:
 
 
 
-prog.elf: main.o core/core.a interfaces.o FrameData.o # libraries/libraries.a
+prog.elf: main.o core/core.a interfaces.o FrameData.o DisplayData.o # libraries/libraries.a
 	@echo -e "\nCreating $@\n"
 	@# $(GCC) $(CFLAGS) $? -o $@
 	$(GCC) $(CFLAGS) -Wl,--gc-sections -Tmemmap.ld --specs=nano.specs --specs=nosys.specs $? -o $@

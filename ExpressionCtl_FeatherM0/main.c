@@ -374,7 +374,7 @@ int main()
 	for (u8 i=0; i<NUM_DISPLAYS_COM4; i++)
 	{
 		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
-		DisplayListCOM4[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+		DisplayListCOM4[i].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
 	}
 
 	RefreshTimer = 0;
@@ -383,6 +383,20 @@ int main()
 
 	IntiUART();
 
+
+#ifdef CHARLIE
+	Max7219RefreshCOM1(TotalSegmentsCOM1);
+#endif
+	Max7219RefreshCOM4(TotalSegmentsCOM4);
+
+	for (u8 i = 0; i < NUM_DISPLAYS_COM4; i++)
+	{
+		DisplayListCOM4[i].FrameIndex = DISPLAY_HEADER_ACC(i)->FrameIndex;
+		DisplayListCOM4[i].EndIndex = DISPLAY_HEADER_ACC(i)->EndIndex;
+		DisplayListCOM4[i].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+	}
+
+
 	InitTimers();
 
 
@@ -390,11 +404,6 @@ int main()
 	// SerialTransmit(FRAME_DATA, FRAME_LEN);
 	
 	SerialFlush();
-
-#ifdef CHARLIE
-	Max7219RefreshCOM1(TotalSegmentsCOM1);
-#endif
-	Max7219RefreshCOM4(TotalSegmentsCOM4);
 
 
 	u8 i=0; (void)i;

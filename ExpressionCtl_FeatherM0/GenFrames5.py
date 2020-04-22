@@ -9,6 +9,7 @@ JESS=1
 F=None
 FFrames="Frames"
 FFrameData="FrameData.bin"
+FDisplayData="DisplayData.bin"
 FFrameManifest="FrameManifest.txt"
 FDefines="Defines.dat"
 
@@ -36,9 +37,15 @@ if JESS:
 		{"Name":"Diamond", "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":"XY"},
 	]
 
+DisplaysInit = [ {"FrameIndex":0, "EndIndex":0} for i in range(len(Displays)) ]
+
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
 FFrameData=f
+
+try: f = open(FDisplayData, 'wb')
+except: print("Error opening file \"{0}\"".format(FDisplayData)); exit(-1)
+FDisplayData=f
 
 try: f = open(FFrameManifest, 'w')
 except: print("Error opening file \"{0}\"".format(FFrameManifest)); exit(-1)
@@ -237,6 +244,10 @@ def Parse():
 			lastofloop[fi]["NextIdx"] = loopFrameData[fi]["Index"]
 			# print(loopFrameData[fi]["Index"])
 			lastofend[fi]["NextIdx"] = -1 #Set to invalid Index  #fi
+
+			if "_INIT" in expr:
+				DisplaysInit[fi]["FrameIndex"] = startFrameData[fi]["Index"]
+				DisplaysInit[fi]["EndIndex"] = endFrameData[fi]["Index"]
 		
 
 		FrameData += startFrameData
@@ -272,6 +283,8 @@ print("Number of Entries: " +str(len(FrameData)))
 print()
 
 
+#Generate Frame Binary Data
+
 HeaderStr=b""
 FrameStr=b""
 
@@ -302,9 +315,26 @@ print("Header: " + str(len(HeaderStr)) + "B")
 print("Frames: " + str(len(FrameStr)) + "B")
 print("Total: " + str(len(HeaderStr) + len(FrameStr)) + "B")
 
+
+#Generate Displau Data
+
+DisplayStr=b""
+
+for disp in DisplaysInit:
+	DisplayStr += Hx(disp["FrameIndex"],2)
+	DisplayStr += Hx(disp["EndIndex"],2)
+
+print()
+print("Display Header Total: " + str(len(DisplayStr)) + "B")
+
+#Write Files
+
 print("Writing Output Files")
 FFrameData.write(HeaderStr+FrameStr)
 FFrameData.close()
+
+FDisplayData.write(DisplayStr)
+FDisplayData.close()
 
 FFrameManifest.write(ManifestStr)
 FFrameManifest.close()
