@@ -182,18 +182,18 @@ void ParseCmd()
 		{
 			switch (((Command *)CmdBuffer)->Type & 0x3F)
 			{
-			case 0x0: //Display Set Immediate
-				if (CmdFill == sizeof(DisplaySet))
-				{
-					u8 d = ((DisplaySet *)CmdBuffer)->Display;
-					//Assign the desplays immediately
-					DisplayListCOM4[d].FrameIndex = ((DisplaySet *)CmdBuffer)->Index;
-					DisplayListCOM4[d].EndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
-					DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
-					cmdinprogress = 0;
-					CmdFill=0;
-				}
-				break;
+			// case 0x0: //Display Set Immediate
+			// 	if (CmdFill == sizeof(DisplaySet))
+			// 	{
+			// 		u8 d = ((DisplaySet *)CmdBuffer)->Display;
+			// 		//Assign the desplays immediately
+			// 		DisplayListCOM4[d].FrameIndex = ((DisplaySet *)CmdBuffer)->Index;
+			// 		DisplayListCOM4[d].EndIndex = ((DisplaySet *)CmdBuffer)->EndIndex;
+			// 		DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+			// 		cmdinprogress = 0;
+			// 		CmdFill=0;
+			// 	}
+			// 	break;
 			case 0x1: //Display Queue
 				if (CmdFill == sizeof(DisplaySet))
 				{
@@ -205,17 +205,17 @@ void ParseCmd()
 					CmdFill=0;
 				}
 				break;
-			case 0x2: //Display Load Queued Immediate
-				for (u8 d = 0; d < NUM_DISPLAYS_COM4; d++)
-				{
-					//Load all of the queued displays now (no transition)
-					DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
-					DisplayListCOM4[d].EndIndex = DisplayListCOM4[d].QueuedEndIndex;
-					DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
-				}
-				cmdinprogress = 0;
-				CmdFill=0;
-				break;
+			// case 0x2: //Display Load Queued Immediate
+			// 	for (u8 d = 0; d < NUM_DISPLAYS_COM4; d++)
+			// 	{
+			// 		//Load all of the queued displays now (no transition)
+			// 		DisplayListCOM4[d].FrameIndex = DisplayListCOM4[d].QueuedIndex;
+			// 		DisplayListCOM4[d].EndIndex = DisplayListCOM4[d].QueuedEndIndex;
+			// 		DisplayListCOM4[d].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[d].FrameIndex)->FrameDelay;
+			// 	}
+			// 	cmdinprogress = 0;
+			// 	CmdFill=0;
+			// 	break;
 			case 0x3: //Display Transition to Queued
 				for (u8 d = 0; d < NUM_DISPLAYS_COM4; d++)
 				{
