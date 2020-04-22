@@ -27,6 +27,7 @@ if CHARLIE:
 if JESS:
 	Displays=[
 		#Name, Img Src Rectangle (x1, y1, x2, y2), Mirror Horizontally
+		#Must be listed in the order of connection
 		{ "Name":"RightMouth",  "Rect":{"x1":16,  "y1":0, "x2":47,  "y2":7}, "Mirror":"XY" },
 		{ "Name":"CenterMouth", "Rect":{"x1":128, "y1":0, "x2":143, "y2":7}, "Mirror":"Y"  },
 		{ "Name":"LeftMouth",   "Rect":{"x1":64,  "y1":0, "x2":95,  "y2":7}, "Mirror":"XY" },
@@ -36,8 +37,6 @@ if JESS:
 		{ "Name":"RightEye",    "Rect":{"x1":0,   "y1":0, "x2":15,  "y2":7}, "Mirror":"X"  },
 		{ "Name":"Diamond",     "Rect":{"x1":112, "y1":0, "x2":127, "y2":7}, "Mirror":"XY" },
 	]
-
-DisplaysInit = [ {"FrameIndex":0, "EndIndex":0} for i in range(len(Displays)) ]
 
 try: f = open(FFrameData, 'wb')
 except: print("Error opening file \"{0}\"".format(FFrameData)); exit(-1)
@@ -93,6 +92,7 @@ def ParseImageData(img, imgrange, mirrorx, mirrory):
 	#return the data for the entire display
 	return data
 
+
 #verify displays
 for d in Displays:
 	if d["Name"].find(" ") != -1 or d["Name"].find("_") != -1:
@@ -106,6 +106,9 @@ for d in Displays:
 	d["W"] = int(d["w"]/8)                         #Width in bytes
 	d["h"] = d["Rect"]["y2"] - d["Rect"]["y1"] + 1 #Height in bits
 	d["H"] = int(d["h"]/8)                         #Height in bytes
+	
+
+DisplaysInit = [ {"FrameIndex":0, "EndIndex":0, "NumSegments":disp["W"]} for disp in Displays ]
 
 # for d in Displays:
 # 	print(d)
@@ -196,6 +199,7 @@ def Parse():
 	global FrameData
 	global Last
 	global ManifestStr
+	global DisplaysInit
 
 	Expressions = os.listdir(FFrames)
 	
@@ -323,6 +327,8 @@ DisplayStr=b""
 for disp in DisplaysInit:
 	DisplayStr += Hx(disp["FrameIndex"],2)
 	DisplayStr += Hx(disp["EndIndex"],2)
+	DisplayStr += Hx(disp["NumSegments"],1)
+	DisplayStr += Hx(0,1) #padding
 
 print()
 print("Display Header Total: " + str(len(DisplayStr)) + "B")

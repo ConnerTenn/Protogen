@@ -110,17 +110,7 @@ Max7219 DisplayListCOM4[] =
 
 #endif
 #ifdef JESS
-Max7219 DisplayListCOM4[NUM_DISPLAYS_COM4] = 
-	{//Must be listed in the order of connection
-		{.NumSegments=4, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Mouth
-		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Center Mouth
-		{.NumSegments=4, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Mouth
-		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Eye
-		{.NumSegments=1, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Left Nose
-		{.NumSegments=1, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Nose
-		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Right Eye
-		{.NumSegments=2, .FrameIndex=0, .EndIndex=-1, .FrameDelay=0, .QueuedIndex=-1, .QueuedEndIndex=-1}, //Diamond
-	};
+Max7219 DisplayListCOM4[NUM_DISPLAYS_COM4];
 #endif
 // Max7219 DisplayList[sizeof(DisplayListCOM1)/sizeof(DisplayListCOM1[0]) + sizeof(DisplayListCOM4)/sizeof(DisplayListCOM4[0])];
 	
@@ -391,9 +381,12 @@ int main()
 
 	for (u8 i = 0; i < NUM_DISPLAYS_COM4; i++)
 	{
+		DisplayListCOM4[i].NumSegments = DISPLAY_HEADER_ACC(i)->NumSegments;
 		DisplayListCOM4[i].FrameIndex = DISPLAY_HEADER_ACC(i)->FrameIndex;
 		DisplayListCOM4[i].EndIndex = DISPLAY_HEADER_ACC(i)->EndIndex;
 		DisplayListCOM4[i].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+		DisplayListCOM4[i].QueuedIndex=-1;
+		DisplayListCOM4[i].QueuedEndIndex=-1;
 	}
 
 

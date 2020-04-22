@@ -29,6 +29,8 @@ typedef struct
 {
 	u16 FrameIndex;
 	u16 EndIndex;
+	u8 NumSegments;
+	u8 _padding;
 } DisplayDat;
 
 #define DISPLAY_HEADER_ACC(i) ((DisplayDat *)(DISPLAY_DATA+(i)*sizeof(DisplayDat)))
