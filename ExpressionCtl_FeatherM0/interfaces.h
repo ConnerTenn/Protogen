@@ -12,7 +12,7 @@ void IntiSPI();
 void SPITransmitCOM1(const u8 data);
 void SPITransmit16COM1(const u16 data);
 #endif
-void SPITransmitCOM4(const u8 data);
+// void SPITransmitCOM4(const u8 data);
 void SPITransmit16COM4(const u16 data);
 
 // #define SPI_TRANSMIT(data) 
@@ -20,16 +20,19 @@ void SPITransmit16COM4(const u16 data);
 
 #define REFRESH_INTERVAL 300
 // u16 RefreshTimer;
+//#define SUPPORT_UART_TRANSMIT
 
 //Page 143
 void IntiUART();
+#ifdef SUPPORT_UART_TRANSMIT
 void SerialTransmitByte(u8 data);
 //void SerialTransmit(u8 *data, u8 len);
 void SerialFlush();
 void SerialTransmit(u8 *data, u8 len);
 void SerialTransmitStr(char *data);
+#endif
 
-u8 SerialRead(u8 *data, u8 len);
+// u8 SerialRead(u8 *data, u8 len);
 u8 SerialGetCh();
 u8 SerialAvail();
 
@@ -51,7 +54,7 @@ void Max7219SendCmdCOM1(u16 cmd, u8 numSegments);
 void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays);
 #endif
 
-void Max7219InitCOM4(u8 numSegments);
+// void Max7219InitCOM4(u8 numSegments);
 void Max7219RefreshCOM4(u8 numSegments);
 void Max7219SendCmdCOM4(u16 cmd, u8 numSegments);
 void Max7219SendFramesCOM4(Max7219 *displays, u8 numDisplays);

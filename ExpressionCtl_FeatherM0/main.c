@@ -360,11 +360,17 @@ int main()
 		DisplayListCOM1[i].FrameDelay=FRAME_HEADER_ACC(DisplayListCOM1[i].FrameIndex)->FrameDelay;
 	}
 #endif
-	TotalSegmentsCOM4=0;
-	for (u8 i=0; i<NUM_DISPLAYS_COM4; i++)
+
+	for (u8 i = 0; i < NUM_DISPLAYS_COM4; i++)
 	{
-		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
+		DisplayListCOM4[i].NumSegments = DISPLAY_HEADER_ACC(i)->NumSegments;
+		DisplayListCOM4[i].FrameIndex = DISPLAY_HEADER_ACC(i)->FrameIndex;
+		DisplayListCOM4[i].EndIndex = DISPLAY_HEADER_ACC(i)->EndIndex;
 		DisplayListCOM4[i].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
+		DisplayListCOM4[i].QueuedIndex=-1;
+		DisplayListCOM4[i].QueuedEndIndex=-1;
+
+		TotalSegmentsCOM4 += DisplayListCOM4[i].NumSegments;
 	}
 
 	RefreshTimer = 0;
@@ -378,16 +384,6 @@ int main()
 	Max7219RefreshCOM1(TotalSegmentsCOM1);
 #endif
 	Max7219RefreshCOM4(TotalSegmentsCOM4);
-
-	for (u8 i = 0; i < NUM_DISPLAYS_COM4; i++)
-	{
-		DisplayListCOM4[i].NumSegments = DISPLAY_HEADER_ACC(i)->NumSegments;
-		DisplayListCOM4[i].FrameIndex = DISPLAY_HEADER_ACC(i)->FrameIndex;
-		DisplayListCOM4[i].EndIndex = DISPLAY_HEADER_ACC(i)->EndIndex;
-		DisplayListCOM4[i].FrameDelay = FRAME_HEADER_ACC(DisplayListCOM4[i].FrameIndex)->FrameDelay;
-		DisplayListCOM4[i].QueuedIndex=-1;
-		DisplayListCOM4[i].QueuedEndIndex=-1;
-	}
 
 
 	InitTimers();

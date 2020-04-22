@@ -164,11 +164,11 @@ void SPITransmit16COM1(const u16 data)
 }
 #endif
 
-void SPITransmitCOM4(const u8 data)
-{
-	SERCOM4->SPI.DATA.reg = data; //Data Out
-	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
-}
+// void SPITransmitCOM4(const u8 data)
+// {
+// 	SERCOM4->SPI.DATA.reg = data; //Data Out
+// 	while (!SERCOM4->SPI.INTFLAG.bit.TXC) {} //Wait for transmit complete
+// }
 void SPITransmit16COM4(const u16 data)
 {
 	SERCOM4->SPI.DATA.reg = (data>>8); //Data Out
@@ -201,9 +201,10 @@ void SPITransmit16COM4(const u16 data)
 // }
 
 
-
+#ifdef SUPPORT_UART_TRANSMIT
 volatile u8 TX_Ring[256];
 volatile u8 TX_Head=0, TX_Tail=0, TX_Ongoing=0; 
+#endif
 
 volatile u8 RX_Ring[256];
 volatile u8 RX_Head=0, RX_Tail=0;
@@ -225,11 +226,13 @@ void SERCOM0_Handler()
 	// 	// SERCOM0->USART.INTENCLR.bit.TXC = 1;
 	// 	SERCOM0->USART.INTENCLR.bit.DRE = 1;
 	// }
+#ifdef SUPPORT_UART_TRANSMIT
 	else if (SERCOM0->USART.INTFLAG.bit.DRE) //Data Register Empty
 	{
 		if (TX_Tail != TX_Head) { SERCOM0->USART.DATA.reg = TX_Ring[TX_Tail++]; }
 		else { SERCOM0->USART.INTENCLR.reg = SERCOM_USART_INTENCLR_DRE; TX_Ongoing = 0; /*SERCOM0->USART.INTENSET.bit.TXC = 1;*/ }
 	}
+#endif
 }
 
 void IntiUART()
@@ -297,6 +300,7 @@ void IntiUART()
 	SERCOM0->USART.INTENSET.reg = SERCOM_USART_INTENSET_RXC; //Receive complete
 }
 
+#ifdef SUPPORT_UART_TRANSMIT
 void SerialTransmitByte(u8 data)
 {
 	// while (!SERCOM0->USART.INTFLAG.bit.DRE) {} //Wait for data empty
@@ -320,17 +324,17 @@ void SerialFlush()
 {
 	while (TX_Ongoing==1) {}
 }
+#endif
 
-
-u8 SerialRead(u8 *data, u8 len)
-{
-	u8 i=0;
-	while (i<len && RX_Tail != RX_Head)
-	{
-		data[i++] = RX_Ring[RX_Tail++];
-	}
-	return i;
-}
+// u8 SerialRead(u8 *data, u8 len)
+// {
+// 	u8 i=0;
+// 	while (i<len && RX_Tail != RX_Head)
+// 	{
+// 		data[i++] = RX_Ring[RX_Tail++];
+// 	}
+// 	return i;
+// }
 u8 SerialGetCh()
 {
 	if (RX_Tail != RX_Head)
@@ -408,22 +412,22 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 }
 #endif
 
-void Max7219InitCOM4(u8 numSegments)
-{
-	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
-	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
-	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
-	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
-	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
+// void Max7219InitCOM4(u8 numSegments)
+// {
+// 	Max7219SendCmdCOM4(0x0C00, numSegments); //Disable
+// 	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
+// 	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+// 	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
+// 	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
 
-	//Blank Display
-	for (u16 l=1; l<=8; l++)
-	{
-		Max7219SendCmdCOM4(l<<8, numSegments); 
-	}
+// 	//Blank Display
+// 	for (u16 l=1; l<=8; l++)
+// 	{
+// 		Max7219SendCmdCOM4(l<<8, numSegments); 
+// 	}
 
-	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
-}
+// 	Max7219SendCmdCOM4(0x0C01, numSegments);  //Enable
+// }
 void Max7219RefreshCOM4(u8 numSegments)
 {
 	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
