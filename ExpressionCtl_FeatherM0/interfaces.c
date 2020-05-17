@@ -431,7 +431,7 @@ void Max7219SendFramesCOM1(Max7219 *displays, u8 numDisplays)
 void Max7219RefreshCOM4(u8 numSegments)
 {
 	Max7219SendCmdCOM4(0x0F00, numSegments); //Test off
-	Max7219SendCmdCOM4(0x0A00, numSegments); //Intensity 0 (minimum)
+	Max7219SendCmdCOM4(0x0A07, numSegments); //Intensity 0 (minimum)
 	Max7219SendCmdCOM4(0x0900, numSegments); //Decode off
 	Max7219SendCmdCOM4(0x0B07, numSegments); //Scan 7
 
